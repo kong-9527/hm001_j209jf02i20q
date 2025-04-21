@@ -19,6 +19,8 @@ import {
   UpdatesIcon 
 } from '../components/Icons';
 import FaqAccordion from '../components/FaqAccordion';
+import PricingPlans from '../components/PricingPlans';
+import CallToAction from '../components/CallToAction';
 
 export default function Home() {
   // 轮播图片数据
@@ -169,6 +171,40 @@ export default function Home() {
           />
         </div>
 
+        {/* 风格选择区域 */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8 rounded-lg my-8">
+          <h2 className="text-4xl font-bold text-center text-gray-800 mb-8">
+            How AI Generates brilliant designs
+          </h2>
+          <p className="text-xl text-gray-700 max-w-3xl mx-auto mt-6">
+            Witness how our AI effortlessly converts ordinary gardens into breathtaking designs within mere seconds. Become part of a community of countless delighted homeowners and professional landscapers who have unlocked the hidden beauty and potential of their outdoor spaces.
+          </p>
+
+          <StyleSelector 
+            styles={styles} 
+            onSelectStyle={handleSelectStyle} 
+          />
+        </div>
+
+        {/* 效果对比区域 */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 rounded-lg">
+          <div className="text-center mb-8 pt-8">
+            <h3 className="text-2xl font-semibold text-gray-800">
+              {selectedStyle.name}
+            </h3>
+            <p className="text-gray-600 mt-2">
+              Drag the slider to compare the front and rear effects
+            </p>
+          </div>
+
+          <ImageComparison 
+            beforeImage={selectedStyle.before} 
+            afterImage={selectedStyle.after}
+            beforeAlt={`${selectedStyle.name} Before`}
+            afterAlt={`${selectedStyle.name} After`}
+          />
+        </div>
+
         {/* 特性展示 */}
         <FeatureGrid
           title="Features of AI Garden Design"
@@ -207,6 +243,11 @@ export default function Home() {
           ]}
         />
 
+        {/* 定价计划 */}
+        <PricingPlans 
+          title="Plans & Pricing"
+        />
+        
         {/* FAQ部分 */}
         <FaqAccordion
           title="Garden Design Help Center: FAQ"
@@ -261,40 +302,13 @@ export default function Home() {
           ]}
         />
 
-        {/* 风格选择区域 */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
-          <h2 className="text-4xl font-bold text-center text-gray-800 mb-8">
-            How AI Generates brilliant designs
-          </h2>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto mt-6">
-            Witness how our AI effortlessly converts ordinary gardens into breathtaking designs within mere seconds. Become part of a community of countless delighted homeowners and professional landscapers who have unlocked the hidden beauty and potential of their outdoor spaces.
-          </p>
-
-          <StyleSelector 
-            styles={styles} 
-            onSelectStyle={handleSelectStyle} 
-          />
-        </div>
-
-        {/* 效果对比区域 */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-semibold text-gray-800">
-              {selectedStyle.name}
-            </h3>
-            <p className="text-gray-600 mt-2">
-              Drag the slider to compare the front and rear effects
-            </p>
-          </div>
-
-          <ImageComparison 
-            beforeImage={selectedStyle.before} 
-            afterImage={selectedStyle.after}
-            beforeAlt={`${selectedStyle.name} Before`}
-            afterAlt={`${selectedStyle.name} After`}
-          />
-        </div>
-
+        {/* 最终行动号召 */}
+        <CallToAction
+          title="Ready To Transform Your Garden?"
+          subtitle="Join thousands of satisfied gardeners and landscapers"
+          buttonText="Start designing now"
+          buttonLink="/design"
+        />
 
       </main>
 

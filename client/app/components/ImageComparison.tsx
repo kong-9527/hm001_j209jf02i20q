@@ -68,7 +68,7 @@ const ImageComparison = ({
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-[500px] select-none overflow-hidden rounded-lg shadow-lg"
+      className="relative w-full h-[500px] select-none overflow-hidden rounded-lg shadow-lg bg-white/80"
     >
       {/* 改造后图片（完整显示） */}
       <div className="absolute inset-0 w-full h-full">
@@ -79,7 +79,7 @@ const ImageComparison = ({
           style={{ objectFit: 'cover' }}
         />
         {/* 后图标签 - 右侧 */}
-        <div className="absolute top-4 right-4 bg-white/80 px-3 py-1 rounded-md shadow-md backdrop-blur-sm text-gray-800 font-medium">
+        <div className="absolute top-4 right-4 px-3 py-1 rounded-md shadow-md backdrop-blur-sm text-gray-800 font-medium">
           {afterAlt}
         </div>
       </div>
