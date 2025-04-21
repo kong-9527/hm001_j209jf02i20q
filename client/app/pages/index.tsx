@@ -9,6 +9,16 @@ import StyleSelector from '../components/StyleSelector';
 import ImageComparison from '../components/ImageComparison';
 import gardenStyles, { GardenStyle } from '../data/gardenStyles';
 import MovingStyles from '../components/MovingStyles';
+import FeatureGrid from '../components/FeatureGrid';
+import { 
+  AutomatedIcon, 
+  GlobalIcon, 
+  PreviewIcon, 
+  StorageIcon, 
+  SharingIcon, 
+  UpdatesIcon 
+} from '../components/Icons';
+import FaqAccordion from '../components/FaqAccordion';
 
 export default function Home() {
   // 轮播图片数据
@@ -124,7 +134,7 @@ export default function Home() {
           </p>
           
           {/* 行动按钮 */}
-          <div className="mt-16 flex flex-col sm:flex-row justify-center gap-4">
+          <div className="mt-16 flex flex-col sm:flex-row justify-center gap-4 pt-8">
             <Link 
               href="/design"
               className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-8 py-3 rounded-md text-lg shadow-md transition-colors"
@@ -158,6 +168,98 @@ export default function Home() {
             ]}
           />
         </div>
+
+        {/* 特性展示 */}
+        <FeatureGrid
+          title="Features of AI Garden Design"
+          subtitle="Our AI garden design platform offers a wide range of features that make it easy for anyone to create beautiful gardens. Whether you're a professional or a hobbyist, we've got you covered."
+          features={[
+            {
+              icon: <AutomatedIcon />,
+              title: "AI-Powered Design",
+              description: "Utilizing AI-driven technologies to automatically enhance garden designs, saving users time and effort while making the designs appear more professional."
+            },
+            {
+              icon: <GlobalIcon />,
+              title: "Global Plant Database",
+              description: "Access to plants from diverse climatic backgrounds, ensuring that users can create gardens suited to their specific regions and environmental conditions."
+            },
+            {
+              icon: <PreviewIcon />,
+              title: "Real-time Preview",
+              description: "See changes to your garden design in real-time, ensuring that the selected elements meet your personal needs and enhancing user experience."
+            },
+            {
+              icon: <StorageIcon />,
+              title: "Cloud Storage",
+              description: "Safely preserve your projects for easy access and management at any time and location, making your creative processes more flexible and efficient."
+            },
+            {
+              icon: <SharingIcon />,
+              title: "Easy Sharing",
+              description: "Quickly share designs to major social platforms with a simple click, making it easier for friends and followers to see your work and enhancing visibility."
+            },
+            {
+              icon: <UpdatesIcon />,
+              title: "Regular Updates",
+              description: "We're constantly improving our platform with new features and plant varieties, ensuring that users always have access to the latest gardening trends."
+            }
+          ]}
+        />
+
+        {/* FAQ部分 */}
+        <FaqAccordion
+          title="Garden Design Help Center: FAQ"
+          subtitle="Commonly Asked Questions About Our AI Garden Designer"
+          faqs={[
+            {
+              question: "What is AI Garden Designer?",
+              answer: "AI Garden Designer is an advanced platform that uses artificial intelligence to transform your outdoor spaces into stunning garden designs. It analyzes your space, considers your preferences, and generates professional landscape designs tailored to your needs."
+            },
+            {
+              question: "How does AI Garden Designer work?",
+              answer: "Our platform works by taking images of your space, analyzing the terrain, light conditions, and local climate. You provide preferences about styles, plants, and features you'd like, and our AI generates multiple design options. You can then refine these designs until you're completely satisfied."
+            },
+            {
+              question: "What types of gardens can I create?",
+              answer: (
+                <div>
+                  <p className="mb-2">AI Garden Designer can generate various types of gardens, including:</p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Residential gardens and backyards</li>
+                    <li>Japanese Zen gardens</li>
+                    <li>English cottage gardens</li>
+                    <li>Modern minimalist landscapes</li>
+                    <li>Desert xeriscapes</li>
+                    <li>Tropical paradises</li>
+                    <li>And many more styles!</li>
+                  </ul>
+                  <p className="mt-2">The platform is designed to adapt to multiple styles and requirements, offering endless possibilities.</p>
+                </div>
+              )
+            },
+            {
+              question: "Is AI Garden Designer easy to use?",
+              answer: "Yes! Our platform is designed with simplicity in mind. Even without prior garden design experience, you can easily use the interface. Just upload your space photos, select your preferences, and let the AI do the rest. The intuitive interface and automated features ensure a smooth user experience."
+            },
+            {
+              question: "What is the quality of designs produced?",
+              answer: "Our AI produces professional-quality garden designs that follow established landscape design principles. The designs are realistic, implementable, and tailored to your specific space and conditions. Many professional landscapers use our platform as a starting point for their client projects."
+            },
+            {
+              question: "How long does it take to get my garden design?",
+              answer: "Most designs are generated within minutes of submitting your requirements. More complex projects might take up to an hour for the AI to process. You can then make revisions and adjustments in real-time."
+            },
+            {
+              question: "Can I use the designs for commercial purposes?",
+              answer: "Yes, all designs created with your account are yours to use for personal or commercial purposes. Many landscape professionals use our platform to create initial concepts for client presentations."
+            },
+            {
+              question: "How do I implement the garden design?",
+              answer: "Once your design is finalized, you'll receive detailed plant lists, material specifications, and implementation guidelines. You can implement the design yourself as a DIY project, or share these specifications with a professional landscaper for installation."
+            }
+          ]}
+        />
 
         {/* 风格选择区域 */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
