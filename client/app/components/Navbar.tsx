@@ -21,19 +21,19 @@ export default function Navbar() {
         </div>
         
         <div className="hidden md:flex justify-center flex-1 space-x-8">
-          <Link href="/design" className="text-gray-600 hover:text-green-600">
+          <Link href="/design" className="text-gray-600 hover:text-teal-600">
             AI Garden Design
           </Link>
-          <Link href="/landscapers" className="text-gray-600 hover:text-green-600">
+          <Link href="/landscapers" className="text-gray-600 hover:text-teal-600">
             AI Landscapers
           </Link>
-          <Link href="/advisor" className="text-gray-600 hover:text-green-600">
+          <Link href="/advisor" className="text-gray-600 hover:text-teal-600">
             AI Garden Plant Advisor
           </Link>
-          <Link href="/pricing" className="text-gray-600 hover:text-green-600">
+          <Link href="/pricing" className="text-gray-600 hover:text-teal-600">
             Pricing
           </Link>
-          <Link href="/faq" className="text-gray-600 hover:text-green-600">
+          <Link href="/faq" className="text-gray-600 hover:text-teal-600">
             FAQ
           </Link>
         </div>

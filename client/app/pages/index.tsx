@@ -97,15 +97,15 @@ export default function Home() {
         {/* 主标题和副标题 */}
         <div className="relative z-20 -mt-60 text-center px-4 sm:px-6 lg:px-8 pb-16">
           <h1 className="text-5xl sm:text-6xl font-bold text-teal-600 mb-4">
-            Design Your Dream<br />Garden With AI
+            Build Your Dream Garden<br />With AI
           </h1>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto mt-6">
-            Transform your outdoor space into a professional landscape design<br />
-            using our powerful <span className="text-teal-600 font-medium">AI technology</span>
+            Create dream designs and advisors for your garden<br />
+            through our powerful <span className="text-teal-600 font-medium">AI technology</span>
           </p>
           
           {/* 行动按钮 */}
-          <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+          <div className="mt-16 flex flex-col sm:flex-row justify-center gap-4">
             <Link 
               href="/design"
               className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-8 py-3 rounded-md text-lg shadow-md transition-colors"
@@ -120,9 +120,9 @@ export default function Home() {
             </Link>
           </div>
           
-          <p className="mt-6 text-gray-500">
+          {/* <p className="mt-6 text-gray-500">
             1130 people joined this week!
-          </p>
+          </p> */}
         </div>
 
         {/* 花园示例展示 */}
