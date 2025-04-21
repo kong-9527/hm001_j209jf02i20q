@@ -6,8 +6,8 @@ import Image from 'next/image';
 export default function Navbar() {
   return (
     <header className="bg-white shadow-sm">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-        <div className="flex items-center">
+      <nav className="w-full mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+        <div className="flex-shrink-0">
           <Link href="/" className="flex items-center">
             <Image 
               src="/logo.png" 
@@ -20,25 +20,25 @@ export default function Navbar() {
           </Link>
         </div>
         
-        <div className="hidden md:flex space-x-8">
+        <div className="hidden md:flex justify-center flex-1 space-x-8">
           <Link href="/design" className="text-gray-600 hover:text-green-600">
             AI Garden Design
           </Link>
           <Link href="/landscapers" className="text-gray-600 hover:text-green-600">
-            For Landscapers
+            AI Landscapers
           </Link>
-          <Link href="/plant-advisor" className="text-gray-600 hover:text-green-600">
-            AI Plant Advisor
+          <Link href="/advisor" className="text-gray-600 hover:text-green-600">
+            AI Garden Plant Advisor
           </Link>
           <Link href="/pricing" className="text-gray-600 hover:text-green-600">
             Pricing
           </Link>
-          <Link href="/blog" className="text-gray-600 hover:text-green-600">
-            Gardening Blog
+          <Link href="/faq" className="text-gray-600 hover:text-green-600">
+            FAQ
           </Link>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex-shrink-0 flex items-center space-x-4">
           <Link href="/signin" className="bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-medium">
             Sign in
           </Link>
