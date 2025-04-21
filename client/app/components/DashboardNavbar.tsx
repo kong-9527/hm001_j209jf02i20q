@@ -8,8 +8,8 @@ export default function DashboardNavbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isProjectOpen, setIsProjectOpen] = useState(false);
   
-  const projectMenuRef = useRef<HTMLDivElement>(null);
-  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const projectTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const profileTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   const projects = [
     { id: 1, name: "My Backyard Garden" },
@@ -18,22 +18,39 @@ export default function DashboardNavbar() {
     { id: 4, name: "Community Project" }
   ];
   
+  const handleProjectMouseEnter = () => {
+    if (projectTimerRef.current) {
+      clearTimeout(projectTimerRef.current);
+      projectTimerRef.current = null;
+    }
+    setIsProjectOpen(true);
+  };
+
+  const handleProjectMouseLeave = () => {
+    projectTimerRef.current = setTimeout(() => {
+      setIsProjectOpen(false);
+    }, 50);
+  };
+
+  const handleProfileMouseEnter = () => {
+    if (profileTimerRef.current) {
+      clearTimeout(profileTimerRef.current);
+      profileTimerRef.current = null;
+    }
+    setIsProfileOpen(true);
+  };
+
+  const handleProfileMouseLeave = () => {
+    profileTimerRef.current = setTimeout(() => {
+      setIsProfileOpen(false);
+    }, 50);
+  };
+  
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // 处理项目菜单的点击外部关闭
-      if (projectMenuRef.current && !projectMenuRef.current.contains(event.target as Node)) {
-        setIsProjectOpen(false);
-      }
-      
-      // 处理个人资料菜单的点击外部关闭
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
-        setIsProfileOpen(false);
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
+    // 组件卸载时清除所有定时器
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      if (projectTimerRef.current) clearTimeout(projectTimerRef.current);
+      if (profileTimerRef.current) clearTimeout(profileTimerRef.current);
     };
   }, []);
   
@@ -51,9 +68,12 @@ export default function DashboardNavbar() {
           {/* 项目选择 */}
           <div className="flex items-center">
             <div className="text-sm font-medium">Project:</div>
-            <div className="relative ml-2" ref={projectMenuRef}>
+            <div 
+              className="relative ml-2 group" 
+              onMouseEnter={handleProjectMouseEnter}
+              onMouseLeave={handleProjectMouseLeave}
+            >
               <button 
-                onClick={() => setIsProjectOpen(!isProjectOpen)}
                 className="text-sm font-medium flex items-center gap-1 text-gray-800 hover:text-gray-900"
               >
                 <span>Select Project</span>
@@ -122,9 +142,12 @@ export default function DashboardNavbar() {
           </div> */}
           
           {/* 用户头像 */}
-          <div className="relative" ref={profileMenuRef}>
+          <div 
+            className="relative"
+            onMouseEnter={handleProfileMouseEnter}
+            onMouseLeave={handleProfileMouseLeave}
+          >
             <button 
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium"
             >
               H
