@@ -1,11 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 export default function DashboardNavbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isProjectOpen, setIsProjectOpen] = useState(false);
+  
+  const projectMenuRef = useRef<HTMLDivElement>(null);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  
+  const projects = [
+    { id: 1, name: "My Backyard Garden" },
+    { id: 2, name: "Front Yard Renovation" },
+    { id: 3, name: "Rooftop Garden" },
+    { id: 4, name: "Community Project" }
+  ];
+  
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // 处理项目菜单的点击外部关闭
+      if (projectMenuRef.current && !projectMenuRef.current.contains(event.target as Node)) {
+        setIsProjectOpen(false);
+      }
+      
+      // 处理个人资料菜单的点击外部关闭
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   
   return (
     <nav className="bg-white border-b border-gray-200">
@@ -21,13 +51,53 @@ export default function DashboardNavbar() {
           {/* 项目选择 */}
           <div className="flex items-center">
             <div className="text-sm font-medium">Project:</div>
-            <div className="relative ml-2">
-              <button className="text-sm font-medium flex items-center gap-1 text-gray-800 hover:text-gray-900">
-                <span>Default</span>
+            <div className="relative ml-2" ref={projectMenuRef}>
+              <button 
+                onClick={() => setIsProjectOpen(!isProjectOpen)}
+                className="text-sm font-medium flex items-center gap-1 text-gray-800 hover:text-gray-900"
+              >
+                <span>Select Project</span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
               </button>
+              
+              {isProjectOpen && (
+                <div className="absolute left-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-10">
+                  <div className="max-h-48 overflow-y-auto">
+                    {projects.map(project => (
+                      <button 
+                        key={project.id} 
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {project.name}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  <div className="border-t border-gray-100 mt-1 pt-1">
+                    <Link 
+                      href="/dashboard/new-project" 
+                      className="flex items-center px-4 py-2 text-sm text-primary hover:bg-gray-100"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                      Create New Project
+                    </Link>
+                    
+                    <Link 
+                      href="/dashboard/projects" 
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                      </svg>
+                      My Projects
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -52,7 +122,7 @@ export default function DashboardNavbar() {
           </div> */}
           
           {/* 用户头像 */}
-          <div className="relative">
+          <div className="relative" ref={profileMenuRef}>
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium"
