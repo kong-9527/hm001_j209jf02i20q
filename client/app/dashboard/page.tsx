@@ -6,10 +6,10 @@ import Link from 'next/link';
 export default function Dashboard() {
   return (
     <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center">
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">Welcome to AI Garden Planner!</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-4">Welcome to AI Garden Designer!</h1>
       
       <p className="text-gray-600 mb-8">
-        Looks like you haven't created any projects yet. Start by creating your first garden project!
+        Start by creating your first garden project!
       </p>
       
       <Link 
