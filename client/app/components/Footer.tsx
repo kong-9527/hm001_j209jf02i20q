@@ -19,33 +19,33 @@ export default function Footer() {
               />
               <span className="text-lg font-semibold text-green-600">AI Garden Design</span>
             </div>
-            <p className="text-gray-500 mt-2">创建您梦想中的花园</p>
+            <p className="text-gray-500 mt-2">Build Your Dream Garden With AI</p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">服务</h3>
+              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Services</h3>
               <ul className="mt-4 space-y-2">
-                <li><Link href="/design" className="text-gray-600 hover:text-green-600">AI花园设计</Link></li>
-                <li><Link href="/plant-advisor" className="text-gray-600 hover:text-green-600">植物顾问</Link></li>
-                <li><Link href="/landscapers" className="text-gray-600 hover:text-green-600">景观设计师专区</Link></li>
+                <li><Link href="/design" className="text-gray-600 hover:text-green-600">AI Garden Design</Link></li>
+                <li><Link href="/advisor" className="text-gray-600 hover:text-green-600">AI Plant Advisor</Link></li>
+                <li><Link href="/landscapers" className="text-gray-600 hover:text-green-600">AI Landscapers</Link></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">公司</h3>
+              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Company</h3>
               <ul className="mt-4 space-y-2">
-                <li><Link href="/about" className="text-gray-600 hover:text-green-600">关于我们</Link></li>
-                <li><Link href="/contact" className="text-gray-600 hover:text-green-600">联系我们</Link></li>
-                <li><Link href="/blog" className="text-gray-600 hover:text-green-600">园艺博客</Link></li>
-              </ul>
+                <li><Link href="/about" className="text-gray-600 hover:text-green-600">About Us</Link></li>
+                <li><Link href="/contact" className="text-gray-600 hover:text-green-600">Contact</Link></li>
+                {/* <li><Link href="/blog" className="text-gray-600 hover:text-green-600">Blog</Link></li> */}
+              </ul> 
             </div>
             
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">法律</h3>
+              <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">Resources</h3>
               <ul className="mt-4 space-y-2">
-                <li><Link href="/privacy" className="text-gray-600 hover:text-green-600">隐私政策</Link></li>
-                <li><Link href="/terms" className="text-gray-600 hover:text-green-600">使用条款</Link></li>
+              <li><Link href="/terms" className="text-gray-600 hover:text-green-600">Terms of Service</Link></li>
+              <li><Link href="/privacy" className="text-gray-600 hover:text-green-600">Privacy Policy</Link></li>
               </ul>
             </div>
           </div>
