@@ -5,6 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import StyleSelector from '../components/StyleSelector';
+import ImageComparison from '../components/ImageComparison';
+import gardenStyles, { GardenStyle } from '../data/gardenStyles';
+import MovingStyles from '../components/MovingStyles';
 
 export default function Home() {
   // 轮播图片数据
@@ -17,6 +21,21 @@ export default function Home() {
 
   // 轮播图状态
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // 花园风格状态
+  const [styles, setStyles] = useState<GardenStyle[]>(gardenStyles);
+  const [selectedStyle, setSelectedStyle] = useState<GardenStyle>(gardenStyles[0]);
+
+  // 切换选中的风格
+  const handleSelectStyle = (styleId: string) => {
+    const updatedStyles = styles.map(style => ({
+      ...style,
+      isActive: style.id === styleId
+    }));
+    
+    setStyles(updatedStyles);
+    setSelectedStyle(updatedStyles.find(style => style.id === styleId) || updatedStyles[0]);
+  };
 
   // 自动轮播
   useEffect(() => {
@@ -126,23 +145,55 @@ export default function Home() {
         </div>
 
         {/* 花园示例展示 */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-          <div className="relative overflow-hidden">
-            <div className="flex space-x-6 py-4 overflow-x-auto hide-scrollbar">
-              {[1, 2, 3, 4].map((id) => (
-                <div key={id} className="flex-none w-80 h-48 rounded-lg overflow-hidden shadow-md transition-transform hover:scale-105">
-                  <Image
-                    src={`/images/style_example_${id}.jfif`}
-                    alt={`Garden style_example_ ${id}`}
-                    width={320}
-                    height={192}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-0">
+          <MovingStyles 
+            // title="Explore garden design inspirations"
+            images={[
+              { id: 1, src: '/images/style_example_1.jfif', alt: 'Garden style example 1' },
+              { id: 2, src: '/images/style_example_2.jfif', alt: 'Garden style example 2' },
+              { id: 3, src: '/images/style_example_3.jfif', alt: 'Garden style example 3' },
+              { id: 4, src: '/images/style_example_4.jfif', alt: 'Garden style example 4' },
+              { id: 5, src: '/images/style_example_3.jfif', alt: 'Garden style example 5' },
+              { id: 6, src: '/images/style_example_2.jfif', alt: 'Garden style example 6' },
+            ]}
+          />
         </div>
+
+        {/* 风格选择区域 */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+          <h2 className="text-4xl font-bold text-center text-gray-800 mb-8">
+            How AI Generates brilliant designs
+          </h2>
+          <p className="text-xl text-gray-700 max-w-3xl mx-auto mt-6">
+            Witness how our AI effortlessly converts ordinary gardens into breathtaking designs within mere seconds. Become part of a community of countless delighted homeowners and professional landscapers who have unlocked the hidden beauty and potential of their outdoor spaces.
+          </p>
+
+          <StyleSelector 
+            styles={styles} 
+            onSelectStyle={handleSelectStyle} 
+          />
+        </div>
+
+        {/* 效果对比区域 */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-semibold text-gray-800">
+              {selectedStyle.name}
+            </h3>
+            <p className="text-gray-600 mt-2">
+              Drag the slider to compare the front and rear effects
+            </p>
+          </div>
+
+          <ImageComparison 
+            beforeImage={selectedStyle.before} 
+            afterImage={selectedStyle.after}
+            beforeAlt={`${selectedStyle.name} Before`}
+            afterAlt={`${selectedStyle.name} After`}
+          />
+        </div>
+
+
       </main>
 
       {/* 页脚 */}
