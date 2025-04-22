@@ -98,7 +98,7 @@ export default function PhotoGenerator() {
       
       // 检查是否超过上限
       if (currentTokens + newWordTokens <= 72) {
-        setPositiveWords([...positiveWords, newWord]);
+      setPositiveWords([...positiveWords, newWord]);
       }
       setPositiveInput('');
     }
@@ -118,7 +118,7 @@ export default function PhotoGenerator() {
       
       // 检查是否超过上限
       if (currentTokens + newWordTokens <= 72) {
-        setNegativeWords([...negativeWords, newWord]);
+      setNegativeWords([...negativeWords, newWord]);
       }
       setNegativeInput('');
     }
@@ -152,7 +152,7 @@ export default function PhotoGenerator() {
         const currentTokens = calculateTokens(positiveWords);
         const newWordTokens = word.text.split(' ').length;
         if (currentTokens + newWordTokens <= 72) {
-          setPositiveWords([...positiveWords, word]);
+        setPositiveWords([...positiveWords, word]);
         }
       }
     } else {
@@ -165,7 +165,7 @@ export default function PhotoGenerator() {
         const currentTokens = calculateTokens(negativeWords);
         const newWordTokens = word.text.split(' ').length;
         if (currentTokens + newWordTokens <= 72) {
-          setNegativeWords([...negativeWords, word]);
+        setNegativeWords([...negativeWords, word]);
         }
       }
     }
@@ -394,14 +394,14 @@ export default function PhotoGenerator() {
                 <span>{calculateTokens(positiveWords)}/72 tokens</span>
               </div>
               <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Type and press Enter to add custom word..."
+              <input
+                type="text"
+                placeholder="Type and press Enter to add custom word..."
                   className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-2 ${inputFocusClass}`}
-                  value={positiveInput}
-                  onChange={(e) => setPositiveInput(e.target.value)}
-                  onKeyDown={handlePositiveInputKeyDown}
-                />
+                value={positiveInput}
+                onChange={(e) => setPositiveInput(e.target.value)}
+                onKeyDown={handlePositiveInputKeyDown}
+              />
                 {positiveInput && (
                   <button 
                     className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600"
@@ -521,14 +521,14 @@ export default function PhotoGenerator() {
                 <span>{calculateTokens(negativeWords)}/72 tokens</span>
               </div>
               <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Type and press Enter to add custom word..."
+              <input
+                type="text"
+                placeholder="Type and press Enter to add custom word..."
                   className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-2 ${inputFocusClass}`}
-                  value={negativeInput}
-                  onChange={(e) => setNegativeInput(e.target.value)}
-                  onKeyDown={handleNegativeInputKeyDown}
-                />
+                value={negativeInput}
+                onChange={(e) => setNegativeInput(e.target.value)}
+                onKeyDown={handleNegativeInputKeyDown}
+              />
                 {negativeInput && (
                   <button 
                     className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600"
@@ -539,8 +539,8 @@ export default function PhotoGenerator() {
                     </svg>
                   </button>
                 )}
-              </div>
-              
+        </div>
+        
               {/* 已选词汇展示 */}
               <div className="flex flex-wrap gap-2 mb-2">
                 {negativeWords.length > 0 ? (
@@ -553,9 +553,9 @@ export default function PhotoGenerator() {
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
+              </svg>
+            </button>
+          </div>
                   ))
                 ) : (
                   <p className="text-xs text-gray-400">Add words from above or type your own</p>
@@ -568,7 +568,7 @@ export default function PhotoGenerator() {
                   className="text-xs text-gray-500 hover:text-gray-700 underline"
                 >
                   Clear all
-                </button>
+          </button>
               )}
             </div>
           </div>
@@ -921,8 +921,8 @@ export default function PhotoGenerator() {
                 onMouseLeave={() => setActiveTooltip(null)}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                </svg>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
                 <Tooltip 
                   id="recent-images" 
                   text="Recent images you've generated or uploaded. You can drag these images to the upload area to reuse them as a base for new designs."
@@ -945,8 +945,8 @@ export default function PhotoGenerator() {
                 onMouseLeave={() => setActiveTooltip(null)}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                </svg>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
                 <Tooltip 
                   id="upload-image" 
                   text="Upload an image of your current garden to use as a starting point. Square images with good lighting work best. Supported formats: JPG, PNG, WEBP."
@@ -1049,8 +1049,8 @@ export default function PhotoGenerator() {
                 onMouseLeave={() => setActiveTooltip(null)}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                </svg>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
                 <Tooltip 
                   id="partial-redesign" 
                   text="Select specific areas of your garden to modify while keeping the rest unchanged. Use the brush tool to precisely indicate which parts you want to redesign."
@@ -1095,8 +1095,8 @@ export default function PhotoGenerator() {
                 onMouseLeave={() => setActiveTooltip(null)}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                </svg>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
                 <Tooltip 
                   id="select-style" 
                   text="Choose from predefined garden styles or create your own custom style using positive and negative words. Different styles will significantly change the look of your garden."
@@ -1131,7 +1131,7 @@ export default function PhotoGenerator() {
               <div>
                 <div className="ml-2 flex mb-3">
                   <span className="text-xs text-gray-700">Choose a Style:</span>
-                </div>
+                  </div>
                 <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
                   {gardenStyles.map((style) => (
                     <div 
@@ -1143,27 +1143,27 @@ export default function PhotoGenerator() {
                       }`}
                       onClick={() => handleStyleSelect(style.id)}
                     >
-                      <div className="aspect-video bg-gray-100 rounded mb-2 relative overflow-hidden">
-                        <Image 
+                  <div className="aspect-video bg-gray-100 rounded mb-2 relative overflow-hidden">
+                    <Image 
                           src={style.image}
                           alt={style.name}
-                          fill
-                          sizes="100%"
-                          style={{objectFit: 'cover'}}
+                      fill
+                      sizes="100%"
+                      style={{objectFit: 'cover'}}
                           className={`transition-transform ${selectedStyleId === style.id ? 'scale-105' : 'hover:scale-105'}`}
-                        />
-                      </div>
+                    />
+                  </div>
                       <p className={`text-xs font-medium ${selectedStyleId === style.id ? 'text-emerald-700' : ''}`}>
                         {style.name}
                       </p>
-                    </div>
-                  ))}
                 </div>
+                  ))}
+                  </div>
                 {selectedStyleId && (
                   <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
                     <h4 className="text-sm font-bold text-emerald-700 mb-1">{getSelectedStyle()?.name}:</h4>
                     <p className="text-xs text-emerald-700">{getSelectedStyle()?.description}</p>
-                  </div>
+                </div>
                 )}
               </div>
             ) : (
@@ -1183,8 +1183,8 @@ export default function PhotoGenerator() {
                 onMouseLeave={() => setActiveTooltip(null)}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                </svg>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+              </svg>
                 <Tooltip 
                   id="structural-resemblance" 
                   text="Control how closely the generated image will match your original garden's layout. Higher values preserve more of the original structure, while lower values allow more creative freedom."
