@@ -73,9 +73,25 @@ export default function PhotoGenerator() {
   
   // 用户自定义风格列表
   const [customStyles, setCustomStyles] = useState([
-    { id: 1, name: 'ddddd', preview: 'mysterious shadows, authentic medieval architecture...' },
-    { id: 2, name: 'new_style', preview: 'mysterious shadows, authentic medieval architecture...' },
+    { id: 1, name: 'Japanese Garden', preview: 'zen rock garden, moss covered stones, maple trees, minimalist design...' },
+    { id: 2, name: 'English Cottage', preview: 'wildflowers, roses, lavender paths, rustic wooden gates, cottage perennials...' },
+    { id: 3, name: 'Modern Minimalist', preview: 'geometric patterns, concrete planters, succulents, structured design...' },
+    { id: 4, name: 'Tropical Paradise', preview: 'palm trees, exotic flowers, vibrant colors, banana leaves, natural pool...' },
+    { id: 5, name: 'Mediterranean', preview: 'olive trees, terracotta pots, lavender, stone paths, warm sunlight...' },
+    { id: 6, name: 'Woodland Retreat', preview: 'native trees, forest floor, ferns, moss patches, dappled sunlight...' },
+    { id: 7, name: 'Desert Oasis', preview: 'cacti, succulents, rock garden, drought resistant plants, warm tones...' },
+    { id: 8, name: 'French Formal', preview: 'geometric hedges, symmetrical design, gravel paths, classical statues...' },
+    { id: 9, name: 'Cottage Herb', preview: 'herb garden, rustic wooden planters, informal layout, edible flowers...' },
+    { id: 10, name: 'Zen Water', preview: 'koi pond, water lilies, bamboo fountains, meditation area, smooth stones...' },
+    { id: 11, name: 'Rooftop Urban', preview: 'container gardens, city views, vertical gardens, outdoor seating, small trees...' },
+    { id: 12, name: 'Fairy Garden', preview: 'miniature features, whimsical elements, moss paths, tiny flowers, magical...' },
+    { id: 13, name: 'Coastal Garden', preview: 'grasses, driftwood, salt-tolerant plants, beach stones, sandy paths...' },
+    { id: 14, name: 'Night Garden', preview: 'white flowers, silver foliage, moonlight reflection, soft lighting...' },
   ]);
+  
+  // 分页状态
+  const [currentPage, setCurrentPage] = useState(1);
+  const stylesPerPage = 5;
   
   // 预设词汇选项
   const positiveWordOptions: WordTag[] = [
@@ -1604,42 +1620,97 @@ export default function PhotoGenerator() {
                 </div>
                 
                 {customStyles.length > 0 ? (
-                  <div className="max-h-64 overflow-y-auto">
-                    {customStyles.map(style => (
-                      <div key={style.id} className="flex items-center py-2 border-b border-gray-100">
-                        <div className="w-1/4 text-sm text-gray-700">{style.name}</div>
-                        <div className="w-1/2 text-sm text-gray-500 truncate">{style.preview}</div>
-                        <div className="w-1/4 flex items-center space-x-2">
-                          <button 
-                            className="p-1 text-gray-500 hover:text-emerald-600"
-                            onClick={() => handleLoadStyle(style.id)}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </button>
-                          <button 
-                            className="p-1 text-gray-500 hover:text-emerald-600"
-                            onClick={() => handleOpenEditStyleDialog(style.id)}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                          </button>
-                          <button 
-                            className="p-1 text-gray-500 hover:text-red-600"
-                            onClick={() => {
-                              setDeletingStyleId(style.id);
-                              setShowDeleteConfirmDialog(true);
-                            }}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
-                          </button>
-                        </div>
+                  <div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {customStyles
+                        .slice((currentPage - 1) * stylesPerPage, currentPage * stylesPerPage)
+                        .map(style => (
+                          <div key={style.id} className="flex items-center py-2 border-b border-gray-100">
+                            <div className="w-1/4 text-sm text-gray-700">{style.name}</div>
+                            <div className="w-1/2 text-sm text-gray-500 truncate">{style.preview}</div>
+                            <div className="w-1/4 flex items-center space-x-2">
+                              <button 
+                                className="p-1 text-gray-500 hover:text-emerald-600"
+                                onClick={() => handleLoadStyle(style.id)}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </button>
+                              <button 
+                                className="p-1 text-gray-500 hover:text-emerald-600"
+                                onClick={() => handleOpenEditStyleDialog(style.id)}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                </svg>
+                              </button>
+                              <button 
+                                className="p-1 text-gray-500 hover:text-red-600"
+                                onClick={() => {
+                                  setDeletingStyleId(style.id);
+                                  setShowDeleteConfirmDialog(true);
+                                }}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                    
+                    {/* 分页控制 */}
+                    <div className="flex justify-between items-center mt-4">
+                      <div className="text-xs text-gray-500">
+                        显示 {Math.min((currentPage - 1) * stylesPerPage + 1, customStyles.length)} - {Math.min(currentPage * stylesPerPage, customStyles.length)} 共 {customStyles.length} 条
                       </div>
-                    ))}
+                      <div className="flex space-x-2">
+                        <button
+                          className={`px-2 py-1 text-xs rounded border ${
+                            currentPage === 1
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-white text-gray-700 hover:bg-gray-50'
+                          }`}
+                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                          disabled={currentPage === 1}
+                        >
+                          上一页
+                        </button>
+                        {Array.from(
+                          { length: Math.min(3, Math.ceil(customStyles.length / stylesPerPage)) },
+                          (_, i) => i + 1
+                        ).map(page => (
+                          <button
+                            key={page}
+                            className={`px-2 py-1 text-xs rounded ${
+                              currentPage === page
+                                ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                                : 'bg-white text-gray-700 border hover:bg-gray-50'
+                            }`}
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                        <button
+                          className={`px-2 py-1 text-xs rounded border ${
+                            currentPage >= Math.ceil(customStyles.length / stylesPerPage)
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-white text-gray-700 hover:bg-gray-50'
+                          }`}
+                          onClick={() =>
+                            setCurrentPage(prev => 
+                              Math.min(prev + 1, Math.ceil(customStyles.length / stylesPerPage))
+                            )
+                          }
+                          disabled={currentPage >= Math.ceil(customStyles.length / stylesPerPage)}
+                        >
+                          下一页
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="py-8 text-center text-gray-500">
