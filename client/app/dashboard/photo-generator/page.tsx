@@ -14,6 +14,9 @@ interface ImageData {
   createTime: string;
   liked: boolean;
   status: string;
+  size?: string;
+  positiveWords?: string[];
+  negativeWords?: string[];
 }
 
 // 定义词汇标签类型
@@ -43,6 +46,10 @@ export default function PhotoGenerator() {
   const [resemblancePercent, setResemblancePercent] = useState(75); // 默认75%
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
+  
+  // 图片详情弹窗状态
+  const [selectedImage, setSelectedImage] = useState<any | null>(null);
+  const [showImageDetail, setShowImageDetail] = useState(false);
   
   // Tooltip相关状态
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
@@ -1094,7 +1101,8 @@ export default function PhotoGenerator() {
       "tags": ["日式", "禅意", "枯山水"],
       "createTime": "2024-03-15T09:30:00Z",
       "liked": true,
-      "status": "processing" // 添加生成中状态
+      "status": "processing", // 添加生成中状态
+      "size": "1024 * 768"
     },
     {
       "id": 2,
@@ -1103,7 +1111,8 @@ export default function PhotoGenerator() {
       "style": "英式花园",
       "tags": ["乡村", "花卉", "自然"],
       "createTime": "2024-03-16T10:25:00Z",
-      "liked": false
+      "liked": false,
+      "size": "1024 * 768"
     },
     {
       "id": 3,
@@ -1112,7 +1121,8 @@ export default function PhotoGenerator() {
       "style": "现代简约",
       "tags": ["几何", "简约", "都市"],
       "createTime": "2024-03-17T14:10:00Z",
-      "liked": false
+      "liked": false,
+      "size": "1024 * 768"
     },
     {
       "id": 4,
@@ -1121,7 +1131,8 @@ export default function PhotoGenerator() {
       "style": "热带风情",
       "tags": ["热带", "多彩", "雨林"],
       "createTime": "2024-03-18T11:45:00Z",
-      "liked": true
+      "liked": true,
+      "size": "1024 * 768"
     },
     {
       "id": 5,
@@ -1130,16 +1141,20 @@ export default function PhotoGenerator() {
       "style": "地中海风格",
       "tags": ["蓝白", "阳光", "悠闲"],
       "createTime": "2024-03-19T16:20:00Z",
-      "liked": false
+      "liked": false,
+      "size": "1024 * 768"
     },
     {
       "id": 6,
       "src": "/uploads/garden-sample.png",
       "alt": "石庭枯山水",
-      "style": "日式庭院",
+      "style": "Custom Style",
       "tags": ["石头", "枯山水", "禅意"],
       "createTime": "2024-03-20T09:15:00Z",
-      "liked": false
+      "liked": false,
+      "size": "1024 * 768",
+      "positiveWords": ["禅意", "石头", "简约", "平衡", "冥想"],
+      "negativeWords": ["喧嚣", "复杂", "杂乱", "过于色彩丰富", "不自然"]
     },
     {
       "id": 7,
@@ -1148,7 +1163,8 @@ export default function PhotoGenerator() {
       "style": "英式花园",
       "tags": ["繁花", "古典", "优雅"],
       "createTime": "2024-03-21T13:40:00Z",
-      "liked": true
+      "liked": true,
+      "size": "1024 * 768"
     },
     {
       "id": 8,
@@ -1157,7 +1173,8 @@ export default function PhotoGenerator() {
       "style": "现代简约",
       "tags": ["简约", "线条", "空间感"],
       "createTime": "2024-03-22T15:55:00Z",
-      "liked": false
+      "liked": false,
+      "size": "1024 * 768"
     },
     {
       "id": 9,
@@ -1166,7 +1183,8 @@ export default function PhotoGenerator() {
       "style": "热带风情",
       "tags": ["棕榈", "热带", "度假"],
       "createTime": "2024-03-23T10:30:00Z",
-      "liked": false
+      "liked": false,
+      "size": "1024 * 768"
     },
     {
       "id": 10,
@@ -1175,7 +1193,8 @@ export default function PhotoGenerator() {
       "style": "地中海风格",
       "tags": ["白墙", "蓝色", "阳光"],
       "createTime": "2024-03-24T12:00:00Z",
-      "liked": true
+      "liked": true,
+      "size": "1024 * 768"
     },
     {
       "id": 11,
@@ -1184,7 +1203,8 @@ export default function PhotoGenerator() {
       "style": "日式庭院",
       "tags": ["竹子", "流水", "冥想"],
       "createTime": "2024-03-25T11:20:00Z",
-      "liked": false
+      "liked": false,
+      "size": "1024 * 768"
     },
     {
       "id": 12,
@@ -1193,7 +1213,8 @@ export default function PhotoGenerator() {
       "style": "英式花园",
       "tags": ["玫瑰", "田园", "自然"],
       "createTime": "2024-03-26T14:15:00Z",
-      "liked": false
+      "liked": false,
+      "size": "1024 * 768"
     }
   ];
   
@@ -1232,6 +1253,7 @@ export default function PhotoGenerator() {
                 sizes="100%"
                 style={{objectFit: 'cover'}}
                 className={`${image.status !== "processing" ? "hover:opacity-80 transition-opacity cursor-pointer" : "opacity-50"}`}
+                onClick={() => image.status !== "processing" && handleImageClick(image)}
               />
               
               {image.status === "processing" && (
@@ -1241,7 +1263,7 @@ export default function PhotoGenerator() {
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                     <div className="absolute inset-0 flex items-center justify-center text-blue-600">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                       </svg>
                     </div>
                   </div>
@@ -1308,6 +1330,95 @@ export default function PhotoGenerator() {
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No Deleted Images</h3>
         <p className="text-sm text-gray-500 text-center mb-4">Your deleted images will appear here</p>
+      </div>
+    );
+  };
+  
+  // 处理图片点击，打开详情弹窗
+  const handleImageClick = (image: any) => {
+    if (image.status !== 'processing') {
+      setSelectedImage(image);
+      setShowImageDetail(true);
+    }
+  };
+
+  // 关闭图片详情弹窗
+  const handleCloseImageDetail = () => {
+    setShowImageDetail(false);
+    setSelectedImage(null);
+  };
+
+  // 渲染图片详情弹窗
+  const renderImageDetailModal = () => {
+    if (!showImageDetail || !selectedImage) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+        <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden">
+          {/* 图片展示 */}
+          <div className="relative w-full pt-6 px-6">
+            <div className="relative w-full h-80 rounded-lg overflow-hidden">
+              <Image 
+                src={selectedImage.src}
+                alt={selectedImage.alt}
+                fill
+                style={{objectFit: 'cover'}}
+                className="w-full h-full"
+              />
+            </div>
+          </div>
+          
+          {/* 图片信息 */}
+          <div className="p-6">
+            <div className="grid grid-cols-2 gap-y-4">
+              <div className="text-gray-500">Style</div>
+              <div className="font-medium">{selectedImage.style}</div>
+              
+              {/* 仅对Custom Style显示Positive/Negative Words */}
+              {selectedImage.style === "Custom Style" && (
+                <>
+                  <div className="text-gray-500">Positive Words</div>
+                  <div className="font-medium">{selectedImage.positiveWords?.join(', ') || 'Null'}</div>
+                  
+                  <div className="text-gray-500">Negative Words</div>
+                  <div className="font-medium">{selectedImage.negativeWords?.join(', ') || 'Null'}</div>
+                </>
+              )}
+              
+              <div className="text-gray-500">Structural Resemblance</div>
+              <div className="font-medium">22%</div>
+              
+              <div className="text-gray-500">Size</div>
+              <div className="font-medium">{selectedImage.size || '1024 * 768'}</div>
+              
+              <div className="text-gray-500">Created At</div>
+              <div className="font-medium">{new Date(selectedImage.createTime).toLocaleString()}</div>
+              
+              <div className="text-gray-500">View Original Image</div>
+              <div className="text-emerald-600 font-medium cursor-pointer">Click here</div>
+            </div>
+            
+            {/* 操作按钮 */}
+            <div className="flex mt-6 gap-4">
+              <button className="flex-1 py-3 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition">
+                Download Image
+              </button>
+              <button className={`flex-1 py-3 rounded-md border ${selectedImage.liked ? 'bg-red-50 text-red-600 border-red-200' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'} transition`}>
+                {selectedImage.liked ? 'Liked' : 'Like'}
+              </button>
+            </div>
+          </div>
+          
+          {/* 关闭按钮 */}
+          <button 
+            onClick={handleCloseImageDetail}
+            className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-100 text-gray-700 transition"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       </div>
     );
   };
@@ -2036,6 +2147,9 @@ export default function PhotoGenerator() {
           </div>
         )}
       </div>
+      
+      {/* 图片详情弹窗 */}
+      {renderImageDetailModal()}
     </div>
   );
 } 
