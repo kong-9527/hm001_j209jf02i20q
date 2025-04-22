@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { CreateProjectModal } from '@/app/components/CreateProjectModal';
+import { EditProjectModal } from '@/app/components/EditProjectModal';
+import { DeleteConfirmModal } from '@/app/components/DeleteConfirmModal';
 
 // 示例项目数据
 const initialProjects = [
@@ -14,6 +16,10 @@ const initialProjects = [
 export default function ProjectsPage() {
   const [projects, setProjects] = useState(initialProjects);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<{id: number, name: string} | null>(null);
+  const [deletingProject, setDeletingProject] = useState<{id: number, name: string} | null>(null);
   
   const handleCreateProject = (projectName: string) => {
     const newProject = {
@@ -24,8 +30,30 @@ export default function ProjectsPage() {
     setProjects([...projects, newProject]);
   };
   
-  const handleDeleteProject = (projectId: number) => {
-    setProjects(projects.filter(project => project.id !== projectId));
+  const handleEditProject = (projectId: number, projectName: string) => {
+    setProjects(projects.map(project => 
+      project.id === projectId 
+        ? { ...project, name: projectName } 
+        : project
+    ));
+  };
+  
+  const handleOpenEditModal = (project: {id: number, name: string}) => {
+    setEditingProject(project);
+    setIsEditModalOpen(true);
+  };
+  
+  const handleOpenDeleteModal = (project: {id: number, name: string}) => {
+    setDeletingProject(project);
+    setIsDeleteModalOpen(true);
+  };
+  
+  const handleConfirmDelete = () => {
+    if (deletingProject) {
+      setProjects(projects.filter(project => project.id !== deletingProject.id));
+      setIsDeleteModalOpen(false);
+      setDeletingProject(null);
+    }
   };
   
   const handleSetCurrentProject = (projectId: number) => {
@@ -41,7 +69,7 @@ export default function ProjectsPage() {
         <h1 className="text-2xl font-semibold">Manage Projects</h1>
         <button 
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md"
+          className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -54,7 +82,7 @@ export default function ProjectsPage() {
         {projects.map(project => (
           <div 
             key={project.id}
-            className={`border rounded-lg p-4 relative ${project.isCurrent ? 'border-green-500' : 'border-gray-200'}`}
+            className={`border rounded-lg p-4 relative ${project.isCurrent ? 'border-green-500 border-2' : 'border-gray-200'} flex flex-col h-full`}
           >
             <div className="mb-6">
               <h3 className="text-lg font-medium">{project.name}</h3>
@@ -65,7 +93,7 @@ export default function ProjectsPage() {
               )}
             </div>
             
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-2 mt-auto">
               {!project.isCurrent && (
                 <button 
                   onClick={() => handleSetCurrentProject(project.id)}
@@ -76,6 +104,7 @@ export default function ProjectsPage() {
               )}
               
               <button 
+                onClick={() => handleOpenEditModal(project)}
                 className="text-gray-500 hover:text-gray-700"
                 title="Edit project"
               >
@@ -85,7 +114,7 @@ export default function ProjectsPage() {
               </button>
               
               <button 
-                onClick={() => handleDeleteProject(project.id)}
+                onClick={() => handleOpenDeleteModal(project)}
                 className="text-gray-500 hover:text-red-600"
                 title="Delete project"
               >
@@ -102,6 +131,23 @@ export default function ProjectsPage() {
         <CreateProjectModal 
           onClose={() => setIsCreateModalOpen(false)}
           onSubmit={handleCreateProject}
+        />
+      )}
+      
+      {isEditModalOpen && editingProject && (
+        <EditProjectModal 
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleEditProject}
+          projectId={editingProject.id}
+          currentName={editingProject.name}
+        />
+      )}
+      
+      {isDeleteModalOpen && deletingProject && (
+        <DeleteConfirmModal
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          projectName={deletingProject.name}
         />
       )}
     </div>
