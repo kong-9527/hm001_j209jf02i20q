@@ -828,6 +828,14 @@ export default function PhotoGenerator() {
     }))
   };
   
+  // 添加20个模拟图片数据用于All页签
+  const allImageData = Array(20).fill(0).map((_, index) => ({
+    id: index + 1,
+    src: `/uploads/garden-sample${index % 5 + 1}.png`,
+    alt: `花园设计 ${index + 1}`,
+    date: `2024/${3 + Math.floor(index/5)}/${5 + index % 25}`
+  }));
+  
   // 处理拖拽开始
   const handleDragStart = (e: DragEvent<HTMLDivElement>, imageSrc: string) => {
     e.dataTransfer.setData('text/plain', imageSrc);
@@ -1024,7 +1032,7 @@ export default function PhotoGenerator() {
         
         // 多张图片需要滚动容器
         return (
-          <div className="max-h-[20rem] overflow-y-auto pr-1">
+          <div className="max-h-[20rem] overflow-y-auto pr-6 scrollbar-thin">
             <div className="grid grid-cols-4 gap-2">
               {imageData.map((image) => (
                 <div 
@@ -1086,13 +1094,14 @@ export default function PhotoGenerator() {
       );
     }
     
-    const imageData = imageDataMap[recentImagesState];
+    // 使用新创建的allImageData
+    const imageData = allImageData;
     
     return (
-      <div className={`${recentImagesState !== 'single' ? 'max-h-[30rem] overflow-y-auto pr-1' : ''} p-6`}>
-        <div className="grid grid-cols-3 gap-4">
+      <div className="max-h-[calc(100vh-25em)] overflow-y-auto p-6 scrollbar-thin">
+        <div className="grid grid-cols-2 gap-2">
           {imageData.map((image) => (
-            <div 
+            <div  
               key={image.id} 
               className="relative aspect-square bg-gray-100 rounded-md overflow-hidden group"
             >
@@ -1158,692 +1167,728 @@ export default function PhotoGenerator() {
   
   return (
     <div className="w-full h-full">
-      {/* <h1 className="text-2xl font-bold mb-6">Images</h1> */}
+      <style jsx global>{`
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.2);
+          border-radius: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(0, 0, 0, 0.3);
+        }
+        .scrollbar-thin {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        }
+        
+        /* 防止页面闪现滚动条 */
+        html, body {
+          overflow: hidden;
+          height: 100%;
+          width: 100%;
+        }
+        
+        /* 确保主容器不会溢出 */
+        #photo-generator-root {
+          overflow: hidden;
+          height: 100%;
+          width: 100%;
+        }
+      `}</style>
       
-      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100%-3rem)]">
-        {/* 左侧面板 */}
-        <div className="bg-white rounded-lg shadow-sm p-6 flex-1 overflow-y-auto">
-          {/* 最近图片 */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">1</div>
-              <h2 className="text-lg font-bold">Recent Images</h2>
-              <button 
-                className="ml-2 text-gray-400 hover:text-gray-500 relative"
-                onMouseEnter={() => setActiveTooltip('recent-images')}
-                onMouseLeave={() => setActiveTooltip(null)}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-              </svg>
-                <Tooltip 
-                  id="recent-images" 
-                  text="Recent images you've generated or uploaded. You can drag these images to the upload area to reuse them as a base for new designs."
-                />
-              </button>
-            </div>
-            <div className="border border-gray-200 rounded-lg p-4">
-              {renderRecentImages()}
-            </div>
-          </div>
-          
-          {/* 上传图片区域 */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">2</div>
-              <h2 className="text-lg font-bold">Upload Your Image</h2>
-              <button 
-                className="ml-2 text-gray-400 hover:text-gray-500 relative"
-                onMouseEnter={() => setActiveTooltip('upload-image')}
-                onMouseLeave={() => setActiveTooltip(null)}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-              </svg>
-                <Tooltip 
-                  id="upload-image" 
-                  text="Upload an image of your current garden to use as a starting point. Square images with good lighting work best. Supported formats: JPG, PNG, WEBP."
-                />
-              </button>
-            </div>
-            
-            <div className="text-sm text-gray-600 mb-3 bg-green-100 rounded-lg p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-green-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-green-800">Tips for the best results:</h3>
-                  <p className="text-sm text-green-700">Use square images</p>
-                  <p className="text-sm text-green-700">Ensure good lighting</p>
-                  <p className="text-sm text-green-700">High resolution</p>
-                  <p className="text-sm text-green-700">Full garden view</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* 上传图片状态 */}
-            {!uploadedImage ? (
-              <div 
-                ref={uploadAreaRef}
-                className={`border-2 border-dashed ${isDragOver ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300'} rounded-lg p-6 flex flex-col items-center justify-center transition-colors`}
-                onDragEnter={handleDragEnter}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <div className="w-12 h-12 mb-4 flex items-center justify-center bg-emerald-100 rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-emerald-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                  </svg>
-                </div>
-                <p className="text-sm font-medium text-center mb-1">
-                  {isDragOver ? 'Release to upload image' : 'Drop your image here or click to upload'}
-                </p>
-                <p className="text-xs text-gray-500 text-center">Supports JPG, PNG, WEBP</p>
-                <label className="mt-4">
-                  <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={handleFileInputChange} />
-                  <span className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition cursor-pointer">
-                    Select File
-                  </span>
-                </label>
-              </div>
-            ) : (
-              <div 
-                ref={uploadAreaRef}
-                className={`border-2 border-dashed ${isDragOver ? 'border-emerald-500' : 'border-gray-300'} rounded-lg p-2 group cursor-pointer transition-colors relative`}
-                onDragEnter={handleDragEnter}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={(e) => {
-                  // 确保点击事件只在div内部触发，而不是冒泡
-                  if (e.currentTarget === e.target || e.target instanceof Node && e.currentTarget.contains(e.target)) {
-                    const fileInput = e.currentTarget.querySelector('input[type="file"]') as HTMLInputElement;
-                    if (fileInput) fileInput.click();
-                  }
-                }}
-              >
-                <div className="relative aspect-video overflow-hidden rounded-md">
-                  <Image 
-                    src="/uploads/garden-sample.png" 
-                    alt="Uploaded Garden" 
-                    fill
-                    sizes="100%"
-                    style={{objectFit: 'cover'}}
-                    className="transition-transform group-hover:scale-105"
-                  />
-                  <div className={`absolute inset-0 flex items-center justify-center ${isDragOver ? 'bg-black bg-opacity-40' : 'bg-black bg-opacity-0 group-hover:bg-opacity-40'} transition-all`}>
-                    <p className={`text-white font-medium ${isDragOver ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
-                      {isDragOver ? 'Release to replace image' : 'Click to change image'}
-                    </p>
-                  </div>
-                </div>
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  accept="image/jpeg,image/png,image/webp" 
-                  onChange={handleFileInputChange} 
-                />
-              </div>
-            )}
-          </div>
-          
-          {/* Partial Redesign部分 */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">3</div>
-              <h2 className="text-lg font-bold">Partial Redesign</h2>
-              <button 
-                className="ml-2 text-gray-400 hover:text-gray-500 relative"
-                onMouseEnter={() => setActiveTooltip('partial-redesign')}
-                onMouseLeave={() => setActiveTooltip(null)}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-              </svg>
-                <Tooltip 
-                  id="partial-redesign" 
-                  text="Select specific areas of your garden to modify while keeping the rest unchanged. Use the brush tool to precisely indicate which parts you want to redesign."
-                />
-              </button>
-            </div>
-            
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 mb-3">Optionally enhance your garden visualization:</p>
-              <ul className="text-sm space-y-2">
-                <li className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-600 mr-2 flex-shrink-0">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>Select areas you want to modify with the brush tool</span>
-                </li>
-                <li className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-600 mr-2 flex-shrink-0">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>Use the zoom, region fill and bucket tool to precisely fill in your garden boundaries</span>
-                </li>
-              </ul>
-              
-              <button className="mt-4 px-4 py-1.5 border border-gray-300 bg-white rounded-lg text-sm flex items-center justify-center hover:bg-gray-50 transition w-full">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+      <div id="photo-generator-root" className="w-full h-full">
+        {/* <h1 className="text-2xl font-bold mb-6">Images</h1> */}
+        
+        <div className="flex flex-col lg:flex-row gap-6 h-[calc(100%)] justify-start">
+          {/* 左侧面板 */}
+          <div className="bg-white rounded-lg shadow-sm p-6 lg:w-[48%] overflow-y-auto scrollbar-thin">
+            {/* 最近图片 */}
+            <div className="mb-8">
+              <div className="flex items-center mb-4">
+                <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">1</div>
+                <h2 className="text-lg font-bold">Recent Images</h2>
+                <button 
+                  className="ml-2 text-gray-400 hover:text-gray-500 relative"
+                  onMouseEnter={() => setActiveTooltip('recent-images')}
+                  onMouseLeave={() => setActiveTooltip(null)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
                 </svg>
-                Edit Garden Image
-              </button>
-            </div>
-          </div>
-          
-          {/* 选择风格 */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">4</div>
-              <h2 className="text-lg font-bold">Select Style</h2>
-              <button 
-                className="ml-2 text-gray-400 hover:text-gray-500 relative"
-                onMouseEnter={() => setActiveTooltip('select-style')}
-                onMouseLeave={() => setActiveTooltip(null)}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-              </svg>
-                <Tooltip 
-                  id="select-style" 
-                  text="Choose from predefined garden styles or create your own custom style using positive and negative words. Different styles will significantly change the look of your garden."
-                />
-              </button>
-            </div>
-            
-            <div className="flex mb-4 border-b border-gray-200">
-              <button 
-                className={`px-4 py-2 text-sm font-medium ${selectedTab === 'premade' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-gray-500 hover:text-gray-700'}`}
-                onClick={() => setSelectedTab('premade')}
-              >
-                Classic styles
-              </button>
-              <button 
-                className={`px-4 py-2 text-sm font-medium ${selectedTab === 'custom' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-gray-500 hover:text-gray-700'}`}
-                onClick={() => setSelectedTab('custom')}
-              >
-                Custom styles
-              </button>
-            </div>
-            
-            {/* 只在Classic styles页签下显示Choose a Style文本 */}
-            {/* {selectedTab === 'premade' && (
-              <div className="ml-2 flex mb-5">
-                <span className="text-xs text-gray-700">Choose a Style:</span>
+                  <Tooltip 
+                    id="recent-images" 
+                    text="Recent images you've generated or uploaded. You can drag these images to the upload area to reuse them as a base for new designs."
+                  />
+                </button>
               </div>
-            )} */}
-
-            {/* 根据选中的页签显示不同内容 */}
-            {selectedTab === 'premade' ? (
-              <div>
-                <div className="ml-2 flex mb-3">
-                  <span className="text-xs text-gray-700">Choose a Style:</span>
+              <div className="border border-gray-200 rounded-lg p-4">
+                {renderRecentImages()}
+              </div>
+            </div>
+            
+            {/* 上传图片区域 */}
+            <div className="mb-8">
+              <div className="flex items-center mb-4">
+                <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">2</div>
+                <h2 className="text-lg font-bold">Upload Your Image</h2>
+                <button 
+                  className="ml-2 text-gray-400 hover:text-gray-500 relative"
+                  onMouseEnter={() => setActiveTooltip('upload-image')}
+                  onMouseLeave={() => setActiveTooltip(null)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                </svg>
+                  <Tooltip 
+                    id="upload-image" 
+                    text="Upload an image of your current garden to use as a starting point. Square images with good lighting work best. Supported formats: JPG, PNG, WEBP."
+                  />
+                </button>
+              </div>
+              
+              <div className="text-sm text-gray-600 mb-3 bg-green-100 rounded-lg p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-green-600">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                    </svg>
                   </div>
-                <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
-                  {gardenStyles.map((style) => (
-                    <div 
-                      key={style.id}
-                      className={`border rounded-lg p-2 cursor-pointer transition ${
-                        selectedStyleId === style.id 
-                          ? 'border-emerald-600 bg-emerald-50 shadow-sm' 
-                          : 'border-gray-200 hover:border-emerald-300'
-                      }`}
-                      onClick={() => handleStyleSelect(style.id)}
-                    >
-                  <div className="aspect-video bg-gray-100 rounded mb-2 relative overflow-hidden">
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-green-800">Tips for the best results:</h3>
+                    <p className="text-sm text-green-700">Use square images</p>
+                    <p className="text-sm text-green-700">Ensure good lighting</p>
+                    <p className="text-sm text-green-700">High resolution</p>
+                    <p className="text-sm text-green-700">Full garden view</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 上传图片状态 */}
+              {!uploadedImage ? (
+                <div 
+                  ref={uploadAreaRef}
+                  className={`border-2 border-dashed ${isDragOver ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300'} rounded-lg p-6 flex flex-col items-center justify-center transition-colors`}
+                  onDragEnter={handleDragEnter}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <div className="w-12 h-12 mb-4 flex items-center justify-center bg-emerald-100 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-emerald-600">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-center mb-1">
+                    {isDragOver ? 'Release to upload image' : 'Drop your image here or click to upload'}
+                  </p>
+                  <p className="text-xs text-gray-500 text-center">Supports JPG, PNG, WEBP</p>
+                  <label className="mt-4">
+                    <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={handleFileInputChange} />
+                    <span className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition cursor-pointer">
+                      Select File
+                    </span>
+                  </label>
+                </div>
+              ) : (
+                <div 
+                  ref={uploadAreaRef}
+                  className={`border-2 border-dashed ${isDragOver ? 'border-emerald-500' : 'border-gray-300'} rounded-lg p-2 group cursor-pointer transition-colors relative`}
+                  onDragEnter={handleDragEnter}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={(e) => {
+                    // 确保点击事件只在div内部触发，而不是冒泡
+                    if (e.currentTarget === e.target || e.target instanceof Node && e.currentTarget.contains(e.target)) {
+                      const fileInput = e.currentTarget.querySelector('input[type="file"]') as HTMLInputElement;
+                      if (fileInput) fileInput.click();
+                    }
+                  }}
+                >
+                  <div className="relative aspect-video overflow-hidden rounded-md">
                     <Image 
-                          src={style.image}
-                          alt={style.name}
+                      src="/uploads/garden-sample.png" 
+                      alt="Uploaded Garden" 
                       fill
                       sizes="100%"
                       style={{objectFit: 'cover'}}
-                          className={`transition-transform ${selectedStyleId === style.id ? 'scale-105' : 'hover:scale-105'}`}
+                      className="transition-transform group-hover:scale-105"
                     />
-                  </div>
-                      <p className={`text-xs font-medium ${selectedStyleId === style.id ? 'text-emerald-700' : ''}`}>
-                        {style.name}
+                    <div className={`absolute inset-0 flex items-center justify-center ${isDragOver ? 'bg-black bg-opacity-40' : 'bg-black bg-opacity-0 group-hover:bg-opacity-40'} transition-all`}>
+                      <p className={`text-white font-medium ${isDragOver ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+                        {isDragOver ? 'Release to replace image' : 'Click to change image'}
                       </p>
-                </div>
-                  ))}
+                    </div>
                   </div>
-                {selectedStyleId && (
-                  <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-                    <h4 className="text-sm font-bold text-emerald-700 mb-1">{getSelectedStyle()?.name}:</h4>
-                    <p className="text-xs text-emerald-700">{getSelectedStyle()?.description}</p>
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/jpeg,image/png,image/webp" 
+                    onChange={handleFileInputChange} 
+                  />
                 </div>
-                )}
+              )}
+            </div>
+            
+            {/* Partial Redesign部分 */}
+            <div className="mb-8">
+              <div className="flex items-center mb-4">
+                <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">3</div>
+                <h2 className="text-lg font-bold">Partial Redesign</h2>
+                <button 
+                  className="ml-2 text-gray-400 hover:text-gray-500 relative"
+                  onMouseEnter={() => setActiveTooltip('partial-redesign')}
+                  onMouseLeave={() => setActiveTooltip(null)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                </svg>
+                  <Tooltip 
+                    id="partial-redesign" 
+                    text="Select specific areas of your garden to modify while keeping the rest unchanged. Use the brush tool to precisely indicate which parts you want to redesign."
+                  />
+                </button>
               </div>
-            ) : (
-              /* 自定义风格内容 */
-              renderCustomStyleContent()
-            )}
-          </div>
-          
-          {/* 结构相似度 */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">5</div>
-              <h2 className="text-lg font-bold">Structural Resemblance</h2>
-              <button 
-                className="ml-2 text-gray-400 hover:text-gray-500 relative"
-                onMouseEnter={() => setActiveTooltip('structural-resemblance')}
-                onMouseLeave={() => setActiveTooltip(null)}
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 mb-3">Optionally enhance your garden visualization:</p>
+                <ul className="text-sm space-y-2">
+                  <li className="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-600 mr-2 flex-shrink-0">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Select areas you want to modify with the brush tool</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-600 mr-2 flex-shrink-0">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Use the zoom, region fill and bucket tool to precisely fill in your garden boundaries</span>
+                  </li>
+                </ul>
+                
+                <button className="mt-4 px-4 py-1.5 border border-gray-300 bg-white rounded-lg text-sm flex items-center justify-center hover:bg-gray-50 transition w-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                  </svg>
+                  Edit Garden Image
+                </button>
+              </div>
+            </div>
+            
+            {/* 选择风格 */}
+            <div className="mb-8">
+              <div className="flex items-center mb-4">
+                <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">4</div>
+                <h2 className="text-lg font-bold">Select Style</h2>
+                <button 
+                  className="ml-2 text-gray-400 hover:text-gray-500 relative"
+                  onMouseEnter={() => setActiveTooltip('select-style')}
+                  onMouseLeave={() => setActiveTooltip(null)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                </svg>
+                  <Tooltip 
+                    id="select-style" 
+                    text="Choose from predefined garden styles or create your own custom style using positive and negative words. Different styles will significantly change the look of your garden."
+                  />
+                </button>
+              </div>
+              
+              <div className="flex mb-4 border-b border-gray-200">
+                <button 
+                  className={`px-4 py-2 text-sm font-medium ${selectedTab === 'premade' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  onClick={() => setSelectedTab('premade')}
+                >
+                  Classic styles
+                </button>
+                <button 
+                  className={`px-4 py-2 text-sm font-medium ${selectedTab === 'custom' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  onClick={() => setSelectedTab('custom')}
+                >
+                  Custom styles
+                </button>
+              </div>
+              
+              {/* 只在Classic styles页签下显示Choose a Style文本 */}
+              {/* {selectedTab === 'premade' && (
+                <div className="ml-2 flex mb-5">
+                  <span className="text-xs text-gray-700">Choose a Style:</span>
+                </div>
+              )} */}
+
+              {/* 根据选中的页签显示不同内容 */}
+              {selectedTab === 'premade' ? (
+                <div>
+                  <div className="ml-2 flex mb-3">
+                    <span className="text-xs text-gray-700">Choose a Style:</span>
+                    </div>
+                  <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                    {gardenStyles.map((style) => (
+                      <div 
+                        key={style.id}
+                        className={`border rounded-lg p-2 cursor-pointer transition ${
+                          selectedStyleId === style.id 
+                            ? 'border-emerald-600 bg-emerald-50 shadow-sm' 
+                            : 'border-gray-200 hover:border-emerald-300'
+                        }`}
+                        onClick={() => handleStyleSelect(style.id)}
+                      >
+                    <div className="aspect-video bg-gray-100 rounded mb-2 relative overflow-hidden">
+                      <Image 
+                            src={style.image}
+                            alt={style.name}
+                        fill
+                        sizes="100%"
+                        style={{objectFit: 'cover'}}
+                            className={`transition-transform ${selectedStyleId === style.id ? 'scale-105' : 'hover:scale-105'}`}
+                      />
+                    </div>
+                        <p className={`text-xs font-medium ${selectedStyleId === style.id ? 'text-emerald-700' : ''}`}>
+                          {style.name}
+                        </p>
+                  </div>
+                    ))}
+                    </div>
+                  {selectedStyleId && (
+                    <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                      <h4 className="text-sm font-bold text-emerald-700 mb-1">{getSelectedStyle()?.name}:</h4>
+                      <p className="text-xs text-emerald-700">{getSelectedStyle()?.description}</p>
+                  </div>
+                  )}
+                </div>
+              ) : (
+                /* 自定义风格内容 */
+                renderCustomStyleContent()
+              )}
+            </div>
+            
+            {/* 结构相似度 */}
+            <div className="mb-8">
+              <div className="flex items-center mb-4">
+                <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">5</div>
+                <h2 className="text-lg font-bold">Structural Resemblance</h2>
+                <button 
+                  className="ml-2 text-gray-400 hover:text-gray-500 relative"
+                  onMouseEnter={() => setActiveTooltip('structural-resemblance')}
+                  onMouseLeave={() => setActiveTooltip(null)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                </svg>
+                  <Tooltip 
+                    id="structural-resemblance" 
+                    text="Control how closely the generated image will match your original garden's layout. Higher values preserve more of the original structure, while lower values allow more creative freedom."
+                  />
+                </button>
+                <div className="flex-grow"></div>
+                <button 
+                  className="px-3 py-1.5 bg-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-300"
+                  onClick={resetResemblance}
+                >
+                  Reset
+                </button>
+              </div>
+              
+              <div className="flex justify-between text-xs text-gray-500 mb-2">
+                <span>Weakest Resemblance</span>
+                <span>Strongest Resemblance</span>
+              </div>
+              
+              <div 
+                ref={sliderRef}
+                className="relative h-2 bg-gray-200 rounded-full mb-2 cursor-pointer"
+                onClick={(e) => updateSliderPosition(e.clientX)}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-              </svg>
-                <Tooltip 
-                  id="structural-resemblance" 
-                  text="Control how closely the generated image will match your original garden's layout. Higher values preserve more of the original structure, while lower values allow more creative freedom."
+                <div 
+                  className="absolute h-full bg-emerald-600 rounded-full" 
+                  style={{ width: `${resemblancePercent}%` }}
+                ></div>
+                <div 
+                  className="absolute h-5 w-5 bg-white border-2 border-emerald-600 rounded-full top-1/2 transform -translate-y-1/2 cursor-grab active:cursor-grabbing shadow-md hover:scale-110 transition-transform"
+                  style={{ left: `${resemblancePercent}%`, marginLeft: "-10px" }}
+                  onMouseDown={handleSliderMouseDown}
+                ></div>
+              </div>
+              
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>0%</span>
+                <span>25%</span>
+                <span>50%</span>
+                <span>75%</span>
+                <span>100%</span>
+              </div>
+              
+              <div className="mt-2 text-sm font-medium text-center">
+                {resemblancePercent}%
+              </div>
+            </div>
+            
+            {/* 生成按钮 */}
+            <div>
+              <div className="flex items-center mb-4">
+                <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">6</div>
+                <h2 className="text-lg font-bold">Generate</h2>
+              </div>
+              
+              <button 
+                className={`w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition flex items-center justify-center ${
+                  (!uploadedImage || (!selectedStyleId && selectedTab === 'premade')) ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                disabled={!uploadedImage || (!selectedStyleId && selectedTab === 'premade')}
+                onClick={() => {
+                  // 在实际应用中，这里会调用API生成图片
+                  if (selectedTab === 'premade') {
+                    console.log('生成图片，使用预设风格:', getSelectedStyle()?.name);
+                  } else {
+                    console.log('生成图片，使用自定义风格。正向词:', positiveWords, '负向词:', negativeWords);
+                  }
+                  console.log('结构相似度:', resemblancePercent + '%');
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                </svg>
+                Generate Image
+              </button>
+            </div>
+            
+            {/* 调试区域 */}
+            <div className="mt-8 border-t border-gray-200 pt-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">调试工具</h3>
+              <form onSubmit={handleDebugSubmit} className="flex flex-col space-y-2">
+                <input
+                  type="text"
+                  value={debugInput}
+                  onChange={(e) => setDebugInput(e.target.value)}
+                  placeholder="输入'1：空'/'1：有图'/'1：多图'/'1:20图'或'2：有图'/'2：空'"
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
                 />
-              </button>
-              <div className="flex-grow"></div>
-              <button 
-                className="px-3 py-1.5 bg-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-300"
-                onClick={resetResemblance}
-              >
-                Reset
-              </button>
-            </div>
-            
-            <div className="flex justify-between text-xs text-gray-500 mb-2">
-              <span>Weakest Resemblance</span>
-              <span>Strongest Resemblance</span>
-            </div>
-            
-            <div 
-              ref={sliderRef}
-              className="relative h-2 bg-gray-200 rounded-full mb-2 cursor-pointer"
-              onClick={(e) => updateSliderPosition(e.clientX)}
-            >
-              <div 
-                className="absolute h-full bg-emerald-600 rounded-full" 
-                style={{ width: `${resemblancePercent}%` }}
-              ></div>
-              <div 
-                className="absolute h-5 w-5 bg-white border-2 border-emerald-600 rounded-full top-1/2 transform -translate-y-1/2 cursor-grab active:cursor-grabbing shadow-md hover:scale-110 transition-transform"
-                style={{ left: `${resemblancePercent}%`, marginLeft: "-10px" }}
-                onMouseDown={handleSliderMouseDown}
-              ></div>
-            </div>
-            
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>0%</span>
-              <span>25%</span>
-              <span>50%</span>
-              <span>75%</span>
-              <span>100%</span>
-            </div>
-            
-            <div className="mt-2 text-sm font-medium text-center">
-              {resemblancePercent}%
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700 transition"
+                >
+                  提交调试命令
+                </button>
+              </form>
+              <div className="mt-2 text-xs text-gray-500">
+                <div>最近图片状态: {recentImagesState}</div>
+                <div>当前上传图片状态: {uploadedImage ? '已上传' : '未上传'}</div>
+              </div>
             </div>
           </div>
           
-          {/* 生成按钮 */}
-          <div>
-            <div className="flex items-center mb-4">
-              <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">6</div>
-              <h2 className="text-lg font-bold">Generate</h2>
+          {/* 右侧面板 */}
+          <div className="bg-white rounded-lg shadow-sm p-6 lg:w-[48%] overflow-y-auto scrollbar-thin">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium">Images</h2>
+                
+                <div className="flex space-x-2">
+                  {/* Tab buttons */}
+                  <div className="flex rounded-md shadow-sm">
+                    <button 
+                      onClick={() => setImageTab('all')}
+                      className={`px-3 py-1.5 text-sm font-medium border ${
+                        imageTab === 'all' 
+                          ? 'bg-gray-800 text-white border-gray-800' 
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      } rounded-l-md`}
+                    >
+                      All
+                    </button>
+                    <button 
+                      onClick={() => setImageTab('liked')}
+                      className={`px-3 py-1.5 text-sm font-medium border-t border-b border-r ${
+                        imageTab === 'liked' 
+                          ? 'bg-gray-800 text-white border-gray-800' 
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      Like
+                    </button>
+                    <button 
+                      onClick={() => setImageTab('deleted')}
+                      className={`px-3 py-1.5 text-sm font-medium border-t border-b border-r ${
+                        imageTab === 'deleted' 
+                          ? 'bg-gray-800 text-white border-gray-800' 
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      } rounded-r-md`}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-green-100 rounded-lg p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-green-600">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-green-800">Smart Tips:</h3>
+                    <p className="text-sm text-green-700">Try both premade and custom styles for different creative results.</p>
+                  </div>
+                </div>
+              </div>
             </div>
             
-            <button 
-              className={`w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition flex items-center justify-center ${
-                (!uploadedImage || (!selectedStyleId && selectedTab === 'premade')) ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              disabled={!uploadedImage || (!selectedStyleId && selectedTab === 'premade')}
-              onClick={() => {
-                // 在实际应用中，这里会调用API生成图片
-                if (selectedTab === 'premade') {
-                  console.log('生成图片，使用预设风格:', getSelectedStyle()?.name);
-                } else {
-                  console.log('生成图片，使用自定义风格。正向词:', positiveWords, '负向词:', negativeWords);
-                }
-                console.log('结构相似度:', resemblancePercent + '%');
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-              </svg>
-              Generate Image
-            </button>
-          </div>
-          
-          {/* 调试区域 */}
-          <div className="mt-8 border-t border-gray-200 pt-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">调试工具</h3>
-            <form onSubmit={handleDebugSubmit} className="flex flex-col space-y-2">
-              <input
-                type="text"
-                value={debugInput}
-                onChange={(e) => setDebugInput(e.target.value)}
-                placeholder="输入'1：空'/'1：有图'/'1：多图'/'1:20图'或'2：有图'/'2：空'"
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700 transition"
-              >
-                提交调试命令
-              </button>
-            </form>
-            <div className="mt-2 text-xs text-gray-500">
-              <div>最近图片状态: {recentImagesState}</div>
-              <div>当前上传图片状态: {uploadedImage ? '已上传' : '未上传'}</div>
-            </div>
+            {renderImageList()}
           </div>
         </div>
         
-        {/* 右侧面板 */}
-        <div className="bg-white rounded-lg shadow-sm flex-1 overflow-y-auto">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium">Images</h2>
-              
-              <div className="flex space-x-2">
-                {/* Tab buttons */}
-                <div className="flex rounded-md shadow-sm">
-                  <button 
-                    onClick={() => setImageTab('all')}
-                    className={`px-3 py-1.5 text-sm font-medium border ${
-                      imageTab === 'all' 
-                        ? 'bg-gray-800 text-white border-gray-800' 
-                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                    } rounded-l-md`}
-                  >
-                    All
-                  </button>
-                  <button 
-                    onClick={() => setImageTab('liked')}
-                    className={`px-3 py-1.5 text-sm font-medium border-t border-b border-r ${
-                      imageTab === 'liked' 
-                        ? 'bg-gray-800 text-white border-gray-800' 
-                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    Like
-                  </button>
-                  <button 
-                    onClick={() => setImageTab('deleted')}
-                    className={`px-3 py-1.5 text-sm font-medium border-t border-b border-r ${
-                      imageTab === 'deleted' 
-                        ? 'bg-gray-800 text-white border-gray-800' 
-                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                    } rounded-r-md`}
-                  >
-                    Delete
-                  </button>
+        {/* 保存风格对话框 */}
+        {showSaveStyleDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl w-96 overflow-hidden">
+              <div className="p-5">
+                <h3 className="text-lg font-medium mb-4">Save Custom Style</h3>
+                <div className="mb-4">
+                  <label className="block text-sm text-gray-700 mb-2">Style Name</label>
+                  <input 
+                    type="text" 
+                    placeholder="Enter a name for your style"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                    value={styleNameInput}
+                    onChange={(e) => setStyleNameInput(e.target.value)}
+                  />
                 </div>
               </div>
-            </div>
-            
-            <div className="bg-green-100 rounded-lg p-4 mb-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-green-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-green-800">Smart Tips:</h3>
-                  <p className="text-sm text-green-700">Try both premade and custom styles for different creative results.</p>
-                </div>
+              <div className="flex justify-end bg-gray-50 px-5 py-3">
+                <button 
+                  className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 mr-2"
+                  onClick={handleCloseSaveStyleDialog}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className={`px-4 py-2 rounded-md text-sm text-white ${
+                    styleNameInput.trim() ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-emerald-300 cursor-not-allowed'
+                  }`}
+                  onClick={handleSaveStyle}
+                  disabled={!styleNameInput.trim()}
+                >
+                  Save
+                </button>
               </div>
             </div>
           </div>
-          
-          {renderImageList()}
-        </div>
-      </div>
-      
-      {/* 保存风格对话框 */}
-      {showSaveStyleDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-96 overflow-hidden">
-            <div className="p-5">
-              <h3 className="text-lg font-medium mb-4">Save Custom Style</h3>
-              <div className="mb-4">
-                <label className="block text-sm text-gray-700 mb-2">Style Name</label>
-                <input 
-                  type="text" 
-                  placeholder="Enter a name for your style"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
-                  value={styleNameInput}
-                  onChange={(e) => setStyleNameInput(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="flex justify-end bg-gray-50 px-5 py-3">
-              <button 
-                className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 mr-2"
-                onClick={handleCloseSaveStyleDialog}
-              >
-                Cancel
-              </button>
-              <button 
-                className={`px-4 py-2 rounded-md text-sm text-white ${
-                  styleNameInput.trim() ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-emerald-300 cursor-not-allowed'
-                }`}
-                onClick={handleSaveStyle}
-                disabled={!styleNameInput.trim()}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* 编辑风格对话框 */}
-      {showEditStyleDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg shadow-xl w-96 overflow-hidden">
-            <div className="p-5">
-              <h3 className="text-lg font-medium mb-4">Edit Custom Style</h3>
-              <div className="mb-4">
-                <label className="block text-sm text-gray-700 mb-2">Style Name</label>
-                <input 
-                  type="text" 
-                  placeholder="Enter a name for your style"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
-                  value={editStyleNameInput}
-                  onChange={(e) => setEditStyleNameInput(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="flex justify-end bg-gray-50 px-5 py-3">
-              <button 
-                className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 mr-2"
-                onClick={() => {
-                  setShowDeleteConfirmDialog(false);
-                  setDeletingStyleId(null);
-                }}
-              >
-                Cancel
-              </button>
-              <button 
-                className={`px-4 py-2 rounded-md text-sm text-white ${
-                  editStyleNameInput.trim() ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-emerald-300 cursor-not-allowed'
-                }`}
-                onClick={handleUpdateStyle}
-                disabled={!editStyleNameInput.trim()}
-              >
-                Update
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* 删除确认对话框 */}
-      {showDeleteConfirmDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg shadow-xl w-80 overflow-hidden">
-            <div className="p-5">
-              <h3 className="text-lg font-medium mb-4">Delete Style</h3>
-              <p className="text-sm text-gray-600 mb-1">
-                Are you sure you want to delete this style?
-              </p>
-              <p className="text-xs text-gray-500">
-                This action cannot be undone.
-              </p>
-            </div>
-            <div className="flex justify-end bg-gray-50 px-5 py-3">
-              <button 
-                className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 mr-2"
-                onClick={() => {
-                  setShowDeleteConfirmDialog(false);
-                  setDeletingStyleId(null);
-                }}
-              >
-                Cancel
-              </button>
-              <button 
-                className="px-4 py-2 rounded-md text-sm text-white bg-red-600 hover:bg-red-700"
-                onClick={handleDeleteCustomStyle}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* 加载风格对话框 */}
-      {showLoadStyleDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-[560px] overflow-hidden">
-            <div className="p-5">
-              <h3 className="text-lg font-medium mb-4">Your Custom Styles</h3>
-              
-              <div className="mb-4">
-                <div className="flex items-center border-b border-gray-200 pb-2 mb-2">
-                  <div className="w-1/4 font-medium text-sm text-gray-700">Name</div>
-                  <div className="w-1/2 font-medium text-sm text-gray-700">Preview</div>
-                  <div className="w-1/4 font-medium text-sm text-gray-700">Actions</div>
+        )}
+        
+        {/* 编辑风格对话框 */}
+        {showEditStyleDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-[60]">
+            <div className="bg-white rounded-lg shadow-xl w-96 overflow-hidden">
+              <div className="p-5">
+                <h3 className="text-lg font-medium mb-4">Edit Custom Style</h3>
+                <div className="mb-4">
+                  <label className="block text-sm text-gray-700 mb-2">Style Name</label>
+                  <input 
+                    type="text" 
+                    placeholder="Enter a name for your style"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                    value={editStyleNameInput}
+                    onChange={(e) => setEditStyleNameInput(e.target.value)}
+                  />
                 </div>
+              </div>
+              <div className="flex justify-end bg-gray-50 px-5 py-3">
+                <button 
+                  className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 mr-2"
+                  onClick={() => {
+                    setShowDeleteConfirmDialog(false);
+                    setDeletingStyleId(null);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className={`px-4 py-2 rounded-md text-sm text-white ${
+                    editStyleNameInput.trim() ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-emerald-300 cursor-not-allowed'
+                  }`}
+                  onClick={handleUpdateStyle}
+                  disabled={!editStyleNameInput.trim()}
+                >
+                  Update
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* 删除确认对话框 */}
+        {showDeleteConfirmDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-[60]">
+            <div className="bg-white rounded-lg shadow-xl w-80 overflow-hidden">
+              <div className="p-5">
+                <h3 className="text-lg font-medium mb-4">Delete Style</h3>
+                <p className="text-sm text-gray-600 mb-1">
+                  Are you sure you want to delete this style?
+                </p>
+                <p className="text-xs text-gray-500">
+                  This action cannot be undone.
+                </p>
+              </div>
+              <div className="flex justify-end bg-gray-50 px-5 py-3">
+                <button 
+                  className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 mr-2"
+                  onClick={() => {
+                    setShowDeleteConfirmDialog(false);
+                    setDeletingStyleId(null);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="px-4 py-2 rounded-md text-sm text-white bg-red-600 hover:bg-red-700"
+                  onClick={handleDeleteCustomStyle}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* 加载风格对话框 */}
+        {showLoadStyleDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl w-[560px] overflow-hidden">
+              <div className="p-5">
+                <h3 className="text-lg font-medium mb-4">Your Custom Styles</h3>
                 
-                {customStyles.length > 0 ? (
-                  <div>
-                    <div className="max-h-64 overflow-y-auto">
-                      {customStyles
-                        .slice((currentPage - 1) * stylesPerPage, currentPage * stylesPerPage)
-                        .map(style => (
-                          <div key={style.id} className="flex items-center py-2 border-b border-gray-100">
-                            <div className="w-1/4 text-sm text-gray-700">{style.name}</div>
-                            <div className="w-1/2 text-sm text-gray-500 truncate">{style.preview}</div>
-                            <div className="w-1/4 flex items-center space-x-2">
-                              <button 
-                                className="p-1 text-gray-500 hover:text-emerald-600"
-                                onClick={() => handleLoadStyle(style.id)}
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </button>
-                              <button 
-                                className="p-1 text-gray-500 hover:text-emerald-600"
-                                onClick={() => handleOpenEditStyleDialog(style.id)}
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                </svg>
-                              </button>
-                              <button 
-                                className="p-1 text-gray-500 hover:text-red-600"
-                                onClick={() => {
-                                  setDeletingStyleId(style.id);
-                                  setShowDeleteConfirmDialog(true);
-                                }}
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                </svg>
-                              </button>
+                <div className="mb-4">
+                  <div className="flex items-center border-b border-gray-200 pb-2 mb-2">
+                    <div className="w-1/4 font-medium text-sm text-gray-700">Name</div>
+                    <div className="w-1/2 font-medium text-sm text-gray-700">Preview</div>
+                    <div className="w-1/4 font-medium text-sm text-gray-700">Actions</div>
+                  </div>
+                  
+                  {customStyles.length > 0 ? (
+                    <div>
+                      <div className="max-h-64 overflow-y-auto">
+                        {customStyles
+                          .slice((currentPage - 1) * stylesPerPage, currentPage * stylesPerPage)
+                          .map(style => (
+                            <div key={style.id} className="flex items-center py-2 border-b border-gray-100">
+                              <div className="w-1/4 text-sm text-gray-700">{style.name}</div>
+                              <div className="w-1/2 text-sm text-gray-500 truncate">{style.preview}</div>
+                              <div className="w-1/4 flex items-center space-x-2">
+                                <button 
+                                  className="p-1 text-gray-500 hover:text-emerald-600"
+                                  onClick={() => handleLoadStyle(style.id)}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </button>
+                                <button 
+                                  className="p-1 text-gray-500 hover:text-emerald-600"
+                                  onClick={() => handleOpenEditStyleDialog(style.id)}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                  </svg>
+                                </button>
+                                <button 
+                                  className="p-1 text-gray-500 hover:text-red-600"
+                                  onClick={() => {
+                                    setDeletingStyleId(style.id);
+                                    setShowDeleteConfirmDialog(true);
+                                  }}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                  </svg>
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                    </div>
-                    
-                    {/* 分页控制 */}
-                    <div className="flex justify-between items-center mt-4">
-                      <div className="text-xs text-gray-500">
-                        显示 {Math.min((currentPage - 1) * stylesPerPage + 1, customStyles.length)} - {Math.min(currentPage * stylesPerPage, customStyles.length)} 共 {customStyles.length} 条
+                          ))}
                       </div>
-                      <div className="flex space-x-2">
-                        <button
-                          className={`px-2 py-1 text-xs rounded border ${
-                            currentPage === 1
-                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                              : 'bg-white text-gray-700 hover:bg-gray-50'
-                          }`}
-                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                          disabled={currentPage === 1}
-                        >
-                          上一页
-                        </button>
-                        {Array.from(
-                          { length: Math.min(3, Math.ceil(customStyles.length / stylesPerPage)) },
-                          (_, i) => i + 1
-                        ).map(page => (
+                      
+                      {/* 分页控制 */}
+                      <div className="flex justify-between items-center mt-4">
+                        <div className="text-xs text-gray-500">
+                          显示 {Math.min((currentPage - 1) * stylesPerPage + 1, customStyles.length)} - {Math.min(currentPage * stylesPerPage, customStyles.length)} 共 {customStyles.length} 条
+                        </div>
+                        <div className="flex space-x-2">
                           <button
-                            key={page}
-                            className={`px-2 py-1 text-xs rounded ${
-                              currentPage === page
-                                ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
-                                : 'bg-white text-gray-700 border hover:bg-gray-50'
+                            className={`px-2 py-1 text-xs rounded border ${
+                              currentPage === 1
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-white text-gray-700 hover:bg-gray-50'
                             }`}
-                            onClick={() => setCurrentPage(page)}
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
                           >
-                            {page}
+                            上一页
                           </button>
-                        ))}
-                        <button
-                          className={`px-2 py-1 text-xs rounded border ${
-                            currentPage >= Math.ceil(customStyles.length / stylesPerPage)
-                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                              : 'bg-white text-gray-700 hover:bg-gray-50'
-                          }`}
-                          onClick={() =>
-                            setCurrentPage(prev => 
-                              Math.min(prev + 1, Math.ceil(customStyles.length / stylesPerPage))
-                            )
-                          }
-                          disabled={currentPage >= Math.ceil(customStyles.length / stylesPerPage)}
-                        >
-                          下一页
-                        </button>
+                          {Array.from(
+                            { length: Math.min(3, Math.ceil(customStyles.length / stylesPerPage)) },
+                            (_, i) => i + 1
+                          ).map(page => (
+                            <button
+                              key={page}
+                              className={`px-2 py-1 text-xs rounded ${
+                                currentPage === page
+                                  ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                                  : 'bg-white text-gray-700 border hover:bg-gray-50'
+                              }`}
+                              onClick={() => setCurrentPage(page)}
+                            >
+                              {page}
+                            </button>
+                          ))}
+                          <button
+                            className={`px-2 py-1 text-xs rounded border ${
+                              currentPage >= Math.ceil(customStyles.length / stylesPerPage)
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-white text-gray-700 hover:bg-gray-50'
+                            }`}
+                            onClick={() =>
+                              setCurrentPage(prev => 
+                                Math.min(prev + 1, Math.ceil(customStyles.length / stylesPerPage))
+                              )
+                            }
+                            disabled={currentPage >= Math.ceil(customStyles.length / stylesPerPage)}
+                          >
+                            下一页
+                          </button>
+                        </div>
                       </div>
                     </div>
+                  ) : (
+                    <div className="py-8 text-center text-gray-500">
+                      <p>You haven't saved any custom styles yet.</p>
+                    </div>
+                  )}
+                  
+                  <div className="mt-3 text-xs text-gray-500">
+                    {customStyles.length}/100 styles
                   </div>
-                ) : (
-                  <div className="py-8 text-center text-gray-500">
-                    <p>You haven't saved any custom styles yet.</p>
-                  </div>
-                )}
-                
-                <div className="mt-3 text-xs text-gray-500">
-                  {customStyles.length}/100 styles
                 </div>
               </div>
-            </div>
-            <div className="flex justify-end bg-gray-50 px-5 py-3">
-              <button 
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300"
-                onClick={handleCloseLoadStyleDialog}
-              >
-                Close
-              </button>
+              <div className="flex justify-end bg-gray-50 px-5 py-3">
+                <button 
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300"
+                  onClick={handleCloseLoadStyleDialog}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 } 
