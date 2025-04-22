@@ -9,6 +9,11 @@ interface ImageData {
   src: string;
   alt: string;
   date: string;
+  style: string;
+  tags: string[];
+  createTime: string;
+  liked: boolean;
+  status: string;
 }
 
 // 定义词汇标签类型
@@ -833,7 +838,8 @@ export default function PhotoGenerator() {
     id: index + 1,
     src: `/uploads/garden-sample${index % 5 + 1}.png`,
     alt: `花园设计 ${index + 1}`,
-    date: `2024/${3 + Math.floor(index/5)}/${5 + index % 25}`
+    date: `2024/${3 + Math.floor(index/5)}/${5 + index % 25}`,
+    style: `${["日式庭院", "英式花园", "现代简约", "热带风情", "地中海风格"][index % 5]}`
   }));
   
   // 处理拖拽开始
@@ -1078,6 +1084,119 @@ export default function PhotoGenerator() {
     }
   };
   
+  // 创建模拟JSON数据，格式化的花园图片数据
+  const mockGardenImagesData = [
+    {
+      "id": 1,
+      "src": "/uploads/garden-sample.png",
+      "alt": "日式禅园",
+      "style": "日式庭院",
+      "tags": ["日式", "禅意", "枯山水"],
+      "createTime": "2024-03-15T09:30:00Z",
+      "liked": true,
+      "status": "processing" // 添加生成中状态
+    },
+    {
+      "id": 2,
+      "src": "/uploads/garden-sample.png",
+      "alt": "英国乡村庭院",
+      "style": "英式花园",
+      "tags": ["乡村", "花卉", "自然"],
+      "createTime": "2024-03-16T10:25:00Z",
+      "liked": false
+    },
+    {
+      "id": 3,
+      "src": "/uploads/garden-sample.png",
+      "alt": "几何现代庭院",
+      "style": "现代简约",
+      "tags": ["几何", "简约", "都市"],
+      "createTime": "2024-03-17T14:10:00Z",
+      "liked": false
+    },
+    {
+      "id": 4,
+      "src": "/uploads/garden-sample.png",
+      "alt": "热带雨林花园",
+      "style": "热带风情",
+      "tags": ["热带", "多彩", "雨林"],
+      "createTime": "2024-03-18T11:45:00Z",
+      "liked": true
+    },
+    {
+      "id": 5,
+      "src": "/uploads/garden-sample.png",
+      "alt": "地中海庭院",
+      "style": "地中海风格",
+      "tags": ["蓝白", "阳光", "悠闲"],
+      "createTime": "2024-03-19T16:20:00Z",
+      "liked": false
+    },
+    {
+      "id": 6,
+      "src": "/uploads/garden-sample.png",
+      "alt": "石庭枯山水",
+      "style": "日式庭院",
+      "tags": ["石头", "枯山水", "禅意"],
+      "createTime": "2024-03-20T09:15:00Z",
+      "liked": false
+    },
+    {
+      "id": 7,
+      "src": "/uploads/garden-sample.png",
+      "alt": "维多利亚花园",
+      "style": "英式花园",
+      "tags": ["繁花", "古典", "优雅"],
+      "createTime": "2024-03-21T13:40:00Z",
+      "liked": true
+    },
+    {
+      "id": 8,
+      "src": "/uploads/garden-sample.png",
+      "alt": "极简屋顶花园",
+      "style": "现代简约",
+      "tags": ["简约", "线条", "空间感"],
+      "createTime": "2024-03-22T15:55:00Z",
+      "liked": false
+    },
+    {
+      "id": 9,
+      "src": "/uploads/garden-sample.png",
+      "alt": "巴厘岛风情花园",
+      "style": "热带风情",
+      "tags": ["棕榈", "热带", "度假"],
+      "createTime": "2024-03-23T10:30:00Z",
+      "liked": false
+    },
+    {
+      "id": 10,
+      "src": "/uploads/garden-sample.png",
+      "alt": "爱琴海庭院",
+      "style": "地中海风格",
+      "tags": ["白墙", "蓝色", "阳光"],
+      "createTime": "2024-03-24T12:00:00Z",
+      "liked": true
+    },
+    {
+      "id": 11,
+      "src": "/uploads/garden-sample.png",
+      "alt": "京都庭院",
+      "style": "日式庭院",
+      "tags": ["竹子", "流水", "冥想"],
+      "createTime": "2024-03-25T11:20:00Z",
+      "liked": false
+    },
+    {
+      "id": 12,
+      "src": "/uploads/garden-sample.png",
+      "alt": "康沃尔郡花园",
+      "style": "英式花园",
+      "tags": ["玫瑰", "田园", "自然"],
+      "createTime": "2024-03-26T14:15:00Z",
+      "liked": false
+    }
+  ];
+  
   // 渲染所有图片
   const renderAllImages = () => {
     if (recentImagesState === 'empty') {
@@ -1094,40 +1213,68 @@ export default function PhotoGenerator() {
       );
     }
     
-    // 使用新创建的allImageData
-    const imageData = allImageData;
+    // 使用模拟JSON数据
+    const imageData = mockGardenImagesData;
     
     return (
-      <div className="max-h-[calc(100vh-25em)] overflow-y-auto p-6 scrollbar-thin">
+      <div className="max-h-[calc(100vh-21em)] overflow-y-auto p-6 scrollbar-thin">
         <div className="grid grid-cols-2 gap-2">
           {imageData.map((image) => (
             <div  
               key={image.id} 
-              className="relative aspect-square bg-gray-100 rounded-md overflow-hidden group"
+              className={`relative aspect-square bg-gray-100 rounded-md overflow-hidden ${image.status !== "processing" ? "group" : ""}`}
             >
+              {/* 所有状态都显示背景图片 */}
               <Image 
                 src={image.src}
                 alt={image.alt}
                 fill
                 sizes="100%"
                 style={{objectFit: 'cover'}}
-                className="hover:opacity-80 transition-opacity cursor-pointer"
+                className={`${image.status !== "processing" ? "hover:opacity-80 transition-opacity cursor-pointer" : "opacity-50"}`}
               />
+              
+              {image.status === "processing" && (
+                // 生成中的状态显示 - 保留背景图片
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40">
+                  <div className="w-12 h-12 mb-3 relative">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <div className="absolute inset-0 flex items-center justify-center text-blue-600">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-white font-medium">Processing image...</p>
+                </div>
+              )}
+              
+              {/* 显示风格名称 */}
               <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
-                {image.date}
+                {image.style}
               </div>
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
-                <button className="p-1.5 rounded-full bg-white text-red-500 hover:bg-red-100 shadow-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                  </svg>
-                </button>
-                <button className="p-1.5 rounded-full bg-white text-gray-700 hover:bg-gray-100 shadow-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                  </svg>
-                </button>
-              </div>
+              
+              {/* 只在非处理状态下显示操作按钮 */}
+              {image.status !== "processing" && (
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
+                  {/* 添加下载按钮 */}
+                  <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                  </button>
+                  <button className={`p-1.5 rounded-full bg-white ${image.liked ? 'text-red-500' : 'text-gray-400'} hover:bg-red-100 shadow-sm`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill={image.liked ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                  </button>
+                  <button className="p-1.5 rounded-full bg-white text-gray-700 hover:bg-gray-100 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
