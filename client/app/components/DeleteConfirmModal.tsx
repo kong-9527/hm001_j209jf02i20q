@@ -4,17 +4,24 @@ interface DeleteConfirmModalProps {
   onClose: () => void;
   onConfirm: () => void;
   projectName: string;
+  title?: string;
+  messageText?: string;
 }
 
-export function DeleteConfirmModal({ onClose, onConfirm, projectName }: DeleteConfirmModalProps) {
+export function DeleteConfirmModal({ 
+  onClose, 
+  onConfirm, 
+  projectName,
+  title = "Delete Project",
+  messageText = `Are you sure you want to delete the project "<span className="font-medium">${projectName}</span>" ? This action cannot be undone.`
+}: DeleteConfirmModalProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="p-6">
-          <h2 className="text-xl font-semibold mb-2">Delete Project</h2>
+          <h2 className="text-xl font-semibold mb-2">{title}</h2>
           
-          <p className="text-gray-600 mb-6">
-            Are you sure you want to delete the project "<span className="font-medium">{projectName}</span>" ? This action cannot be undone.
+          <p className="text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: messageText }}>
           </p>
           
           <div className="flex justify-end space-x-2 mt-6">
