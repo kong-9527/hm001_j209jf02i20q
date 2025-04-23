@@ -138,13 +138,13 @@ export default function Home() {
           {/* 行动按钮 */}
           <div className="mt-16 flex flex-col sm:flex-row justify-center gap-4 pt-8">
             <Link 
-              href="/design"
+              href="/signin"
               className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-8 py-3 rounded-md text-lg shadow-md transition-colors"
             >
               Start your design
             </Link>
             <Link 
-              href="/pricing"
+              href="/#pricing"
               className="bg-white hover:bg-gray-50 text-gray-800 font-medium px-8 py-3 rounded-md text-lg shadow-md border border-gray-200 transition-colors"
             >
               View pricing
@@ -307,7 +307,7 @@ export default function Home() {
           title="Ready To Transform Your Garden?"
           subtitle="Join thousands of satisfied gardeners and landscapers"
           buttonText="Start designing now"
-          buttonLink="/design"
+          buttonLink="/signin"
         />
 
       </main>
