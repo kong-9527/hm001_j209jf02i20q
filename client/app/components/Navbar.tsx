@@ -30,10 +30,10 @@ export default function Navbar() {
           <Link href="/advisor" className="text-gray-600 hover:text-teal-600">
             AI Garden Plant Advisor
           </Link>
-          <Link href="/pricing" className="text-gray-600 hover:text-teal-600">
+          <Link href="/#pricing" className="text-gray-600 hover:text-teal-600">
             Pricing
           </Link>
-          <Link href="/faq" className="text-gray-600 hover:text-teal-600">
+          <Link href="/#faq" className="text-gray-600 hover:text-teal-600">
             FAQ
           </Link>
         </div>
