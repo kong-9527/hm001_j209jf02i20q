@@ -4,6 +4,10 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 
 export default function CreateGardenAdvisorPage() {
+  // 添加步骤状态
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 3;
+
   // General Information state
   const [gardenLocation, setGardenLocation] = useState('');
   const [hardinessZone, setHardinessZone] = useState('');
@@ -70,72 +74,38 @@ export default function CreateGardenAdvisorPage() {
     }
   ]);
 
-  const handleGoalChange = (goal: string) => {
-    if (goals.includes(goal)) {
-      setGoals(goals.filter(g => g !== goal));
-    } else {
-      setGoals([...goals, goal]);
+  // 步骤切换函数
+  const goToNextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+      window.scrollTo(0, 0);
     }
   };
 
-  const handlePlantTypeChange = (type: string) => {
-    if (plantTypes.includes(type)) {
-      setPlantTypes(plantTypes.filter(t => t !== type));
-    } else {
-      setPlantTypes([...plantTypes, type]);
+  const goToPrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      window.scrollTo(0, 0);
     }
   };
 
-  const handleAllergyChange = (allergy: string) => {
-    if (allergies.includes(allergy)) {
-      setAllergies(allergies.filter(a => a !== allergy));
-    } else {
-      setAllergies([...allergies, allergy]);
+  // 根据步骤显示相应内容
+  const showContentByStep = (step: number) => {
+    switch (step) {
+      case 1:
+        return showStep1Content();
+      case 2:
+        return showStep2Content();
+      case 3:
+        return showStep3Content();
+      default:
+        return showStep1Content();
     }
   };
 
-  const createGardenPlan = () => {
-    // Implement the creation logic here
-    console.log('Creating garden plan with the following data:');
-    console.log({
-      gardenLocation,
-      hardinessZone,
-      experience,
-      budget,
-      time,
-      maintenance,
-      goals,
-      plantTypes,
-      fertilizerType,
-      allergies,
-      gardenSpaces
-    });
-    // Navigate or show success message
-  };
-
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold mb-8">Create Garden Advisor</h1>
-      
-      <div className="bg-green-100 rounded-lg p-5 mb-8">
-        <div className="flex items-start">
-          <div className="mr-3 text-green-600 mt-1">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm mb-1 text-green-800">What You'll Get</h3>
-            <ul className="text-sm space-y-1 text-green-800">
-              <li>Personalized plant recommendations for your unique spaces</li>
-              <li>Expert care instructions for each plant</li>
-              <li>Optimize your garden layout for maximum yield</li>
-              <li>Save time and money with our AI-powered insights</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
+  // 各步骤内容展示函数占位 - 将在后面实现
+  const showStep1Content = () => {
+    return (
       <div className="space-y-10">
         {/* Section 1: General Information */}
         <div className="bg-white rounded-lg shadow p-6">
@@ -144,11 +114,9 @@ export default function CreateGardenAdvisorPage() {
             <h2 className="text-xl font-semibold">General Information</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-            <div className="md:col-span-1">
-              <label className="block text-sm font-semibold mb-1">Garden Location</label>
-            </div>
-            <div className="md:col-span-3">
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold mb-1">Where is your garden</label>
               <select 
                 className="w-full p-2.5 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                 value={gardenLocation}
@@ -161,13 +129,9 @@ export default function CreateGardenAdvisorPage() {
                 <option value="au">Australia</option>
               </select>
             </div>
-          </div>
-          
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-            <div className="md:col-span-1">
+            
+            <div>
               <label className="block text-sm font-semibold mb-1">Hardiness Zone</label>
-            </div>
-            <div className="md:col-span-3">
               <select 
                 className="w-full p-2.5 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                 value={hardinessZone}
@@ -400,8 +364,26 @@ export default function CreateGardenAdvisorPage() {
               </div>
             </div>
           </div>
+          
+          <div className="mt-8 flex justify-end">
+            <button
+              onClick={goToNextStep}
+              className="bg-primary hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors flex items-center"
+            >
+              Next Step
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
-        
+      </div>
+    );
+  };
+
+  const showStep2Content = () => {
+    return (
+      <div className="space-y-10">
         {/* Section 2: Custom Planting Plan */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center mb-5">
@@ -521,8 +503,35 @@ export default function CreateGardenAdvisorPage() {
               </div>
             </div>
           </div>
+          
+          <div className="mt-8 flex justify-between">
+            <button
+              onClick={goToPrevStep}
+              className="border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-6 py-2 rounded-md font-medium transition-colors flex items-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Previous
+            </button>
+            <button
+              onClick={goToNextStep}
+              className="bg-primary hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors flex items-center"
+            >
+              Next Step
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
-        
+      </div>
+    );
+  };
+
+  const showStep3Content = () => {
+    return (
+      <div className="space-y-10">
         {/* Section 3: Custom Your Planting Space */}
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center mb-5">
@@ -693,19 +702,142 @@ export default function CreateGardenAdvisorPage() {
             <div className="md:col-span-3">
               <p className="text-sm mb-6 text-gray-700">Our garden plans are generated once, based on the inputs you provide, and cannot be edited afterwards. This is due to the intensive data processing required to create your personalized plan. We recommend thoroughly checking all your inputs before finalizing the plan.</p>
               
-              <button 
-                onClick={createGardenPlan}
-                className="w-full bg-primary hover:bg-green-700 text-white py-3.5 rounded-md font-medium transition-colors flex items-center justify-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Create My Personalized Garden Plan Now!
-              </button>
+              <div className="flex justify-between">
+                <button
+                  onClick={goToPrevStep}
+                  className="border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-6 py-2 rounded-md font-medium transition-colors flex items-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Previous
+                </button>
+                
+                <button 
+                  onClick={createGardenPlan}
+                  className="bg-primary hover:bg-green-700 text-white py-3.5 px-8 rounded-md font-medium transition-colors flex items-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  Create My Personalized Garden Plan Now!
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    );
+  };
+
+  const handleGoalChange = (goal: string) => {
+    if (goals.includes(goal)) {
+      setGoals(goals.filter(g => g !== goal));
+    } else {
+      setGoals([...goals, goal]);
+    }
+  };
+
+  const handlePlantTypeChange = (type: string) => {
+    if (plantTypes.includes(type)) {
+      setPlantTypes(plantTypes.filter(t => t !== type));
+    } else {
+      setPlantTypes([...plantTypes, type]);
+    }
+  };
+
+  const handleAllergyChange = (allergy: string) => {
+    if (allergies.includes(allergy)) {
+      setAllergies(allergies.filter(a => a !== allergy));
+    } else {
+      setAllergies([...allergies, allergy]);
+    }
+  };
+
+  const createGardenPlan = () => {
+    // Implement the creation logic here
+    console.log('Creating garden plan with the following data:');
+    console.log({
+      gardenLocation,
+      hardinessZone,
+      experience,
+      budget,
+      time,
+      maintenance,
+      goals,
+      plantTypes,
+      fertilizerType,
+      allergies,
+      gardenSpaces
+    });
+    // Navigate or show success message
+  };
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <h1 className="text-2xl font-bold">Create Garden Advisor</h1>
+        
+        {/* 添加3步导航 */}
+        <div className="mt-4 md:mt-0">
+          <div className="flex items-center">
+            {[1, 2, 3].map((step) => (
+              <React.Fragment key={step}>
+                <div 
+                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                    currentStep === step 
+                      ? 'bg-primary text-white' 
+                      : currentStep > step 
+                        ? 'bg-green-100 text-primary border border-primary' 
+                        : 'bg-gray-100 text-gray-500'
+                  }`}
+                >
+                  {currentStep > step ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <span>{step}</span>
+                  )}
+                </div>
+                
+                {step < 3 && (
+                  <div className={`w-10 h-1 mx-1 ${
+                    currentStep > step ? 'bg-primary' : 'bg-gray-200'
+                  }`}></div>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+          <div className="flex justify-between text-xs text-gray-600 mt-1">
+            <span>General Info</span>
+            <span className="ml-1">Planting Plan</span>
+            <span>Spaces & Create</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="bg-green-100 rounded-lg p-5 mb-8">
+        <div className="flex items-start">
+          <div className="mr-3 text-green-600 mt-1">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm mb-1 text-green-800">What You'll Get</h3>
+            <ul className="text-sm space-y-1 text-green-800">
+              <li>Personalized plant recommendations for your unique spaces</li>
+              <li>Expert care instructions for each plant</li>
+              <li>Optimize your garden layout for maximum yield</li>
+              <li>Save time and money with our AI-powered insights</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* 根据当前步骤显示内容 */}
+      {showContentByStep(currentStep)}
     </div>
   );
 } 
