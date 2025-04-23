@@ -8,18 +8,18 @@ export default function CreateGardenAdvisorPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3;
 
-  // General Information state
+  // General Information state - 将所有默认值设为空
   const [gardenLocation, setGardenLocation] = useState('');
   const [hardinessZone, setHardinessZone] = useState('');
-  const [experience, setExperience] = useState('Beginner');
-  const [budget, setBudget] = useState('Low');
-  const [time, setTime] = useState('Low');
-  const [maintenance, setMaintenance] = useState('Low');
-  const [goals, setGoals] = useState<string[]>(['Food']);
+  const [experience, setExperience] = useState('');
+  const [budget, setBudget] = useState('');
+  const [time, setTime] = useState('');
+  const [maintenance, setMaintenance] = useState('');
+  const [goals, setGoals] = useState<string[]>([]);
 
-  // Custom Planting Plan state
-  const [plantTypes, setPlantTypes] = useState<string[]>(['Flowers']);
-  const [fertilizerType, setFertilizerType] = useState('Organic');
+  // Custom Planting Plan state - 将所有默认值设为空
+  const [plantTypes, setPlantTypes] = useState<string[]>([]);
+  const [fertilizerType, setFertilizerType] = useState('');
   const [allergies, setAllergies] = useState<string[]>([]);
 
   // Garden Space state
@@ -116,13 +116,13 @@ export default function CreateGardenAdvisorPage() {
           
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold mb-1">Where is your garden</label>
+              <label className="block text-sm font-semibold mb-1">Where is your garden (optional)</label>
               <select 
                 className="w-full p-2.5 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                 value={gardenLocation}
                 onChange={(e) => setGardenLocation(e.target.value)}
               >
-                <option value="">Select a country or a region</option>
+                <option value="">Select a country or a region (optional)</option>
                 <option value="us">United States</option>
                 <option value="ca">Canada</option>
                 <option value="uk">United Kingdom</option>
@@ -131,13 +131,13 @@ export default function CreateGardenAdvisorPage() {
             </div>
             
             <div>
-              <label className="block text-sm font-semibold mb-1">Hardiness Zone</label>
+              <label className="block text-sm font-semibold mb-1">Hardiness Zone (optional)</label>
               <select 
                 className="w-full p-2.5 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                 value={hardinessZone}
                 onChange={(e) => setHardinessZone(e.target.value)}
               >
-                <option value="">Select a hardiness zone</option>
+                <option value="">Select a hardiness zone (optional)</option>
                 <option value="1">Zone 1</option>
                 <option value="2">Zone 2</option>
                 <option value="3">Zone 3</option>
@@ -156,9 +156,9 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Your Gardening Experience</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select your level of gardening experience:</p>
+                <p className="text-xs text-gray-500 mb-3">Select your level of gardening experience (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${experience === 'Beginner' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="experience"
@@ -169,7 +169,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Beginner' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={experience === 'Beginner' ? 'text-primary font-medium' : ''}>Beginner</span>
                   </label>
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${experience === 'Intermediate' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="experience"
@@ -180,7 +180,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Intermediate' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={experience === 'Intermediate' ? 'text-primary font-medium' : ''}>Intermediate</span>
                   </label>
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${experience === 'Advanced' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="experience"
@@ -202,9 +202,9 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Your Gardening Budget</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select your gardening budget range:</p>
+                <p className="text-xs text-gray-500 mb-3">Select your gardening budget range (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${budget === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="budget"
@@ -215,7 +215,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${budget === 'Low' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={budget === 'Low' ? 'text-primary font-medium' : ''}>Low</span>
                   </label>
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${budget === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="budget"
@@ -226,7 +226,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${budget === 'Medium' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={budget === 'Medium' ? 'text-primary font-medium' : ''}>Medium</span>
                   </label>
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${budget === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="budget"
@@ -248,9 +248,9 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Your Gardening Time</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select the amount of time you can dedicate to gardening:</p>
+                <p className="text-xs text-gray-500 mb-3">Select the amount of time you can dedicate to gardening (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${time === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="time"
@@ -261,7 +261,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${time === 'Low' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={time === 'Low' ? 'text-primary font-medium' : ''}>Low</span>
                   </label>
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${time === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="time"
@@ -272,7 +272,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${time === 'Medium' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={time === 'Medium' ? 'text-primary font-medium' : ''}>Medium</span>
                   </label>
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${time === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="time"
@@ -294,9 +294,9 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Your Maintenance Preference</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select your preferred level of maintenance for your garden:</p>
+                <p className="text-xs text-gray-500 mb-3">Select your preferred level of maintenance for your garden (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${maintenance === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="maintenance"
@@ -307,7 +307,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${maintenance === 'Low' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={maintenance === 'Low' ? 'text-primary font-medium' : ''}>Low</span>
                   </label>
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${maintenance === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="maintenance"
@@ -318,7 +318,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${maintenance === 'Medium' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={maintenance === 'Medium' ? 'text-primary font-medium' : ''}>Medium</span>
                   </label>
-                  <label className="flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer hover:border-primary hover:bg-green-50 transition-colors">
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${maintenance === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="maintenance"
@@ -340,8 +340,8 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Your Gardening Goals</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select the goals you wish to achieve through gardening:</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <p className="text-xs text-gray-500 mb-3">Select the goals you wish to achieve through gardening (optional):</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {['Food', 'Wildlife', 'Beauty', 'Education', 'Medicinal', 'Hobby', 'Fragrance', 'Money'].map((goal) => (
                     <label key={goal} className={`flex items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors ${goals.includes(goal) ? 'border-primary bg-green-50' : 'border-gray-200'}`}>
                       <input
@@ -397,7 +397,7 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Preferred Plant Types</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select the types of plants you prefer to grow:</p>
+                <p className="text-xs text-gray-500 mb-3">Select the types of plants you prefer to grow (optional):</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
                   {['Flowers', 'Vegetables', 'Trees', 'Grasses', 'Cacti', 'Mosses', 'Aquatics', 'Orchids', 'Herbs', 'Fruits', 'Shrubs', 'Succulents', 'Ferns', 'Vines', 'Bulbs'].map((type) => (
                     <div 
@@ -430,7 +430,7 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Fertilizers Type</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select your preferred gardening style:</p>
+                <p className="text-xs text-gray-500 mb-3">Select your preferred gardening style (optional):</p>
                 <div className="space-y-3">
                   <label className="flex items-start p-3 border rounded-md cursor-pointer hover:bg-green-50 transition-colors">
                     <input
@@ -479,10 +479,10 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Allergies</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select any allergies or health concerns you have related to gardening:</p>
+                <p className="text-xs text-gray-500 mb-3">Select any allergies or health concerns you have related to gardening (optional):</p>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                   {['Pollen', 'Mold', 'Trees', 'Weeds', 'Bees', 'Dust', 'Shrubs', 'Insects', 'Grass', 'Flowers'].map((allergy) => (
-                    <label key={allergy} className={`flex items-center border rounded-md p-2 cursor-pointer hover:bg-gray-50 transition-colors ${allergies.includes(allergy) ? 'border-primary bg-green-50' : 'border-gray-200'}`}>
+                    <label key={allergy} className={`flex items-center border rounded-md p-2 cursor-pointer hover:bg-green-50 transition-colors ${allergies.includes(allergy) ? 'border-primary bg-green-50' : 'border-gray-200'}`}>
                       <input
                         type="checkbox"
                         checked={allergies.includes(allergy)}
@@ -778,7 +778,7 @@ export default function CreateGardenAdvisorPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <h1 className="text-2xl font-bold">Create Garden Advisor</h1>
         
-        {/* 添加3步导航 */}
+        {/* 修改3步导航，让连接线更长 */}
         <div className="mt-4 md:mt-0">
           <div className="flex items-center">
             {[1, 2, 3].map((step) => (
@@ -802,7 +802,7 @@ export default function CreateGardenAdvisorPage() {
                 </div>
                 
                 {step < 3 && (
-                  <div className={`w-10 h-1 mx-1 ${
+                  <div className={`w-40 h-1 mx-1 ${
                     currentStep > step ? 'bg-primary' : 'bg-gray-200'
                   }`}></div>
                 )}
@@ -817,24 +817,27 @@ export default function CreateGardenAdvisorPage() {
         </div>
       </div>
       
-      <div className="bg-green-100 rounded-lg p-5 mb-8">
-        <div className="flex items-start">
-          <div className="mr-3 text-green-600 mt-1">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm mb-1 text-green-800">What You'll Get</h3>
-            <ul className="text-sm space-y-1 text-green-800">
-              <li>Personalized plant recommendations for your unique spaces</li>
-              <li>Expert care instructions for each plant</li>
-              <li>Optimize your garden layout for maximum yield</li>
-              <li>Save time and money with our AI-powered insights</li>
-            </ul>
+      {/* "What You'll Get"信息框只在第1步显示 */}
+      {currentStep === 1 && (
+        <div className="bg-green-100 rounded-lg p-5 mb-8">
+          <div className="flex items-start">
+            <div className="mr-3 text-green-600 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm mb-1 text-green-800">What You'll Get</h3>
+              <ul className="text-sm space-y-1 text-green-800">
+                <li>Personalized plant recommendations for your unique spaces</li>
+                <li>Expert care instructions for each plant</li>
+                <li>Optimize your garden layout for maximum yield</li>
+                <li>Save time and money with our AI-powered insights</li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 根据当前步骤显示内容 */}
       {showContentByStep(currentStep)}
