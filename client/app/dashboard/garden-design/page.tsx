@@ -1452,14 +1452,14 @@ export default function PhotoGenerator() {
         }
         
         /* 确保主容器不会溢出 */
-        #photo-generator-root {
+        #garden-design-root {
           overflow: hidden;
           height: 100%;
           width: 100%;
         }
       `}</style>
       
-      <div id="photo-generator-root" className="w-full h-full">
+      <div id="garden-design-root" className="w-full h-full">
         {/* <h1 className="text-2xl font-bold mb-6">Images</h1> */}
         
         <div className="flex flex-col lg:flex-row gap-6 h-[calc(100%)] justify-start">
