@@ -1517,7 +1517,7 @@ export default function PhotoGenerator() {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-green-800">Tips for the best results:</h3>
+                    <h3 className="text-sm font-semibold text-green-800">Tips for the best results:</h3>
                     <p className="text-sm text-green-700">Use square images</p>
                     <p className="text-sm text-green-700">Ensure good lighting</p>
                     <p className="text-sm text-green-700">High resolution</p>
