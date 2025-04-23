@@ -66,16 +66,27 @@ export default function GardenPlansPage() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-semibold">Manage garden advisor (__still a demo__)</h1>
-        <button 
-          onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          New Garden Plan
-        </button>
+        <h1 className="text-2xl font-semibold">Manage garden advisor</h1>
+        <div className="flex space-x-3">
+          <Link 
+            href="/dashboard/garden-advisor/create"
+            className="flex items-center bg-primary hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Create Advisor
+          </Link>
+          <button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            New Garden Plan
+          </button>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
