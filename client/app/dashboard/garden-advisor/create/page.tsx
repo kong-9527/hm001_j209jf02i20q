@@ -508,7 +508,7 @@ export default function CreateGardenAdvisorPage() {
           <div className="mt-8 flex justify-between">
             <button
               onClick={goToPrevStep}
-              className="border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-6 py-2 rounded-md font-medium transition-colors flex items-center"
+              className="w-[130px] border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-6 py-2 rounded-md font-medium transition-colors flex items-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -517,7 +517,7 @@ export default function CreateGardenAdvisorPage() {
             </button>
             <button
               onClick={goToNextStep}
-              className="bg-primary hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors flex items-center"
+              className="w-[130px] bg-primary hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors flex items-center"
             >
               Next Step
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -695,7 +695,7 @@ export default function CreateGardenAdvisorPage() {
             <h2 className="text-2xl font-bold text-center">Confirm Your Personalized Garden Plan And Create!</h2>
           </div>
           
-          <div className="grid grid-cols-1 gap-6 items-start mx-auto">
+          <div className="text-center max-w-2xl mx-auto">            
             {/* <div className="md:col-span-1">
               <div className="flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-amber-500 mr-2">
@@ -704,31 +704,42 @@ export default function CreateGardenAdvisorPage() {
                 <span className="font-semibold text-sm">Important</span>
               </div>
             </div> */}
-            <div className="text-center max-w-2xl mx-auto">
-              <p className="text-sm mb-6 text-gray-700">Our garden plans are generated once, based on the inputs you provide, and cannot be edited afterwards. This is due to the intensive data processing required to create your personalized plan. We recommend thoroughly checking all your inputs before finalizing the plan.</p>
-            </div>
-            <div className="text-center">
-              <div className="mt-8 flex justify-start">
-                <button
-                  onClick={goToPrevStep}
-                  className="border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-6 py-2 rounded-md font-medium transition-colors flex items-center"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Previous
-                </button>
+            <p className="text-sm mb-6 text-gray-700">Our garden plans are generated once, based on the inputs you provide, and cannot be edited afterwards. This is due to the intensive data processing required to create your personalized plan. We recommend thoroughly checking all your inputs before finalizing the plan.</p>
+          </div>
 
-                <button 
-                  onClick={createGardenPlan}
-                  className="bg-primary hover:bg-green-700 text-white py-3.5 px-8 rounded-md font-medium transition-colors flex items-center justify-center ml-4"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                  Create My Personalized Garden Plan Now!
-                </button>
-              </div>
+          <div className="mt-8 flex justify-between">
+            <div>
+              <button
+                onClick={goToPrevStep}
+                className="w-[130px] border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-6 py-2 rounded-md font-medium transition-colors flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Previous
+              </button>
+            </div>
+            <div>
+              <button 
+                onClick={createGardenPlan}
+                className="bg-primary hover:bg-green-700 text-white py-3.5 px-8 rounded-md font-medium transition-colors flex items-center justify-center ml-4"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Create My Personalized Garden Plan Now!
+              </button>
+            </div>
+            <div className="w-[130px] px-6 py-2 rounded-md font-medium transition-colors flex items-center">
+              {/* <button
+                onClick={goToPrevStep}
+                className="border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-6 py-2 rounded-md font-medium transition-colors flex items-center hidden"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Next
+              </button> */}
             </div>
           </div>
         </div>
