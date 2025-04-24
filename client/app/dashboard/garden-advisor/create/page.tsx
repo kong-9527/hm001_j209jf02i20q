@@ -574,7 +574,7 @@ export default function CreateGardenAdvisorPage() {
                   </div>
                   <div className="border border-dashed rounded-md p-3 flex items-center hover:bg-green-50 hover:border-primary cursor-pointer transition-colors">
                     <div className="w-6 h-6 rounded-full bg-green-100 text-primary flex items-center justify-center mr-3">+</div>
-                    <span>Custom your planting space freely</span>
+                    <span>Customize Freely</span>
                   </div>
                 </div>
               </div>
@@ -584,26 +584,30 @@ export default function CreateGardenAdvisorPage() {
           <div className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
               <div className="md:col-span-1">
-                <div className="flex items-center">
+                <div className="flex items-center mb-2.5">
                   <label className="block text-sm font-semibold">Your Garden Space List</label>
                   <span className="text-xs text-gray-500 ml-2">(4 spaces)</span>
                 </div>
               </div>
               <div className="md:col-span-3">
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="col-span-1">
                 <div className="overflow-x-auto border rounded-md">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">In/Out</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cultivation</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Length</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Width</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Height</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diameter</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sunlight</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Soil</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Water Access</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">In/Out</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Cultivation</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Length</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Width</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Height</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Diameter</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Sunlight</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Soil</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Water Access</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -686,24 +690,25 @@ export default function CreateGardenAdvisorPage() {
         
         {/* Section 4: Confirm Your Personalized Garden Plan */}
         <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center mb-5">
-            <div className="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-semibold mr-3">4</div>
-            <h2 className="text-xl font-semibold">Confirm Your Personalized Garden Plan And Create!</h2>
+          <div className="flex items-center mb-5 justify-center">
+            {/* <div className="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-semibold mr-3">4</div> */}
+            <h2 className="text-2xl font-bold text-center">Confirm Your Personalized Garden Plan And Create!</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-            <div className="md:col-span-1">
+          <div className="grid grid-cols-1 gap-6 items-start mx-auto">
+            {/* <div className="md:col-span-1">
               <div className="flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-amber-500 mr-2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                 </svg>
                 <span className="font-semibold text-sm">Important</span>
               </div>
-            </div>
-            <div className="md:col-span-3">
+            </div> */}
+            <div className="text-center max-w-2xl mx-auto">
               <p className="text-sm mb-6 text-gray-700">Our garden plans are generated once, based on the inputs you provide, and cannot be edited afterwards. This is due to the intensive data processing required to create your personalized plan. We recommend thoroughly checking all your inputs before finalizing the plan.</p>
-              
-              <div className="flex justify-between">
+            </div>
+            <div className="text-center">
+              <div className="mt-8 flex justify-start">
                 <button
                   onClick={goToPrevStep}
                   className="border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-6 py-2 rounded-md font-medium transition-colors flex items-center"
@@ -713,10 +718,10 @@ export default function CreateGardenAdvisorPage() {
                   </svg>
                   Previous
                 </button>
-                
+
                 <button 
                   onClick={createGardenPlan}
-                  className="bg-primary hover:bg-green-700 text-white py-3.5 px-8 rounded-md font-medium transition-colors flex items-center"
+                  className="bg-primary hover:bg-green-700 text-white py-3.5 px-8 rounded-md font-medium transition-colors flex items-center justify-center ml-4"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
