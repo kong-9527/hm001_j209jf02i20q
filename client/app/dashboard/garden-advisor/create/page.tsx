@@ -189,7 +189,7 @@ export default function CreateGardenAdvisorPage() {
                       onChange={() => setExperience('Advanced')}
                       className="hidden"
                     />
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${experience === 'Advanced' ? 'border-primary bg-primary' : 'border-gray-300'}`}>
+                    <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Advanced' ? 'border-primary bg-primary' : 'border-gray-300'}`}>
                     </div>
                     <span className={experience === 'Advanced' ? 'text-primary font-medium' : ''}>Advanced</span>
                   </label>
@@ -496,7 +496,7 @@ export default function CreateGardenAdvisorPage() {
                 <p className="text-xs text-gray-500 mb-3">Select any allergies or health concerns you have related to gardening (optional):</p>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                   {['Pollen', 'Mold', 'Trees', 'Weeds', 'Bees', 'Dust', 'Shrubs', 'Insects', 'Grass', 'Flowers'].map((allergy) => (
-                    <label key={allergy} className={`flex items-center border rounded-md p-2 cursor-pointer hover:bg-green-50 transition-colors ${allergies.includes(allergy) ? 'border-primary' : 'border-gray-200'}`}>
+                    <label key={allergy} className={`flex items-center border rounded-md px-3 py-3 cursor-pointer hover:bg-green-50 transition-colors ${allergies.includes(allergy) ? 'border-primary' : 'border-gray-200'}`}>
                       <input
                         type="checkbox"
                         checked={allergies.includes(allergy)}
@@ -509,6 +509,19 @@ export default function CreateGardenAdvisorPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
                         )}
+                      </div>
+                      <div className={`w-10 h-10 mr-2 flex-shrink-0 flex items-center justify-center rounded-sm ${
+                        ['Pollen', 'Trees', 'Weeds', 'Grass', 'Flowers'].includes(allergy) 
+                        ? 'bg-[#FFE8CC]' 
+                        : 'bg-[#F5E8F5]'
+                      }`}>
+                        <img 
+                          src={`/Allergies/${['Pollen', 'Trees', 'Weeds', 'Grass', 'Flowers'].includes(allergy) 
+                            ? 'EA2D78EC-0577-4d3f-9F0D-52418077527B.png' 
+                            : '2D903A66-E528-4d44-8785-CA38282FFC08.png'}`} 
+                          alt="" 
+                          className="w-10 h-10 object-contain"
+                        />
                       </div>
                       <span className={allergies.includes(allergy) ? 'text-primary font-medium' : ''}>{allergy}</span>
                     </label>
@@ -630,16 +643,42 @@ export default function CreateGardenAdvisorPage() {
                           <td className="px-4 py-3 whitespace-nowrap text-sm">
                             <div className="flex items-center">
                               {space.type === 'raised-bed' && (
-                                <div className="bg-gray-200 h-6 w-6 rounded-sm mr-2"></div>
+                                <div className="bg-[#EDFAEF] h-6 w-10 rounded-sm mr-2 flex items-center justify-center">
+                                  <svg width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="1" y="5" width="20" height="10" rx="1" fill="#B7E4C7" stroke="#2D6A4F" strokeWidth="1.5"/>
+                                    <line x1="1" y1="8.25" x2="21" y2="8.25" stroke="#2D6A4F" strokeWidth="1.5"/>
+                                    <line x1="4" y1="1" x2="4" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
+                                    <line x1="18" y1="1" x2="18" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
+                                    <line x1="11" y1="1" x2="11" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
+                                  </svg>
+                                </div>
                               )}
                               {space.type === 'ground' && (
-                                <div className="bg-gray-200 h-6 w-6 rounded-sm mr-2"></div>
+                                <div className="bg-[#FFF3E0] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
+                                  <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 15C1 12 5 1 10 1C15 1 19 12 19 15" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
+                                    <path d="M1 15H19" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
+                                    <path d="M5 10C6.5 8.5 8.5 8 10 8C11.5 8 13.5 8.5 15 10" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
+                                  </svg>
+                                </div>
                               )}
                               {space.type === 'square-pot' && (
-                                <div className="bg-gray-200 h-6 w-6 rounded-sm mr-2"></div>
+                                <div className="bg-[#E6F7FF] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
+                                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="1" y="5" width="14" height="10" rx="1" fill="#BAE7FF" stroke="#0D6EFD" strokeWidth="1.5"/>
+                                    <path d="M3 5V3C3 1.89543 3.89543 1 5 1H11C12.1046 1 13 1.89543 13 3V5" stroke="#0D6EFD" strokeWidth="1.5"/>
+                                    <line x1="3" y1="8.25" x2="13" y2="8.25" stroke="#0D6EFD" strokeWidth="1.5"/>
+                                  </svg>
+                                </div>
                               )}
                               {space.type === 'round-pot' && (
-                                <div className="bg-gray-200 h-6 w-6 rounded-sm mr-2"></div>
+                                <div className="bg-[#F9E9FB] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
+                                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <ellipse cx="8" cy="10.5" rx="7" ry="4.5" fill="#E9C7F9" stroke="#9C27B0" strokeWidth="1.5"/>
+                                    <path d="M3 10.5V7C3 4.79086 5.23858 3 8 3C10.7614 3 13 4.79086 13 7V10.5" stroke="#9C27B0" strokeWidth="1.5"/>
+                                    <line x1="5" y1="7.25" x2="11" y2="7.25" stroke="#9C27B0" strokeWidth="1.5"/>
+                                  </svg>
+                                </div>
                               )}
                               <span>{space.type}</span>
                             </div>
