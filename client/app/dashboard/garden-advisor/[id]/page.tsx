@@ -45,12 +45,12 @@ export default function GardenAdvisorDetail() {
           </svg>
           Back
         </Link>
-        <h1 className="text-2xl font-semibold">Garden Advisor</h1>
+        <h1 className="text-2xl font-semibold">Garden Plant Advisor</h1>
       </div>
       
       <div className="bg-green-100 rounded-lg shadow-sm p-6 mb-1">
         <div className="flex justify-between items-start mb-5">
-          <h2 className="text-xl font-bold text-gray-800">Garden Plan:</h2>
+          <h2 className="text-xl text-gray-800">Garden Plan:</h2>
           {/* <div className="flex space-x-2">
             <button className="px-4 py-2 bg-primary text-white rounded-md hover:bg-green-700 transition-colors">
               Edit Plan
@@ -208,29 +208,58 @@ export default function GardenAdvisorDetail() {
           {/* Space 1 */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
-              <h3 className="font-semibold text-lg">Space 1: Front Yard</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 text-sm">
-                <div>
-                  <span className="text-gray-500">Sunlight:</span>
-                  <p>Full sun (6+ hrs)</p>
+              <h3 className="font-semibold text-lg">Space 1: Indoor Round Pot </h3>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2 text-sm">
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">In/Out:</span>
+                  <p className="mt-1">Indoor</p>
                 </div>
-                <div>
-                  <span className="text-gray-500">Soil Type:</span>
-                  <p>Clay loam</p>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Cultivation:</span>
+                  <div className="flex items-center mt-1">
+                    <div className="bg-[#F9E9FB] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="8" cy="10.5" rx="7" ry="4.5" fill="#E9C7F9" stroke="#9C27B0" strokeWidth="1.5"/>
+                        <path d="M3 10.5V7C3 4.79086 5.23858 3 8 3C10.7614 3 13 4.79086 13 7V10.5" stroke="#9C27B0" strokeWidth="1.5"/>
+                        <line x1="5" y1="7.25" x2="11" y2="7.25" stroke="#9C27B0" strokeWidth="1.5"/>
+                      </svg>
+                    </div>
+                    <span>Round Pot</span>
+                  </div>
                 </div>
-                <div>
+                <div className="flex flex-col justify-center">
                   <span className="text-gray-500">Dimensions:</span>
-                  <p>10ft × 15ft</p>
+                  <p className="mt-1"><span className="text-gray-500">D</span>50cm<span className="text-gray-500"> x H</span>50cm</p>
                 </div>
-                <div>
-                  <span className="text-gray-500">Irrigation:</span>
-                  <p>Sprinkler system</p>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Sunlight:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Full sun (6+ hrs)
+                    </span>
+                  </p>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Soil:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                      Clay loam
+                    </span>
+                  </p>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Water Access:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Sprinkler system
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>
             <div className="p-6">
               <h4 className="font-medium mb-3">Recommended Plants:</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {["Lavender", "Butterfly Bush", "Black-Eyed Susan", "Coneflower"].map((plant, index) => (
                   <button 
                     key={index}
@@ -248,30 +277,61 @@ export default function GardenAdvisorDetail() {
           {/* Space 2 */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
-              <h3 className="font-semibold text-lg">Space 2: Vegetable Garden</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 text-sm">
-                <div>
-                  <span className="text-gray-500">Sunlight:</span>
-                  <p>Partial sun (4-6 hrs)</p>
+              <h3 className="font-semibold text-lg">Space 2: Outdoor Raised Bed</h3>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2 text-sm">
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">In/Out:</span>
+                  <p className="mt-1">Outdoor</p>
                 </div>
-                <div>
-                  <span className="text-gray-500">Soil Type:</span>
-                  <p>Sandy loam</p>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Cultivation:</span>
+                  <div className="flex items-center mt-1">
+                    <div className="bg-[#EDFAEF] h-6 w-10 rounded-sm mr-2 flex items-center justify-center">
+                      <svg width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="5" width="20" height="10" rx="1" fill="#B7E4C7" stroke="#2D6A4F" strokeWidth="1.5"/>
+                        <line x1="1" y1="8.25" x2="21" y2="8.25" stroke="#2D6A4F" strokeWidth="1.5"/>
+                        <line x1="4" y1="1" x2="4" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
+                        <line x1="18" y1="1" x2="18" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
+                        <line x1="11" y1="1" x2="11" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
+                      </svg>
+                    </div>
+                    <span>Raised Bed</span>
+                  </div>
                 </div>
-                <div>
+                <div className="flex flex-col justify-center">
                   <span className="text-gray-500">Dimensions:</span>
-                  <p>8ft × 12ft</p>
+                  <p className="mt-1"><span className="text-gray-500">L</span>8ft <span className="text-gray-500"> x W</span>12ft <span className="text-gray-500"> x H</span>2ft</p>
                 </div>
-                <div>
-                  <span className="text-gray-500">Irrigation:</span>
-                  <p>Drip system</p>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Sunlight:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Partial sun (4-6 hrs)
+                    </span>
+                  </p>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Soil:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                      Sandy loam
+                    </span>
+                  </p>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Water Access:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Drip system
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>
             <div className="p-6">
               <h4 className="font-medium mb-3">Recommended Plants:</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {["Tomatoes", "Bell Peppers", "Lettuce", "Basil"].map((plant, index) => (
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {["Tomatoes", "Bell Peppers", "Lettuce", "Basil", "Cucumbers", "Zucchini"].map((plant, index) => (
                   <button 
                     key={index}
                     onClick={() => handlePlantSelect(plant)}
@@ -288,29 +348,58 @@ export default function GardenAdvisorDetail() {
           {/* Space 3 */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
-              <h3 className="font-semibold text-lg">Space 3: Shade Garden</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 text-sm">
-                <div>
-                  <span className="text-gray-500">Sunlight:</span>
-                  <p>Shade (2-4 hrs)</p>
+              <h3 className="font-semibold text-lg">Space 3: Outdoor Square Pot</h3>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2 text-sm">
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">In/Out:</span>
+                  <p className="mt-1">Outdoor</p>
                 </div>
-                <div>
-                  <span className="text-gray-500">Soil Type:</span>
-                  <p>Rich loam</p>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Cultivation:</span>
+                  <div className="flex items-center mt-1">
+                    <div className="bg-[#E6F7FF] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="5" width="14" height="10" rx="1" fill="#BAE7FF" stroke="#0D6EFD" strokeWidth="1.5"/>
+                        <path d="M3 5V3C3 1.89543 3.89543 1 5 1H11C12.1046 1 13 1.89543 13 3V5" stroke="#0D6EFD" strokeWidth="1.5"/>
+                        <line x1="3" y1="8.25" x2="13" y2="8.25" stroke="#0D6EFD" strokeWidth="1.5"/>
+                      </svg>
+                    </div>
+                    <span>Square Pot</span>
+                  </div>
                 </div>
-                <div>
+                <div className="flex flex-col justify-center">
                   <span className="text-gray-500">Dimensions:</span>
-                  <p>6ft × 8ft</p>
+                  <p className="mt-1"><span className="text-gray-500">L</span>6ft<span className="text-gray-500"> x W</span>8ft<span className="text-gray-500"> x H</span>2ft</p>
                 </div>
-                <div>
-                  <span className="text-gray-500">Irrigation:</span>
-                  <p>Manual watering</p>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Sunlight:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Shade (2-4 hrs)
+                    </span>
+                  </p>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Soil:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                      Rich loam
+                    </span>
+                  </p>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Water Access:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Manual watering
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>
             <div className="p-6">
               <h4 className="font-medium mb-3">Recommended Plants:</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {["Hostas", "Ferns", "Astilbe", "Impatiens"].map((plant, index) => (
                   <button 
                     key={index}
@@ -328,29 +417,58 @@ export default function GardenAdvisorDetail() {
           {/* Space 4 */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
-              <h3 className="font-semibold text-lg">Space 4: Fruit Garden</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 text-sm">
-                <div>
-                  <span className="text-gray-500">Sunlight:</span>
-                  <p>Full sun (6+ hrs)</p>
+              <h3 className="font-semibold text-lg">Space 4: Outdoor Ground</h3>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2 text-sm">
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">In/Out:</span>
+                  <p className="mt-1">Outdoor</p>
                 </div>
-                <div>
-                  <span className="text-gray-500">Soil Type:</span>
-                  <p>Humus-rich loam</p>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Cultivation:</span>
+                  <div className="flex items-center mt-1">
+                    <div className="bg-[#FFF3E0] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
+                      <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 15C1 12 5 1 10 1C15 1 19 12 19 15" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M1 15H19" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
+                        <path d="M5 10C6.5 8.5 8.5 8 10 8C11.5 8 13.5 8.5 15 10" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                    <span>Ground</span>
+                  </div>
                 </div>
-                <div>
+                <div className="flex flex-col justify-center">
                   <span className="text-gray-500">Dimensions:</span>
-                  <p>12ft × 15ft</p>
+                  <p className="mt-1"><span className="text-gray-500">L</span>12ft<span className="text-gray-500"> x W</span>15ft<span className="text-gray-500"> x H</span>2ft</p>
                 </div>
-                <div>
-                  <span className="text-gray-500">Irrigation:</span>
-                  <p>Drip system</p>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Sunlight:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Full sun (6+ hrs)
+                    </span>
+                  </p>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Soil:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                      Humus-rich loam
+                    </span>
+                  </p>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <span className="text-gray-500">Water Access:</span>
+                  <p className="mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Drip system
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>
             <div className="p-6">
               <h4 className="font-medium mb-3">Recommended Plants:</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {["Strawberries", "Blueberries", "Raspberry Bush", "Apple Tree (Dwarf)"].map((plant, index) => (
                   <button 
                     key={index}
