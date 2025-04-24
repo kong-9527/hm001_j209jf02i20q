@@ -158,7 +158,7 @@ export default function CreateGardenAdvisorPage() {
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">Select your level of gardening experience (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${experience === 'Beginner' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${experience === 'Beginner' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="experience"
@@ -166,10 +166,10 @@ export default function CreateGardenAdvisorPage() {
                       onChange={() => setExperience('Beginner')}
                       className="hidden"
                     />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Beginner' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
+                    <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Beginner' ? 'border-primary bg-primary' : 'border-gray-300'}`}>  </div>
                     <span className={experience === 'Beginner' ? 'text-primary font-medium' : ''}>Beginner</span>
                   </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${experience === 'Intermediate' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${experience === 'Intermediate' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="experience"
@@ -177,10 +177,11 @@ export default function CreateGardenAdvisorPage() {
                       onChange={() => setExperience('Intermediate')}
                       className="hidden"
                     />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Intermediate' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
+                    <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Intermediate' ? 'border-primary bg-primary' : 'border-gray-300'}`}>
+                    </div>
                     <span className={experience === 'Intermediate' ? 'text-primary font-medium' : ''}>Intermediate</span>
                   </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${experience === 'Advanced' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${experience === 'Advanced' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="experience"
@@ -188,7 +189,8 @@ export default function CreateGardenAdvisorPage() {
                       onChange={() => setExperience('Advanced')}
                       className="hidden"
                     />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Advanced' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${experience === 'Advanced' ? 'border-primary bg-primary' : 'border-gray-300'}`}>
+                    </div>
                     <span className={experience === 'Advanced' ? 'text-primary font-medium' : ''}>Advanced</span>
                   </label>
                 </div>
@@ -204,7 +206,7 @@ export default function CreateGardenAdvisorPage() {
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">Select your gardening budget range (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${budget === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${budget === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="budget"
@@ -212,10 +214,11 @@ export default function CreateGardenAdvisorPage() {
                       onChange={() => setBudget('Low')}
                       className="hidden"
                     />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${budget === 'Low' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
+                    <div className={`w-4 h-4 rounded-full mr-2 border ${budget === 'Low' ? 'border-primary bg-primary' : 'border-gray-300'}`}>
+                    </div>
                     <span className={budget === 'Low' ? 'text-primary font-medium' : ''}>Low</span>
                   </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${budget === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${budget === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="budget"
@@ -226,7 +229,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${budget === 'Medium' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={budget === 'Medium' ? 'text-primary font-medium' : ''}>Medium</span>
                   </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${budget === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${budget === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="budget"
@@ -250,7 +253,7 @@ export default function CreateGardenAdvisorPage() {
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">Select the amount of time you can dedicate to gardening (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${time === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer  hover:bg-green-50 ${time === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="time"
@@ -261,7 +264,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${time === 'Low' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={time === 'Low' ? 'text-primary font-medium' : ''}>Low</span>
                   </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${time === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${time === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="time"
@@ -272,7 +275,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${time === 'Medium' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={time === 'Medium' ? 'text-primary font-medium' : ''}>Medium</span>
                   </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${time === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${time === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="time"
@@ -296,7 +299,7 @@ export default function CreateGardenAdvisorPage() {
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">Select your preferred level of maintenance for your garden (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${maintenance === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${maintenance === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="maintenance"
@@ -307,7 +310,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${maintenance === 'Low' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={maintenance === 'Low' ? 'text-primary font-medium' : ''}>Low</span>
                   </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${maintenance === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${maintenance === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="maintenance"
@@ -318,7 +321,7 @@ export default function CreateGardenAdvisorPage() {
                     <div className={`w-4 h-4 rounded-full mr-2 border ${maintenance === 'Medium' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
                     <span className={maintenance === 'Medium' ? 'text-primary font-medium' : ''}>Medium</span>
                   </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors ${maintenance === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${maintenance === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
                       type="radio"
                       name="maintenance"
@@ -343,7 +346,7 @@ export default function CreateGardenAdvisorPage() {
                 <p className="text-xs text-gray-500 mb-3">Select the goals you wish to achieve through gardening (optional):</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {['Food', 'Wildlife', 'Beauty', 'Education', 'Medicinal', 'Hobby', 'Fragrance', 'Money'].map((goal) => (
-                    <label key={goal} className={`flex items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors ${goals.includes(goal) ? 'border-primary bg-green-50' : 'border-gray-200'}`}>
+                    <label key={goal} className={`flex items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors ${goals.includes(goal) ? 'border-primary' : 'border-gray-200'}`}>
                       <input
                         type="checkbox"
                         checked={goals.includes(goal)}
@@ -398,26 +401,24 @@ export default function CreateGardenAdvisorPage() {
               </div>
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">Select the types of plants you prefer to grow (optional):</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {['Flowers', 'Vegetables', 'Trees', 'Grasses', 'Cacti', 'Mosses', 'Aquatics', 'Orchids', 'Herbs', 'Fruits', 'Shrubs', 'Succulents', 'Ferns', 'Vines', 'Bulbs'].map((type) => (
-                    <div 
-                      key={type} 
-                      className={`border rounded-md p-2 cursor-pointer text-center transition-all ${
-                        plantTypes.includes(type) 
-                          ? 'border-primary bg-green-50 shadow-sm' 
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`} 
-                      onClick={() => handlePlantTypeChange(type)}
-                    >
-                      <div className="flex items-center justify-center h-full">
+                    <label key={type} className={`flex items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors ${plantTypes.includes(type) ? 'border-primary' : 'border-gray-200'}`}>
+                      <input
+                        type="checkbox"
+                        checked={plantTypes.includes(type)}
+                        onChange={() => handlePlantTypeChange(type)}
+                        className="hidden"
+                      />
+                      <div className={`w-4 h-4 rounded mr-2 flex items-center justify-center border ${plantTypes.includes(type) ? 'border-primary bg-primary' : 'border-gray-300'}`}>
                         {plantTypes.includes(type) && (
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-primary mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
                         )}
-                        <span className={plantTypes.includes(type) ? 'text-primary font-medium' : ''}>{type}</span>
                       </div>
-                    </div>
+                      <span className={plantTypes.includes(type) ? 'text-primary font-medium' : ''}>{type}</span>
+                    </label>
                   ))}
                 </div>
               </div>
@@ -482,7 +483,7 @@ export default function CreateGardenAdvisorPage() {
                 <p className="text-xs text-gray-500 mb-3">Select any allergies or health concerns you have related to gardening (optional):</p>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                   {['Pollen', 'Mold', 'Trees', 'Weeds', 'Bees', 'Dust', 'Shrubs', 'Insects', 'Grass', 'Flowers'].map((allergy) => (
-                    <label key={allergy} className={`flex items-center border rounded-md p-2 cursor-pointer hover:bg-green-50 transition-colors ${allergies.includes(allergy) ? 'border-primary bg-green-50' : 'border-gray-200'}`}>
+                    <label key={allergy} className={`flex items-center border rounded-md p-2 cursor-pointer hover:bg-green-50 transition-colors ${allergies.includes(allergy) ? 'border-primary' : 'border-gray-200'}`}>
                       <input
                         type="checkbox"
                         checked={allergies.includes(allergy)}
