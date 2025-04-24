@@ -2,29 +2,38 @@ import React, { useState } from 'react';
 
 interface EditGardenPlanModalProps {
   onClose: () => void;
-  onSubmit: (planId: number, planName: string) => void;
+  onSubmit: (planId: number, planName: string, location?: string, experience?: string, fertilizer?: string) => void;
   planId: number;
   currentName: string;
+  location?: string;
+  experience?: string;
+  fertilizer?: string;
 }
 
 export function EditGardenPlanModal({ 
   onClose, 
   onSubmit, 
   planId, 
-  currentName 
+  currentName,
+  location = '',
+  experience = 'beginner',
+  fertilizer = ''
 }: EditGardenPlanModalProps) {
   const [planName, setPlanName] = useState(currentName);
+  const [planLocation, setPlanLocation] = useState(location);
+  const [planExperience, setPlanExperience] = useState(experience);
+  const [planFertilizer, setPlanFertilizer] = useState(fertilizer);
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!planName.trim()) {
-      setError('Plan name is required');
+      setError('Plan name cannot be empty');
       return;
     }
     
-    onSubmit(planId, planName);
+    onSubmit(planId, planName, planLocation, planExperience, planFertilizer);
     onClose();
   };
 
@@ -47,6 +56,53 @@ export function EditGardenPlanModal({
               placeholder="Enter garden plan name"
             />
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+          </div>
+          
+          <div className="mb-4">
+            <label htmlFor="planLocation" className="block text-sm font-medium text-gray-700 mb-1">
+              Location
+            </label>
+            <input
+              type="text"
+              id="planLocation"
+              value={planLocation}
+              onChange={(e) => setPlanLocation(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Enter location"
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label htmlFor="planExperience" className="block text-sm font-medium text-gray-700 mb-1">
+              Experience Level
+            </label>
+            <select
+              id="planExperience"
+              value={planExperience}
+              onChange={(e) => setPlanExperience(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="expert">Expert</option>
+            </select>
+          </div>
+          
+          <div className="mb-4">
+            <label htmlFor="planFertilizer" className="block text-sm font-medium text-gray-700 mb-1">
+              Fertilizer Type
+            </label>
+            <select
+              id="planFertilizer"
+              value={planFertilizer}
+              onChange={(e) => setPlanFertilizer(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="">Please select</option>
+              <option value="Organic">Organic</option>
+              <option value="Chemical">Chemical</option>
+              <option value="Mixed">Mixed</option>
+            </select>
           </div>
           
           <div className="flex justify-end space-x-3">
