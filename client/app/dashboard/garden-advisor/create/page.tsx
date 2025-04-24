@@ -541,11 +541,11 @@ export default function CreateGardenAdvisorPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-            <div className="md:col-span-1">
+            {/* <div className="md:col-span-1">
               <label className="block text-sm font-semibold">Description</label>
-            </div>
+            </div> */}
             <div className="md:col-span-3">
-              <p className="text-sm text-gray-700 mb-4">A garden space is an individual area within your garden or home where you grow your plants (like a pot, or a piece of land). You can add up to 25 garden spaces. Each garden space will have up to 10 recommendations. You will only be able to fit this in once, so make sure to add all your garden spaces now, so that we can provide you with the best recommendations. Be sure to include all your indoor and outdoor garden spaces.</p>
+              <p className="text-sm text-gray-700 mb-4 bg-green-50 p-4 rounded-md gap-2">A garden space is an individual area within your garden or home where you grow your plants (like a pot, or a piece of land). You can add up to 25 garden spaces. Each garden space will have up to 10 recommendations. You will only be able to fit this in once, so make sure to add all your garden spaces now, so that we can provide you with the best recommendations. Be sure to include all your indoor and outdoor garden spaces.</p>
             </div>
           </div>
           
@@ -686,11 +686,9 @@ export default function CreateGardenAdvisorPage() {
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Section 4: Confirm Your Personalized Garden Plan */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center mb-5 justify-center">
+
+          {/* <div className="border-t border-gray-200 my-6"></div> */}
+          <div className="flex items-center mb-5 justify-center mt-8">
             {/* <div className="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-semibold mr-3">4</div> */}
             <h2 className="text-2xl font-bold text-center">Confirm Your Personalized Garden Plan And Create!</h2>
           </div>
