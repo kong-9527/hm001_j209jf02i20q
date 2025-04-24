@@ -403,7 +403,7 @@ export default function CreateGardenAdvisorPage() {
                 <p className="text-xs text-gray-500 mb-3">Select the types of plants you prefer to grow (optional):</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {['Flowers', 'Vegetables', 'Trees', 'Grasses', 'Cacti', 'Mosses', 'Aquatics', 'Orchids', 'Herbs', 'Fruits', 'Shrubs', 'Succulents', 'Ferns', 'Vines', 'Bulbs'].map((type) => (
-                    <label key={type} className={`flex items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors ${plantTypes.includes(type) ? 'border-primary' : 'border-gray-200'}`}>
+                    <label key={type} className={`flex items-center border rounded-md px-3 py-3 cursor-pointer hover:bg-green-50 transition-colors ${plantTypes.includes(type) ? 'border-primary' : 'border-gray-200'}`}>
                       <input
                         type="checkbox"
                         checked={plantTypes.includes(type)}
@@ -416,6 +416,19 @@ export default function CreateGardenAdvisorPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
                         )}
+                      </div>
+                      <div className={`w-10 h-10 mr-2 flex-shrink-0 flex items-center justify-center rounded-sm ${
+                        ['Flowers', 'Vegetables', 'Herbs', 'Ferns', 'Vines', 'Bulbs'].includes(type) 
+                        ? 'bg-[#D9EFDE]' 
+                        : 'bg-[#FFE8CC]'
+                      }`}>
+                        <img 
+                          src={`/plants/${['Flowers', 'Vegetables', 'Herbs', 'Ferns', 'Vines', 'Bulbs'].includes(type) 
+                            ? '2D903A66-E528-4d44-8785-CA38282FFC08.png' 
+                            : 'EA2D78EC-0577-4d3f-9F0D-52418077527B.png'}`} 
+                          alt="" 
+                          className="w-10 h-10 object-contain"
+                        />
                       </div>
                       <span className={plantTypes.includes(type) ? 'text-primary font-medium' : ''}>{type}</span>
                     </label>
