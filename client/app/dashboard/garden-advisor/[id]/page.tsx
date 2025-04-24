@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -25,6 +25,14 @@ export default function GardenAdvisorDetail() {
     createdAt: "2025/4/21",
   };
   
+  // Define state for selected plant
+  const [selectedPlant, setSelectedPlant] = useState<string | null>(null);
+
+  // Handler for plant selection
+  const handlePlantSelect = (plantName: string) => {
+    setSelectedPlant(plantName);
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-center mb-8">
@@ -193,6 +201,287 @@ export default function GardenAdvisorDetail() {
         </div>
       </div>
       
+      <div className="mt-8">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Plant Recommendations</h2>
+        
+        <div className="space-y-6">
+          {/* Space 1 */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
+              <h3 className="font-semibold text-lg">Space 1: Front Yard</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 text-sm">
+                <div>
+                  <span className="text-gray-500">Sunlight:</span>
+                  <p>Full sun (6+ hrs)</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Soil Type:</span>
+                  <p>Clay loam</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Dimensions:</span>
+                  <p>10ft × 15ft</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Irrigation:</span>
+                  <p>Sprinkler system</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <h4 className="font-medium mb-3">Recommended Plants:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {["Lavender", "Butterfly Bush", "Black-Eyed Susan", "Coneflower"].map((plant, index) => (
+                  <button 
+                    key={index}
+                    onClick={() => handlePlantSelect(plant)}
+                    className="text-left p-3 bg-gray-50 hover:bg-green-50 rounded-md border border-gray-200 transition-colors"
+                  >
+                    <div className="font-medium text-primary">{plant}</div>
+                    <div className="text-sm text-gray-500">Perennial • Low maintenance</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Space 2 */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
+              <h3 className="font-semibold text-lg">Space 2: Vegetable Garden</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 text-sm">
+                <div>
+                  <span className="text-gray-500">Sunlight:</span>
+                  <p>Partial sun (4-6 hrs)</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Soil Type:</span>
+                  <p>Sandy loam</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Dimensions:</span>
+                  <p>8ft × 12ft</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Irrigation:</span>
+                  <p>Drip system</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <h4 className="font-medium mb-3">Recommended Plants:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {["Tomatoes", "Bell Peppers", "Lettuce", "Basil"].map((plant, index) => (
+                  <button 
+                    key={index}
+                    onClick={() => handlePlantSelect(plant)}
+                    className="text-left p-3 bg-gray-50 hover:bg-green-50 rounded-md border border-gray-200 transition-colors"
+                  >
+                    <div className="font-medium text-primary">{plant}</div>
+                    <div className="text-sm text-gray-500">Edible • Seasonal</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Space 3 */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
+              <h3 className="font-semibold text-lg">Space 3: Shade Garden</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 text-sm">
+                <div>
+                  <span className="text-gray-500">Sunlight:</span>
+                  <p>Shade (2-4 hrs)</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Soil Type:</span>
+                  <p>Rich loam</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Dimensions:</span>
+                  <p>6ft × 8ft</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Irrigation:</span>
+                  <p>Manual watering</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <h4 className="font-medium mb-3">Recommended Plants:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {["Hostas", "Ferns", "Astilbe", "Impatiens"].map((plant, index) => (
+                  <button 
+                    key={index}
+                    onClick={() => handlePlantSelect(plant)}
+                    className="text-left p-3 bg-gray-50 hover:bg-green-50 rounded-md border border-gray-200 transition-colors"
+                  >
+                    <div className="font-medium text-primary">{plant}</div>
+                    <div className="text-sm text-gray-500">Shade-loving • Perennial</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Space 4 */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
+              <h3 className="font-semibold text-lg">Space 4: Fruit Garden</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 text-sm">
+                <div>
+                  <span className="text-gray-500">Sunlight:</span>
+                  <p>Full sun (6+ hrs)</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Soil Type:</span>
+                  <p>Humus-rich loam</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Dimensions:</span>
+                  <p>12ft × 15ft</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Irrigation:</span>
+                  <p>Drip system</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <h4 className="font-medium mb-3">Recommended Plants:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {["Strawberries", "Blueberries", "Raspberry Bush", "Apple Tree (Dwarf)"].map((plant, index) => (
+                  <button 
+                    key={index}
+                    onClick={() => handlePlantSelect(plant)}
+                    className="text-left p-3 bg-gray-50 hover:bg-green-50 rounded-md border border-gray-200 transition-colors"
+                  >
+                    <div className="font-medium text-primary">{plant}</div>
+                    <div className="text-sm text-gray-500">Fruit-bearing • Perennial</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Plant Detail Drawer */}
+      <div className={`fixed inset-y-0 right-0 w-full md:w-1/3 bg-white shadow-xl transform ${selectedPlant ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out z-50`}>
+        {selectedPlant && (
+          <div className="h-full flex flex-col">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-xl font-semibold">{selectedPlant}</h3>
+              <button onClick={() => setSelectedPlant(null)} className="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="aspect-w-16 aspect-h-9 mb-6">
+                <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-500">Plant Image</span>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <h4 className="font-semibold mb-2">Overview</h4>
+                <p className="text-gray-700">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. 
+                  Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                  <h4 className="font-semibold mb-2">Growing Conditions</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <span className="w-28 text-gray-500">Sunlight:</span>
+                      <span>Full sun</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="w-28 text-gray-500">Water Needs:</span>
+                      <span>Moderate</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="w-28 text-gray-500">Soil Type:</span>
+                      <span>Well-draining</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="w-28 text-gray-500">USDA Zones:</span>
+                      <span>4-9</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Plant Characteristics</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <span className="w-28 text-gray-500">Height:</span>
+                      <span>2-3 feet</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="w-28 text-gray-500">Spread:</span>
+                      <span>1-2 feet</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="w-28 text-gray-500">Bloom Time:</span>
+                      <span>Summer</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="w-28 text-gray-500">Lifespan:</span>
+                      <span>Perennial</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <h4 className="font-semibold mb-2">Care Instructions</h4>
+                <ul className="space-y-2">
+                  <li className="flex items-start">
+                    <div className="w-6 h-6 flex-shrink-0 mr-2 text-green-600">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </div>
+                    <span>Water regularly, allowing soil to dry between waterings</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="w-6 h-6 flex-shrink-0 mr-2 text-green-600">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </div>
+                    <span>Fertilize monthly during growing season</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="w-6 h-6 flex-shrink-0 mr-2 text-green-600">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </div>
+                    <span>Prune after flowering to encourage new growth</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-2">Companion Planting</h4>
+                <p className="mb-2">Grows well with:</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Marigolds</span>
+                  <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Zinnias</span>
+                  <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Nasturtiums</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
