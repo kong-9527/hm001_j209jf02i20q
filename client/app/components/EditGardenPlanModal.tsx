@@ -58,7 +58,7 @@ export function EditGardenPlanModal({
             {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
           </div>
           
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label htmlFor="planLocation" className="block text-sm font-medium text-gray-700 mb-1">
               Location
             </label>
@@ -103,7 +103,7 @@ export function EditGardenPlanModal({
               <option value="Chemical">Chemical</option>
               <option value="Mixed">Mixed</option>
             </select>
-          </div>
+          </div> */}
           
           <div className="flex justify-end space-x-3">
             <button

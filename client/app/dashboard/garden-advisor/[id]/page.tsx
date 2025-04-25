@@ -47,10 +47,10 @@ export default function GardenAdvisorDetail() {
         </Link>
         <h1 className="text-2xl font-semibold">Garden Plant Advisor</h1>
       </div>
-      
-      <div className="bg-green-100 rounded-lg shadow-sm p-6 mb-1">
+      <h2 className="text-xl text-gray-800 mb-4" >Garden Plan</h2>
+      <div className="bg-green-100 rounded-lg shadow-sm py-3 px-6 mb-1">
         <div className="flex justify-between items-start mb-5">
-          <h2 className="text-xl text-gray-800">Garden Plan:</h2>
+          
           {/* <div className="flex space-x-2">
             <button className="px-4 py-2 bg-primary text-white rounded-md hover:bg-green-700 transition-colors">
               Edit Plan
@@ -196,8 +196,6 @@ export default function GardenAdvisorDetail() {
           </div>
           
 
-          
-
         </div>
       </div>
       
@@ -207,7 +205,7 @@ export default function GardenAdvisorDetail() {
         <div className="space-y-6">
           {/* Space 1 */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
+            <div className="bg-white px-6 py-4 border-b border-gray-200">
               <h3 className="font-semibold text-lg">Space 1: Indoor Round Pot </h3>
               <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2 text-sm">
                 <div className="flex flex-col justify-center">
@@ -258,21 +256,29 @@ export default function GardenAdvisorDetail() {
               </div>
             </div>
             <div className="p-6">
-              <h4 className="font-medium mb-3">Recommended Plants:</h4>
+              {/* <h4 className="font-medium mb-3">Recommended Plants:</h4> */}
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {["Lavender", "Butterfly Bush", "Black-Eyed Susan", "Coneflower"].map((plant, index) => (
                   <button 
                     key={index}
                     onClick={() => handlePlantSelect(plant)}
-                    className="text-left p-3 bg-gray-50 hover:bg-green-50 rounded-md border border-gray-200 transition-colors"
+                    className={`text-left p-3 rounded-md border border-gray-200 transition-colors ${
+                      selectedPlant === plant 
+                        ? 'bg-green-700 text-white' 
+                        : 'bg-grey-100 hover:bg-green-300'
+                    }`}
                   >
-                    <div className="font-medium text-primary flex items-center">
+                    <div className={`font-medium flex items-center ${
+                      selectedPlant === plant ? 'text-white' : 'text-primary'
+                    }`}>
                       <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 384 512" data-sentry-element="FaTree" data-sentry-source-file="GardenRecommendation.tsx" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
                         <path d="M378.31 378.49L298.42 288h30.63c9.01 0 16.98-5 20.78-13.06 3.8-8.04 2.55-17.26-3.28-24.05L268.42 160h28.89c9.1 0 17.3-5.35 20.86-13.61 3.52-8.13 1.86-17.59-4.24-24.08L203.66 4.83c-6.03-6.45-17.28-6.45-23.32 0L70.06 122.31c-6.1 6.49-7.75 15.95-4.24 24.08C69.38 154.65 77.59 160 86.69 160h28.89l-78.14 90.91c-5.81 6.78-7.06 15.99-3.27 24.04C37.97 283 45.93 288 54.95 288h30.63L5.69 378.49c-6 6.79-7.36 16.09-3.56 24.26 3.75 8.05 12 13.25 21.01 13.25H160v24.45l-30.29 48.4c-5.32 10.64 2.42 23.16 14.31 23.16h95.96c11.89 0 19.63-12.52 14.31-23.16L224 440.45V416h136.86c9.01 0 17.26-5.2 21.01-13.25 3.8-8.17 2.44-17.47-3.56-24.26z"></path>
                       </svg>
                       {plant}
                     </div>
-                    <div className="text-sm text-gray-500">Perennial • Low maintenance</div>
+                    <div className={`text-sm ${
+                      selectedPlant === plant ? 'text-white' : 'text-gray-500'
+                    }`}>Perennial • Low maintenance</div>
                   </button>
                 ))}
               </div>
@@ -281,7 +287,7 @@ export default function GardenAdvisorDetail() {
 
           {/* Space 2 */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
+            <div className="bg-white px-6 py-4 border-b border-gray-200">
               <h3 className="font-semibold text-lg">Space 2: Outdoor Raised Bed</h3>
               <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2 text-sm">
                 <div className="flex flex-col justify-center">
@@ -334,21 +340,29 @@ export default function GardenAdvisorDetail() {
               </div>
             </div>
             <div className="p-6">
-              <h4 className="font-medium mb-3">Recommended Plants:</h4>
+              {/* <h4 className="font-medium mb-3">Recommended Plants:</h4> */}
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {["Tomatoes", "Bell Peppers", "Lettuce", "Basil", "Cucumbers", "Zucchini"].map((plant, index) => (
                   <button 
                     key={index}
                     onClick={() => handlePlantSelect(plant)}
-                    className="text-left p-3 bg-gray-50 hover:bg-green-50 rounded-md border border-gray-200 transition-colors"
+                    className={`text-left p-3 rounded-md border border-gray-200 transition-colors ${
+                      selectedPlant === plant 
+                        ? 'bg-green-700 text-white' 
+                        : 'bg-grey-100 hover:bg-green-300'
+                    }`}
                   >
-                    <div className="font-medium text-primary flex items-center">
+                    <div className={`font-medium flex items-center ${
+                      selectedPlant === plant ? 'text-white' : 'text-primary'
+                    }`}>
                       <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 384 512" data-sentry-element="FaTree" data-sentry-source-file="GardenRecommendation.tsx" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
                         <path d="M378.31 378.49L298.42 288h30.63c9.01 0 16.98-5 20.78-13.06 3.8-8.04 2.55-17.26-3.28-24.05L268.42 160h28.89c9.1 0 17.3-5.35 20.86-13.61 3.52-8.13 1.86-17.59-4.24-24.08L203.66 4.83c-6.03-6.45-17.28-6.45-23.32 0L70.06 122.31c-6.1 6.49-7.75 15.95-4.24 24.08C69.38 154.65 77.59 160 86.69 160h28.89l-78.14 90.91c-5.81 6.78-7.06 15.99-3.27 24.04C37.97 283 45.93 288 54.95 288h30.63L5.69 378.49c-6 6.79-7.36 16.09-3.56 24.26 3.75 8.05 12 13.25 21.01 13.25H160v24.45l-30.29 48.4c-5.32 10.64 2.42 23.16 14.31 23.16h95.96c11.89 0 19.63-12.52 14.31-23.16L224 440.45V416h136.86c9.01 0 17.26-5.2 21.01-13.25 3.8-8.17 2.44-17.47-3.56-24.26z"></path>
                       </svg>
                       {plant}
                     </div>
-                    <div className="text-sm text-gray-500">Edible • Seasonal</div>
+                    <div className={`text-sm ${
+                      selectedPlant === plant ? 'text-white' : 'text-gray-500'
+                    }`}>Edible • Seasonal</div>
                   </button>
                 ))}
               </div>
@@ -357,7 +371,7 @@ export default function GardenAdvisorDetail() {
 
           {/* Space 3 */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
+            <div className="bg-white px-6 py-4 border-b border-gray-200">
               <h3 className="font-semibold text-lg">Space 3: Outdoor Square Pot</h3>
               <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2 text-sm">
                 <div className="flex flex-col justify-center">
@@ -408,21 +422,29 @@ export default function GardenAdvisorDetail() {
               </div>
             </div>
             <div className="p-6">
-              <h4 className="font-medium mb-3">Recommended Plants:</h4>
+              {/* <h4 className="font-medium mb-3">Recommended Plants:</h4> */}
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {["Hostas", "Ferns", "Astilbe", "Impatiens"].map((plant, index) => (
                   <button 
                     key={index}
                     onClick={() => handlePlantSelect(plant)}
-                    className="text-left p-3 bg-gray-50 hover:bg-green-50 rounded-md border border-gray-200 transition-colors"
+                    className={`text-left p-3 rounded-md border border-gray-200 transition-colors ${
+                      selectedPlant === plant 
+                        ? 'bg-green-700 text-white' 
+                        : 'bg-grey-100 hover:bg-green-300'
+                    }`}
                   >
-                    <div className="font-medium text-primary flex items-center">
+                    <div className={`font-medium flex items-center ${
+                      selectedPlant === plant ? 'text-white' : 'text-primary'
+                    }`}>
                       <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 384 512" data-sentry-element="FaTree" data-sentry-source-file="GardenRecommendation.tsx" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
                         <path d="M378.31 378.49L298.42 288h30.63c9.01 0 16.98-5 20.78-13.06 3.8-8.04 2.55-17.26-3.28-24.05L268.42 160h28.89c9.1 0 17.3-5.35 20.86-13.61 3.52-8.13 1.86-17.59-4.24-24.08L203.66 4.83c-6.03-6.45-17.28-6.45-23.32 0L70.06 122.31c-6.1 6.49-7.75 15.95-4.24 24.08C69.38 154.65 77.59 160 86.69 160h28.89l-78.14 90.91c-5.81 6.78-7.06 15.99-3.27 24.04C37.97 283 45.93 288 54.95 288h30.63L5.69 378.49c-6 6.79-7.36 16.09-3.56 24.26 3.75 8.05 12 13.25 21.01 13.25H160v24.45l-30.29 48.4c-5.32 10.64 2.42 23.16 14.31 23.16h95.96c11.89 0 19.63-12.52 14.31-23.16L224 440.45V416h136.86c9.01 0 17.26-5.2 21.01-13.25 3.8-8.17 2.44-17.47-3.56-24.26z"></path>
                       </svg>
                       {plant}
                     </div>
-                    <div className="text-sm text-gray-500">Shade-loving • Perennial</div>
+                    <div className={`text-sm ${
+                      selectedPlant === plant ? 'text-white' : 'text-gray-500'
+                    }`}>Shade-loving • Perennial</div>
                   </button>
                 ))}
               </div>
@@ -431,7 +453,7 @@ export default function GardenAdvisorDetail() {
 
           {/* Space 4 */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="bg-green-50 px-6 py-4 border-b border-gray-200">
+            <div className="bg-white px-6 py-4 border-b border-gray-200">
               <h3 className="font-semibold text-lg">Space 4: Outdoor Ground</h3>
               <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2 text-sm">
                 <div className="flex flex-col justify-center">
@@ -482,21 +504,29 @@ export default function GardenAdvisorDetail() {
               </div>
             </div>
             <div className="p-6">
-              <h4 className="font-medium mb-3">Recommended Plants:</h4>
+              {/* <h4 className="font-medium mb-3">Recommended Plants:</h4> */}
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {["Strawberries", "Blueberries", "Raspberry Bush", "Apple Tree (Dwarf)"].map((plant, index) => (
                   <button 
                     key={index}
                     onClick={() => handlePlantSelect(plant)}
-                    className="text-left p-3 bg-gray-50 hover:bg-green-50 rounded-md border border-gray-200 transition-colors"
+                    className={`text-left p-3 rounded-md border border-gray-200 transition-colors ${
+                      selectedPlant === plant 
+                        ? 'bg-green-700 text-white' 
+                        : 'bg-grey-100 hover:bg-green-300'
+                    }`}
                   >
-                    <div className="font-medium text-primary flex items-center">
+                    <div className={`font-medium flex items-center ${
+                      selectedPlant === plant ? 'text-white' : 'text-primary'
+                    }`}>
                       <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 384 512" data-sentry-element="FaTree" data-sentry-source-file="GardenRecommendation.tsx" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
                         <path d="M378.31 378.49L298.42 288h30.63c9.01 0 16.98-5 20.78-13.06 3.8-8.04 2.55-17.26-3.28-24.05L268.42 160h28.89c9.1 0 17.3-5.35 20.86-13.61 3.52-8.13 1.86-17.59-4.24-24.08L203.66 4.83c-6.03-6.45-17.28-6.45-23.32 0L70.06 122.31c-6.1 6.49-7.75 15.95-4.24 24.08C69.38 154.65 77.59 160 86.69 160h28.89l-78.14 90.91c-5.81 6.78-7.06 15.99-3.27 24.04C37.97 283 45.93 288 54.95 288h30.63L5.69 378.49c-6 6.79-7.36 16.09-3.56 24.26 3.75 8.05 12 13.25 21.01 13.25H160v24.45l-30.29 48.4c-5.32 10.64 2.42 23.16 14.31 23.16h95.96c11.89 0 19.63-12.52 14.31-23.16L224 440.45V416h136.86c9.01 0 17.26-5.2 21.01-13.25 3.8-8.17 2.44-17.47-3.56-24.26z"></path>
                       </svg>
                       {plant}
                     </div>
-                    <div className="text-sm text-gray-500">Fruit-bearing • Perennial</div>
+                    <div className={`text-sm ${
+                      selectedPlant === plant ? 'text-white' : 'text-gray-500'
+                    }`}>Fruit-bearing • Perennial</div>
                   </button>
                 ))}
               </div>
