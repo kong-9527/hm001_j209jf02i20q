@@ -12,7 +12,7 @@ const StyleSelector: React.FC<StyleSelectorProps> = ({ styles, onSelectStyle }) 
   return (
     <div className="mb-12 py-6 rounded-lg">
       <h2 className="text-2xl font-semibold text-center text-teal-600 mb-8 pt-8">
-        30 design styles to match every house-owner's ideas
+        5 design styles to match every house-owner's ideas
       </h2>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">

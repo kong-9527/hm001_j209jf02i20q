@@ -79,7 +79,7 @@ export default function Home() {
       <main className="flex-grow">
         {/* 背景画廊 */}
         <div className="relative overflow-hidden h-[500px]">
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-transparent to-white/70 z-10"></div>
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-transparent to-black/50 z-10"></div>
           
           <div className="flex overflow-hidden w-full h-full relative">
             {gardenImages.map((src, index) => (
@@ -124,12 +124,12 @@ export default function Home() {
 
         {/* 主标题和副标题 */}
         <div className="relative z-20 -mt-60 text-center px-4 sm:px-6 lg:px-8 pb-16">
-          <h1 className="text-5xl sm:text-6xl font-bold text-teal-600 mb-4">
+          <h1 className="text-5xl sm:text-6xl font-bold text-teal-400 mb-4">
             Build Your Dream Garden<br />With AI
           </h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto mt-6">
+          <p className="text-xl text-white/90 max-w-3xl mx-auto mt-6">
             Create dream designs and advisors for your garden<br />
-            through our powerful <span className="text-teal-600 font-medium">AI technology</span>
+            through our powerful <span className="text-teal-400 font-medium">AI technology</span>
           </p>
           
           {/* 行动按钮 */}
@@ -303,8 +303,8 @@ export default function Home() {
 
         {/* 最终行动号召 */}
         <CallToAction
-          title="Ready To Transform Your Garden?"
-          subtitle="Join thousands of satisfied gardeners and landscapers"
+          title="Join To Transform Your Garden!"
+          subtitle="Be one of the thousands of content gardeners and landscapers enjoying our offerings"
           buttonText="Start designing now"
           buttonLink="/signin"
         />
