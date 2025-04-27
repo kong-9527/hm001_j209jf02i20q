@@ -79,7 +79,7 @@ const ImageComparison = ({
           style={{ objectFit: 'cover' }}
         />
         {/* 后图标签 - 右侧 */}
-        <div className="absolute top-4 right-4 px-3 py-1 rounded-md shadow-md backdrop-blur-sm text-gray-800 font-medium">
+        <div className="absolute top-4 right-4 bg-white/80 px-3 py-1 rounded-md shadow-md backdrop-blur-sm text-gray-800 font-medium">
           {afterAlt}
         </div>
       </div>

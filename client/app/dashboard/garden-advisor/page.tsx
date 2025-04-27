@@ -131,16 +131,21 @@ export default function GardenPlansPage() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {gardenPlans.map(plan => (
-          <div 
+          <Link 
             key={plan.id}
-            className={`border rounded-lg overflow-hidden flex flex-col h-full shadow-sm hover:shadow-md hover:bg-green-50 transition-shadow`}
+            href={`/dashboard/garden-advisor/${plan.id}`}
+            className={`border rounded-lg overflow-hidden flex flex-col h-full shadow-sm hover:shadow-md hover:bg-green-50 transition-shadow cursor-pointer`}
           >
             <div className="p-4 flex flex-col h-full">
               <div className="flex justify-between items-start mb-3">
                 <h3 className="text-lg font-medium">{plan.name}</h3>
                 <div className="flex items-center">
                   <button 
-                    onClick={() => handleOpenEditModal(plan)}
+                    onClick={(e) => {
+                      e.preventDefault(); // 阻止导航事件
+                      e.stopPropagation(); // 阻止事件冒泡
+                      handleOpenEditModal(plan);
+                    }}
                     className="text-gray-500 hover:text-gray-700"
                     title="Edit garden plan"
                   >
@@ -151,7 +156,11 @@ export default function GardenPlansPage() {
 
                   {plan.status === 'failed' && (
                     <button 
-                      onClick={() => handleOpenDeleteModal(plan)}
+                      onClick={(e) => {
+                        e.preventDefault(); // 阻止导航事件
+                        e.stopPropagation(); // 阻止事件冒泡
+                        handleOpenDeleteModal(plan);
+                      }}
                       className="text-gray-500 hover:text-red-600 ml-3"
                       title="Delete garden plan"
                     >
@@ -199,7 +208,7 @@ export default function GardenPlansPage() {
               </span>
 
             </div>
-          </div>
+          </Link>
         ))}
       </div>
       

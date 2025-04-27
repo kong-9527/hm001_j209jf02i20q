@@ -417,7 +417,7 @@ export default function CreateGardenAdvisorPage() {
                           </svg>
                         )}
                       </div>
-                      <div className={`w-10 h-10 mr-2 flex-shrink-0 flex items-center justify-center rounded-sm ${
+                      {/* <div className={`w-10 h-10 mr-2 flex-shrink-0 flex items-center justify-center rounded-sm ${
                         ['Flowers', 'Vegetables', 'Herbs', 'Ferns', 'Vines', 'Bulbs'].includes(type) 
                         ? 'bg-[#D9EFDE]' 
                         : 'bg-[#FFE8CC]'
@@ -429,7 +429,7 @@ export default function CreateGardenAdvisorPage() {
                           alt="" 
                           className="w-10 h-10 object-contain"
                         />
-                      </div>
+                      </div> */}
                       <span className={plantTypes.includes(type) ? 'text-primary font-medium' : ''}>{type}</span>
                     </label>
                   ))}
@@ -510,7 +510,7 @@ export default function CreateGardenAdvisorPage() {
                           </svg>
                         )}
                       </div>
-                      <div className={`w-10 h-10 mr-2 flex-shrink-0 flex items-center justify-center rounded-sm ${
+                      {/* <div className={`w-10 h-10 mr-2 flex-shrink-0 flex items-center justify-center rounded-sm ${
                         ['Pollen', 'Trees', 'Weeds', 'Grass', 'Flowers'].includes(allergy) 
                         ? 'bg-[#FFE8CC]' 
                         : 'bg-[#F5E8F5]'
@@ -522,7 +522,7 @@ export default function CreateGardenAdvisorPage() {
                           alt="" 
                           className="w-10 h-10 object-contain"
                         />
-                      </div>
+                      </div> */}
                       <span className={allergies.includes(allergy) ? 'text-primary font-medium' : ''}>{allergy}</span>
                     </label>
                   ))}

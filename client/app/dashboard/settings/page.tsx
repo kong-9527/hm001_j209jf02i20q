@@ -34,7 +34,7 @@ const Settings = () => {
         <h1 className="text-2xl font-medium mb-6">Settings</h1>
         
         <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
-          <h2 className="text-base font-medium mb-4">Profile</h2>
+          <h2 className="text-bold font-medium mb-4">Profile</h2>
           
           <div className="grid grid-cols-[180px_1fr] gap-4 items-center mb-4">
             <label className="text-sm">Email</label>
@@ -65,7 +65,7 @@ const Settings = () => {
         </div>
         
         <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
-          <h2 className="text-base font-medium mb-4">Change Password</h2>
+          <h2 className="text-bold font-medium mb-4">Change Password</h2>
           
           <div className="grid grid-cols-[180px_1fr] gap-4 items-center mb-4">
             <label className="text-sm">Current Password</label>

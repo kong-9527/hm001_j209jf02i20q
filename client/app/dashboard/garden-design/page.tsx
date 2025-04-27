@@ -2,6 +2,7 @@
 
 import React, { useState, FormEvent, useRef, DragEvent, useEffect } from 'react';
 import Image from 'next/image';
+import gardenStylesData from '../../data/gardenStyles';
 
 // 定义图片数据类型
 interface ImageData {
@@ -743,68 +744,12 @@ export default function PhotoGenerator() {
   };
   
   // Mock风格数据
-  const gardenStyles: GardenStyle[] = [
-    {
-      id: 1,
-      name: "Japanese Zen Garden",
-      image: "/uploads/garden-sample.png",
-      description: "Minimalist design featuring carefully arranged rocks, gravel, and pruned plants to create a tranquil meditation space."
-    },
-    {
-      id: 2,
-      name: "English Cottage Garden",
-      image: "/uploads/garden-sample.png", 
-      description: "Lush, romantic garden with densely planted flowering perennials, climbing roses, and informal design."
-    },
-    {
-      id: 3,
-      name: "Modern Minimalist",
-      image: "/uploads/garden-sample.png",
-      description: "Clean lines, architectural plants, and simple color palette with emphasis on form and texture."
-    },
-    {
-      id: 4,
-      name: "Mediterranean Garden",
-      image: "/uploads/garden-sample.png",
-      description: "Drought-tolerant plants, terracotta elements, and gravel paths inspired by the Mediterranean climate."
-    },
-    {
-      id: 5,
-      name: "Tropical Paradise",
-      image: "/uploads/garden-sample.png",
-      description: "Lush foliage, vibrant flowers, and water features creating a resort-like atmosphere."
-    },
-    {
-      id: 6,
-      name: "French Formal Garden",
-      image: "/uploads/garden-sample.png",
-      description: "Symmetrical design with carefully manicured hedges, geometric patterns, and classical elements."
-    },
-    {
-      id: 7,
-      name: "Desert Landscape",
-      image: "/uploads/garden-sample.png",
-      description: "Featuring cacti, succulents, and rocky elements adapted to arid conditions."
-    },
-    {
-      id: 8,
-      name: "Woodland Garden",
-      image: "/uploads/garden-sample.png",
-      description: "Naturalistic design with native trees, shade-loving plants, and organic pathways."
-    },
-    {
-      id: 9,
-      name: "Contemporary Urban",
-      image: "/uploads/garden-sample.png",
-      description: "Innovative use of space with vertical gardens, container plants, and modern materials."
-    },
-    {
-      id: 10,
-      name: "Chinese Classical Garden",
-      image: "/uploads/garden-sample.png",
-      description: "Harmonious design with water features, ornate pavilions, and symbolic elements."
-    }
-  ];
+  const gardenStyles: GardenStyle[] = gardenStylesData.map((style, index) => ({
+    id: index + 1,
+    name: style.name,
+    image: style.image || style.after,
+    description: style.description || ''
+  }));
 
   // 处理风格选择
   const handleStyleSelect = (styleId: number) => {
@@ -1893,7 +1838,7 @@ export default function PhotoGenerator() {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-green-800">Smart Tips:</h3>
+                    <h3 className="text-sm font-semibold text-green-800">Smart Tips:</h3>
                     <p className="text-sm text-green-700">Try both premade and custom styles for different creative results.</p>
                   </div>
                 </div>

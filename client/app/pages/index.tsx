@@ -25,10 +25,7 @@ import CallToAction from '../components/CallToAction';
 export default function Home() {
   // 轮播图片数据
   const gardenImages = [
-    '/images/garden1.jfif',
-    '/images/garden1.jfif',
-    '/images/garden3.jpg',
-    '/images/garden4.jpg',
+    '/images/garden1.png',
   ];
 
   // 轮播图状态
@@ -161,18 +158,18 @@ export default function Home() {
           <MovingStyles 
             // title="Explore garden design inspirations"
             images={[
-              { id: 1, src: '/images/style_example_1.jfif', alt: 'Garden style example 1' },
-              { id: 2, src: '/images/style_example_2.jfif', alt: 'Garden style example 2' },
-              { id: 3, src: '/images/style_example_3.jfif', alt: 'Garden style example 3' },
-              { id: 4, src: '/images/style_example_4.jfif', alt: 'Garden style example 4' },
-              { id: 5, src: '/images/style_example_3.jfif', alt: 'Garden style example 5' },
-              { id: 6, src: '/images/style_example_2.jfif', alt: 'Garden style example 6' },
+              { id: 1, src: '/images/style_example_1.png', alt: 'Garden style example 1' },
+              { id: 2, src: '/images/style_example_2.png', alt: 'Garden style example 2' },
+              { id: 3, src: '/images/style_example_3.png', alt: 'Garden style example 3' },
+              { id: 4, src: '/images/style_example_4.png', alt: 'Garden style example 4' },
+              { id: 5, src: '/images/style_example_5.png', alt: 'Garden style example 5' },
+              { id: 6, src: '/images/style_example_6.png', alt: 'Garden style example 6' },
             ]}
           />
         </div>
 
         {/* 风格选择区域 */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8 rounded-lg my-8">
+        <div id="ai-garden-design" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8 rounded-lg my-8">
           <h2 className="text-4xl font-bold text-center text-gray-800 mb-8">
             How AI Generates brilliant designs
           </h2>
@@ -206,42 +203,44 @@ export default function Home() {
         </div>
 
         {/* 特性展示 */}
-        <FeatureGrid
-          title="Features of AI Garden Design"
-          subtitle="Our AI garden design platform offers a wide range of features that make it easy for anyone to create beautiful gardens. Whether you're a professional or a hobbyist, we've got you covered."
-          features={[
-            {
-              icon: <AutomatedIcon />,
-              title: "AI-Powered Design",
-              description: "Utilizing AI-driven technologies to automatically enhance garden designs, saving users time and effort while making the designs appear more professional."
-            },
-            {
-              icon: <GlobalIcon />,
-              title: "Global Plant Database",
-              description: "Access to plants from diverse climatic backgrounds, ensuring that users can create gardens suited to their specific regions and environmental conditions."
-            },
-            {
-              icon: <PreviewIcon />,
-              title: "Real-time Preview",
-              description: "See changes to your garden design in real-time, ensuring that the selected elements meet your personal needs and enhancing user experience."
-            },
-            {
-              icon: <StorageIcon />,
-              title: "Cloud Storage",
-              description: "Safely preserve your projects for easy access and management at any time and location, making your creative processes more flexible and efficient."
-            },
-            {
-              icon: <SharingIcon />,
-              title: "Easy Sharing",
-              description: "Quickly share designs to major social platforms with a simple click, making it easier for friends and followers to see your work and enhancing visibility."
-            },
-            {
-              icon: <UpdatesIcon />,
-              title: "Regular Updates",
-              description: "We're constantly improving our platform with new features and plant varieties, ensuring that users always have access to the latest gardening trends."
-            }
-          ]}
-        />
+        <div id="features-of-ai-garden-design">
+          <FeatureGrid
+            title="Features of AI Garden Design"
+            subtitle="Our AI garden design platform offers a wide range of features that make it easy for anyone to create beautiful gardens. Whether you're a professional or a hobbyist, we've got you covered."
+            features={[
+              {
+                icon: <AutomatedIcon />,
+                title: "AI-Powered Design",
+                description: "Utilizing AI-driven technologies to automatically enhance garden designs, saving users time and effort while making the designs appear more professional."
+              },
+              {
+                icon: <GlobalIcon />,
+                title: "Global Plant Database",
+                description: "Access to plants from diverse climatic backgrounds, ensuring that users can create gardens suited to their specific regions and environmental conditions."
+              },
+              {
+                icon: <PreviewIcon />,
+                title: "Real-time Preview",
+                description: "See changes to your garden design in real-time, ensuring that the selected elements meet your personal needs and enhancing user experience."
+              },
+              {
+                icon: <StorageIcon />,
+                title: "Cloud Storage",
+                description: "Safely preserve your projects for easy access and management at any time and location, making your creative processes more flexible and efficient."
+              },
+              {
+                icon: <SharingIcon />,
+                title: "Easy Sharing",
+                description: "Quickly share designs to major social platforms with a simple click, making it easier for friends and followers to see your work and enhancing visibility."
+              },
+              {
+                icon: <UpdatesIcon />,
+                title: "Regular Updates",
+                description: "We're constantly improving our platform with new features and plant varieties, ensuring that users always have access to the latest gardening trends."
+              }
+            ]}
+          />
+        </div>
 
         {/* 定价计划 */}
         <PricingPlans 
