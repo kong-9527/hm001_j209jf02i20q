@@ -116,7 +116,7 @@ export default function CreateGardenAdvisorPage() {
           
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold mb-1">Where is your garden (optional)</label>
+              <label className="block text-sm font-semibold mb-1">Where is your geographic location (optional)</label>
               <select 
                 className="w-full p-2.5 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                 value={gardenLocation}
@@ -156,7 +156,7 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Your Gardening Experience</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select your level of gardening experience (optional):</p>
+                <p className="text-xs text-gray-500 mb-3">Your gardening experience (optional):</p>
                 <div className="flex flex-wrap gap-4">
                   <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${experience === 'Beginner' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
@@ -167,7 +167,7 @@ export default function CreateGardenAdvisorPage() {
                       className="hidden"
                     />
                     <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Beginner' ? 'border-primary bg-primary' : 'border-gray-300'}`}>  </div>
-                    <span className={experience === 'Beginner' ? 'text-primary font-medium' : ''}>Beginner</span>
+                    <span className={experience === 'Beginner' ? 'text-primary font-medium' : ''}>Novice</span>
                   </label>
                   <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${experience === 'Intermediate' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
@@ -179,7 +179,7 @@ export default function CreateGardenAdvisorPage() {
                     />
                     <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Intermediate' ? 'border-primary bg-primary' : 'border-gray-300'}`}>
                     </div>
-                    <span className={experience === 'Intermediate' ? 'text-primary font-medium' : ''}>Intermediate</span>
+                    <span className={experience === 'Intermediate' ? 'text-primary font-medium' : ''}>Proficient</span>
                   </label>
                   <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${experience === 'Advanced' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
@@ -191,7 +191,7 @@ export default function CreateGardenAdvisorPage() {
                     />
                     <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Advanced' ? 'border-primary bg-primary' : 'border-gray-300'}`}>
                     </div>
-                    <span className={experience === 'Advanced' ? 'text-primary font-medium' : ''}>Advanced</span>
+                    <span className={experience === 'Advanced' ? 'text-primary font-medium' : ''}>Expert</span>
                   </label>
                 </div>
               </div>
@@ -204,7 +204,7 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Your Gardening Budget</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select your gardening budget range (optional):</p>
+                <p className="text-xs text-gray-500 mb-3">Your funds range for gardening (optional):</p>
                 <div className="flex flex-wrap gap-4">
                   <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${budget === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
@@ -251,7 +251,7 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Your Gardening Time</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select the amount of time you can dedicate to gardening (optional):</p>
+                <p className="text-xs text-gray-500 mb-3">How much time you spending on gardening (optional):</p>
                 <div className="flex flex-wrap gap-4">
                   <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer  hover:bg-green-50 ${time === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
@@ -297,7 +297,7 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Your Maintenance Preference</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select your preferred level of maintenance for your garden (optional):</p>
+                <p className="text-xs text-gray-500 mb-3">Select the level of difficulty you want to maintain (optional):</p>
                 <div className="flex flex-wrap gap-4">
                   <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${maintenance === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
                     <input
@@ -343,7 +343,7 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Your Gardening Goals</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select the goals you wish to achieve through gardening (optional):</p>
+                <p className="text-xs text-gray-500 mb-3">What are you maintaining your garden for (optional):</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {['Food', 'Wildlife', 'Beauty', 'Education', 'Medicinal', 'Hobby', 'Fragrance', 'Money'].map((goal) => (
                     <label key={goal} className={`flex items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors ${goals.includes(goal) ? 'border-primary' : 'border-gray-200'}`}>
@@ -397,10 +397,10 @@ export default function CreateGardenAdvisorPage() {
           <div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
               <div className="md:col-span-1">
-                <label className="block text-sm font-semibold mb-1">Preferred Plant Types</label>
+                <label className="block text-sm font-semibold mb-1">Plant Classification</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select the types of plants you prefer to grow (optional):</p>
+                <p className="text-xs text-gray-500 mb-3">What kind of plants you prefer to grow (optional):</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {['Flowers', 'Vegetables', 'Trees', 'Grasses', 'Cacti', 'Mosses', 'Aquatics', 'Orchids', 'Herbs', 'Fruits', 'Shrubs', 'Succulents', 'Ferns', 'Vines', 'Bulbs'].map((type) => (
                     <label key={type} className={`flex items-center border rounded-md px-3 py-3 cursor-pointer hover:bg-green-50 transition-colors ${plantTypes.includes(type) ? 'border-primary' : 'border-gray-200'}`}>
@@ -444,7 +444,7 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Fertilizers Type</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select your preferred gardening style (optional):</p>
+                <p className="text-xs text-gray-500 mb-3">What kind of fertilizer do you prefer to use to maintain plants (optional):</p>
                 <div className="space-y-3">
                   <label className="flex items-start p-3 border rounded-md cursor-pointer hover:bg-green-50 transition-colors">
                     <input
@@ -461,7 +461,7 @@ export default function CreateGardenAdvisorPage() {
                     </div>
                     <div>
                       <span className={`font-medium ${fertilizerType === 'Organic' ? 'text-primary' : ''}`}>Organic</span>
-                      <p className="text-xs text-gray-500 mt-1">Organic gardening focuses on using natural methods and materials to grow plants, without the use of synthetic chemicals or pesticides</p>
+                      <p className="text-xs text-gray-500 mt-1">Organic gardening emphasizes the utilization of natural techniques and substances for plant cultivation. It strictly avoids the application of synthetic chemicals and pesticides, instead relying on nature - friendly approaches to ensure healthy plant growth.</p>
                     </div>
                   </label>
                   <label className="flex items-start p-3 border rounded-md cursor-pointer hover:bg-green-50 transition-colors">
@@ -479,7 +479,7 @@ export default function CreateGardenAdvisorPage() {
                     </div>
                     <div>
                       <span className={`font-medium ${fertilizerType === 'Conventional' ? 'text-primary' : ''}`}>Conventional</span>
-                      <p className="text-xs text-gray-500 mt-1">Conventional gardening involves using synthetic fertilizers and pesticides to maximize plant growth and manage pests</p>
+                      <p className="text-xs text-gray-500 mt-1">In contrast, conventional gardening typically makes use of synthetic fertilizers and pesticides. The main goal of this method is to boost plant growth to the maximum extent and effectively control pests, often through the use of artificial chemical substances.</p>
                     </div>
                   </label>
                 </div>
@@ -493,7 +493,7 @@ export default function CreateGardenAdvisorPage() {
                 <label className="block text-sm font-semibold mb-1">Allergies</label>
               </div>
               <div className="md:col-span-3">
-                <p className="text-xs text-gray-500 mb-3">Select any allergies or health concerns you have related to gardening (optional):</p>
+                <p className="text-xs text-gray-500 mb-3">Allergens and options that may affect your health or mood (optional):</p>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                   {['Pollen', 'Mold', 'Trees', 'Weeds', 'Bees', 'Dust', 'Shrubs', 'Insects', 'Grass', 'Flowers'].map((allergy) => (
                     <label key={allergy} className={`flex items-center border rounded-md px-3 py-3 cursor-pointer hover:bg-green-50 transition-colors ${allergies.includes(allergy) ? 'border-primary' : 'border-gray-200'}`}>
@@ -563,7 +563,7 @@ export default function CreateGardenAdvisorPage() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center mb-5">
             <div className="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-semibold mr-3">3</div>
-            <h2 className="text-xl font-semibold">Custom Your Planting Space</h2>
+            <h2 className="text-xl font-semibold">Custom Your Planting Places</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
@@ -571,14 +571,14 @@ export default function CreateGardenAdvisorPage() {
               <label className="block text-sm font-semibold">Description</label>
             </div> */}
             <div className="md:col-span-3">
-              <p className="text-sm text-gray-700 mb-4 bg-green-50 p-4 rounded-md gap-2">A garden space is an individual area within your garden or home where you grow your plants (like a pot, or a piece of land). You can add up to 25 garden spaces. Each garden space will have up to 10 recommendations. You will only be able to fit this in once, so make sure to add all your garden spaces now, so that we can provide you with the best recommendations. Be sure to include all your indoor and outdoor garden spaces.</p>
+              <p className="text-sm text-gray-700 mb-4 bg-green-50 p-4 rounded-md gap-2">Planting Place: You can divide your garden or separate area for planting plants in your home into several planting places. We suggest that you divide different garden spaces based on factors such as pot size, soil type, lighting conditions, water supply conditions, indoor or outdoor conditions, and so on. We will provide individual planting suggestions and plans for each planting place.</p>
             </div>
           </div>
           
           <div className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
               <div className="md:col-span-1">
-                <label className="block text-sm font-semibold">Frequently Used Planting Space</label>
+                <label className="block text-sm font-semibold">Frequently Used Planting Places</label>
               </div>
               <div className="md:col-span-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -611,7 +611,7 @@ export default function CreateGardenAdvisorPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
               <div className="md:col-span-1">
                 <div className="flex items-center mb-2.5">
-                  <label className="block text-sm font-semibold">Your Garden Space List</label>
+                  <label className="block text-sm font-semibold">Your Planting Place List</label>
                   <span className="text-xs text-gray-500 ml-2">(4 spaces)</span>
                 </div>
               </div>
@@ -754,7 +754,7 @@ export default function CreateGardenAdvisorPage() {
                 <span className="font-semibold text-sm">Important</span>
               </div>
             </div> */}
-            <p className="text-sm mb-6 text-gray-700">Our garden plans are generated once, based on the inputs you provide, and cannot be edited afterwards. This is due to the intensive data processing required to create your personalized plan. We recommend thoroughly checking all your inputs before finalizing the plan.</p>
+            <p className="text-sm mb-6 text-gray-700">To ensure you're completely satisfied with the end result, we strongly advise carefully reviewing all your inputs before finalizing the plan.</p>
           </div>
 
           <div className="mt-8 flex justify-between">
@@ -894,12 +894,12 @@ export default function CreateGardenAdvisorPage() {
               </svg>
             </div>
             <div>
-              <h3 className="font-semibold text-sm mb-1 text-green-800">What You'll Get</h3>
+              <h3 className="font-semibold text-sm mb-1 text-green-800">What Awaits You</h3>
               <ul className="text-sm space-y-1 text-green-800">
-                <li>Personalized plant recommendations for your unique spaces</li>
-                <li>Expert care instructions for each plant</li>
-                <li>Optimize your garden layout for maximum yield</li>
-                <li>Save time and money with our AI-powered insights</li>
+                <li>Tailored plant suggestions perfectly suited to your individual spaces</li>
+                <li>Professional care guidelines for every single plant</li>
+                <li>Enhance your garden layout to achieve the highest possible yield</li>
+                <li>Leverage our AI-driven insights to save both time and money</li>
               </ul>
             </div>
           </div>
