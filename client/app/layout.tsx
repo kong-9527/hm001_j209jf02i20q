@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import Script from 'next/script'
 
 export const metadata: Metadata = {
   title: 'AI Garden Design',
@@ -14,6 +15,14 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <body>
+        <Script 
+          defer 
+          data-domain="aigardendesign.org" 
+          src="https://plausible.io/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"
+        />
+        <Script id="plausible-setup">
+          {`window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }`}
+        </Script>
         <main>{children}</main>
       </body>
     </html>

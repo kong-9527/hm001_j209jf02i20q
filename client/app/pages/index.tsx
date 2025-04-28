@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Script from 'next/script';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import StyleSelector from '../components/StyleSelector';
@@ -72,6 +73,15 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Script 
+        defer 
+        data-domain="aigardendesign.org" 
+        src="https://plausible.io/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"
+      />
+      <Script id="plausible-setup">
+        {`window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }`}
+      </Script>
+      
       {/* 导航栏 */}
       <Navbar />
 

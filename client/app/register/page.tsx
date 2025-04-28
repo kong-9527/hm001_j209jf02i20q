@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Script from 'next/script';
 
 export default function SignUp() {
   const router = useRouter();
@@ -76,6 +77,15 @@ export default function SignUp() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-gray-50 text-gray-800 px-4 relative">
+      <Script 
+        defer 
+        data-domain="aigardendesign.org" 
+        src="https://plausible.io/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"
+      />
+      <Script id="plausible-setup">
+        {`window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }`}
+      </Script>
+      
       {/* 回到首页的链接 */}
       <Link 
         href="/" 
