@@ -1,0 +1,96 @@
+import { DataTypes, Model, Optional } from 'sequelize';
+import sequelize from '../config/database';
+import User from './User';
+
+// 定义用户订单表的接口
+interface UserOrderAttributes {
+  id: number;
+  user_id: number;
+  goods_id: number | null;
+  order_type: number;
+  points_num: number | null;
+  points_remain: number | null;
+  member_start_date: Date | null;
+  member_end_date: Date | null;
+  ctime: number | null;
+  utime: number | null;
+}
+
+// 创建时的可选属性
+interface UserOrderCreationAttributes extends Optional<UserOrderAttributes, 'id'> {}
+
+// 用户订单模型类
+class UserOrder extends Model<UserOrderAttributes, UserOrderCreationAttributes> implements UserOrderAttributes {
+  public id!: number;
+  public user_id!: number;
+  public goods_id!: number | null;
+  public order_type!: number;
+  public points_num!: number | null;
+  public points_remain!: number | null;
+  public member_start_date!: Date | null;
+  public member_end_date!: Date | null;
+  public ctime!: number | null;
+  public utime!: number | null;
+}
+
+// 初始化模型
+UserOrder.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    goods_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: '1免费234档付费',
+    },
+    order_type: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      comment: '1订单 2每日赠送 9其他',
+    },
+    points_num: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    points_remain: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    member_start_date: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    member_end_date: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    ctime: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    utime: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+  },
+  {
+    sequelize,
+    tableName: 'user_order',
+    modelName: 'UserOrder',
+  }
+);
+
+// 建立与User模型的关联
+UserOrder.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user',
+});
+
+export default UserOrder; 
