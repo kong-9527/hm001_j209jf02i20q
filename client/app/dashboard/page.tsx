@@ -21,7 +21,7 @@ export default function Dashboard() {
           router.push('/signin');
         }
       } catch (error) {
-        console.error('获取用户数据失败:', error);
+        console.error('Failed to retrieve user data:', error);
       } finally {
         setLoading(false);
       }
