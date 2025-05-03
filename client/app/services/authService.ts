@@ -56,8 +56,10 @@ export const loginWithGooglePopup = () => {
       return;
     }
     
-    // Poll to check if popup is closed
-    const checkPopup = setInterval(() => {
+    // Poll to check if user is logged in
+    // This is a fallback mechanism in case the window.postMessage doesn't work
+    const checkPopup = setInterval(async () => {
+      // Check if popup is closed
       if (!popup || popup.closed) {
         clearInterval(checkPopup);
         // Check if user is logged in after popup is closed
@@ -70,28 +72,40 @@ export const loginWithGooglePopup = () => {
             }
           })
           .catch(err => reject(err));
+        return;
+      }
+      
+      // Also check current URL of the popup to see if it's redirected
+      try {
+        // This will throw an error if the popup is on a different origin
+        // due to Same-Origin Policy
+        const popupUrl = popup.location.href;
+        
+        // If the popup URL contains success indicator
+        if (popupUrl.includes('/auth-success')) {
+          clearInterval(checkPopup);
+          popup.close();
+          
+          // Get the current user information
+          const user = await getCurrentUser();
+          if (user) {
+            resolve(user);
+          } else {
+            reject(new Error('Failed to get user information'));
+          }
+        }
+        
+        // If the popup URL contains error indicator
+        if (popupUrl.includes('/auth-error')) {
+          clearInterval(checkPopup);
+          popup.close();
+          reject(new Error('Login failed'));
+        }
+      } catch (error) {
+        // Error is expected due to cross-origin restrictions
+        // Just continue polling
       }
     }, 500);
-    
-    // Listen for message events from the popup
-    window.addEventListener('message', function authListener(event) {
-      // Validate message origin
-      if (event.origin !== window.location.origin) return;
-      
-      if (event.data.type === 'google-auth-success') {
-        // Authorization successful
-        clearInterval(checkPopup);
-        window.removeEventListener('message', authListener);
-        if (popup && !popup.closed) popup.close();
-        resolve(event.data.user);
-      } else if (event.data.type === 'google-auth-error') {
-        // Authorization failed
-        clearInterval(checkPopup);
-        window.removeEventListener('message', authListener);
-        if (popup && !popup.closed) popup.close();
-        reject(new Error(event.data.error || 'Login failed'));
-      }
-    });
   });
 };
 

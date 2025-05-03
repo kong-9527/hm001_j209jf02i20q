@@ -18,7 +18,7 @@ export default function DashboardLayout({
           <DashboardNavbar />
           
           <main className="flex-1 overflow-hidden p-4">
-            <div className="h-full overflow-auto">
+            <div className="h-full">
               {children}
             </div>
           </main>

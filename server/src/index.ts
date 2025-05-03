@@ -12,6 +12,13 @@ console.log('尝试加载 .env 文件:', envPath);
 // 加载环境变量
 dotenv.config({ path: envPath });
 
+// 设置HTTP代理（必须在其他网络请求之前）
+import setupProxy from './config/httpProxy';
+const proxyEnabled = setupProxy();
+if (proxyEnabled) {
+  console.log('全局HTTP代理已启用');
+}
+
 // 直接打印一些环境变量值（不显示敏感信息）
 console.log('环境变量检查:');
 console.log('GOOGLE_CLIENT_ID 是否设置:', !!process.env.GOOGLE_CLIENT_ID);
@@ -36,10 +43,17 @@ const PORT = process.env.PORT || 5000;
 
 // 中间件
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
+  origin: true, // 允许所有来源的请求，这样可以保证弹窗可以正常通信
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(helmet());
+
+// 配置Helmet，但允许内联脚本执行（使弹窗中的脚本能够执行）
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

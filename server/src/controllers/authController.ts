@@ -60,33 +60,64 @@ export const googleCallback = async (req: Request, res: Response) => {
     const isPopup = req.query.popup === 'true';
     
     if (isPopup) {
-      // 弹窗模式：返回HTML，包含关闭弹窗并向父窗口发送消息的脚本
+      // 弹窗模式：使用自动关闭HTML
+      // 关键改进：
+      // 1. 避免使用postMessage进行跨窗口通信
+      // 2. 使用自关闭重定向方式
+      // 3. 直接关闭窗口，不使用倒计时
       const html = `
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Google 登录成功</title>
+          <title>Login Success</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+            .success-message { margin: 20px auto; max-width: 400px; }
+            .btn { 
+              background: #4285f4; 
+              color: white; 
+              border: none; 
+              padding: 10px 20px; 
+              border-radius: 4px; 
+              cursor: pointer; 
+            }
+          </style>
+          <script>
+            // 立即关闭窗口
+            function closeWindow() {
+              window.close();
+              // 如果窗口未关闭，尝试重定向到客户端
+              setTimeout(() => {
+                if (!window.closed) {
+                  window.location.href = "${clientUrl}/auth-success";
+                }
+              }, 300);
+            }
+
+            // 页面加载时立即尝试关闭窗口
+            window.onload = function() {
+              try {
+                if (window.opener && !window.opener.closed) {
+                  // 告诉父窗口登录成功
+                  window.opener.location.href = "${clientUrl}/auth-success";
+                  // 立即关闭本窗口
+                  closeWindow();
+                } else {
+                  // 如果没有父窗口，也尝试关闭
+                  closeWindow();
+                }
+              } catch(e) {
+                console.error("通知父窗口失败", e);
+                // 失败后仍然尝试关闭窗口
+                closeWindow();
+              }
+            };
+          </script>
         </head>
         <body>
-          <script>
-            // 向父窗口发送登录成功消息
-            if (window.opener) {
-              window.opener.postMessage(
-                { 
-                  type: 'google-auth-success',
-                  user: ${JSON.stringify(user)}
-                }, 
-                "${clientUrl}"
-              );
-              window.close();
-            } else {
-              // 如果没有父窗口，则重定向到仪表板
-              window.location.href = "${clientUrl}/dashboard";
-            }
-          </script>
-          <div style="text-align: center; padding-top: 100px;">
-            <h3>登录成功！</h3>
-            <p>正在关闭窗口...</p>
+          <div class="success-message">
+            <h2>Login Successful!</h2>
+            <p>Your account has been successfully logged in</p>
           </div>
         </body>
         </html>
@@ -104,33 +135,61 @@ export const googleCallback = async (req: Request, res: Response) => {
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
     
     if (isPopup) {
-      // 弹窗模式：返回错误消息
+      // 弹窗模式：返回错误消息，但使用更可靠的自关闭机制
       const html = `
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Google 登录失败</title>
+          <title>Login Failed</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+            .error-message { margin: 20px auto; max-width: 400px; }
+            .btn { 
+              background: #f44336; 
+              color: white; 
+              border: none; 
+              padding: 10px 20px; 
+              border-radius: 4px; 
+              cursor: pointer; 
+            }
+          </style>
+          <script>
+            // 立即关闭窗口
+            function closeWindow() {
+              window.close();
+              // 如果窗口未关闭，尝试重定向到客户端
+              setTimeout(() => {
+                if (!window.closed) {
+                  window.location.href = "${clientUrl}/auth-error";
+                }
+              }, 300);
+            }
+
+            // 页面加载时立即尝试关闭窗口
+            window.onload = function() {
+              try {
+                if (window.opener && !window.opener.closed) {
+                  // 告诉父窗口登录失败
+                  window.opener.location.href = "${clientUrl}/auth-error";
+                  // 立即关闭本窗口
+                  closeWindow();
+                } else {
+                  // 如果没有父窗口，也尝试关闭
+                  closeWindow();
+                }
+              } catch(e) {
+                console.error("通知父窗口失败", e);
+                // 失败后仍然尝试关闭窗口
+                closeWindow();
+              }
+            };
+          </script>
         </head>
         <body>
-          <script>
-            // 向父窗口发送登录失败消息
-            if (window.opener) {
-              window.opener.postMessage(
-                { 
-                  type: 'google-auth-error',
-                  error: "登录失败，请重试"
-                }, 
-                "${clientUrl}"
-              );
-              window.close();
-            } else {
-              // 如果没有父窗口，则重定向到登录页
-              window.location.href = "${clientUrl}/signin?error=server_error";
-            }
-          </script>
-          <div style="text-align: center; padding-top: 100px;">
-            <h3>登录失败！</h3>
-            <p>正在关闭窗口...</p>
+          <div class="error-message">
+            <h2>Login Failed</h2>
+            <p>Sorry, there was a problem during the login process</p>
+            <button class="btn" onclick="closeWindow()">Click here if window doesn't close automatically</button>
           </div>
         </body>
         </html>
