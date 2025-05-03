@@ -5,10 +5,11 @@ import sequelize from '../config/database';
 interface GoodsAttributes {
   id: number;
   goods_name: string | null;
-  goods_month: number | null;
+  goods_version: number | null;
   during: number | null;
   price_original: number | null;
   price_pay: number | null;
+  price_per_month: number | null;
 }
 
 // 创建时的可选属性
@@ -18,10 +19,11 @@ interface GoodsCreationAttributes extends Optional<GoodsAttributes, 'id'> {}
 class Goods extends Model<GoodsAttributes, GoodsCreationAttributes> implements GoodsAttributes {
   public id!: number;
   public goods_name!: string | null;
-  public goods_month!: number | null;
+  public goods_version!: number | null;
   public during!: number | null;
   public price_original!: number | null;
   public price_pay!: number | null;
+  public price_per_month!: number | null;
 }
 
 // 初始化模型
@@ -36,7 +38,7 @@ Goods.init(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-    goods_month: {
+    goods_version: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
@@ -50,6 +52,10 @@ Goods.init(
       allowNull: true,
     },
     price_pay: {
+      type: DataTypes.FLOAT(10, 2),
+      allowNull: true,
+    },
+    price_per_month: {
       type: DataTypes.FLOAT(10, 2),
       allowNull: true,
     },
