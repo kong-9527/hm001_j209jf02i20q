@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { User } from '../models';
+import { generateAvatarFromNickName } from '../utils/avatarGenerator';
 
 // 获取所有用户
 export const getAllUsers = async (req: Request, res: Response) => {
@@ -49,13 +50,20 @@ export const createUser = async (req: Request, res: Response) => {
       return res.status(400).json({ message: '邮箱已被注册' });
     }
     
+    // 设置昵称 - 默认使用邮箱前缀
+    const userNickName = nick_name || email.split('@')[0];
+    
+    // 根据昵称生成头像
+    const avatarUrl = generateAvatarFromNickName(userNickName);
+    
     // 创建新用户
     const now = Math.floor(Date.now() / 1000); // 当前Unix时间戳（秒）
     const newUser = await User.create({
       email,
       password,
-      nick_name: nick_name || email.split('@')[0], // 默认使用邮箱前缀作为昵称
+      nick_name: userNickName,
       register_type: register_type || 1,
+      head_pic: avatarUrl, // 设置生成的头像URL
       points: '0',
       ctime: now,
       utime: now
@@ -64,7 +72,8 @@ export const createUser = async (req: Request, res: Response) => {
     return res.status(201).json({
       id: newUser.id,
       email: newUser.email,
-      nick_name: newUser.nick_name
+      nick_name: newUser.nick_name,
+      head_pic: newUser.head_pic
     });
   } catch (error) {
     console.error('创建用户失败:', error);

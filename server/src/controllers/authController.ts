@@ -6,6 +6,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../models';
+import { generateAvatarFromNickName } from '../utils/avatarGenerator';
 
 /**
  * JWT 配置

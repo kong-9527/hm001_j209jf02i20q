@@ -6,6 +6,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { User } from '../models';
+import { generateAvatarFromNickName } from '../utils/avatarGenerator';
 
 /**
  * Google OAuth 配置
@@ -52,12 +53,15 @@ if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
             const now = Math.floor(Date.now() / 1000);
             const nickName = email.split('@')[0]; // 使用邮箱前缀作为昵称
             
+            // 根据昵称生成头像
+            const avatarUrl = generateAvatarFromNickName(nickName);
+            
             const newUser = await User.create({
               email,
               password: null, // Google 登录不需要密码
               register_type: 2, // 2表示Google登录
               nick_name: nickName,
-              head_pic: null,
+              head_pic: avatarUrl, // 使用生成的头像URL
               points: "0",
               ctime: now,
               utime: now

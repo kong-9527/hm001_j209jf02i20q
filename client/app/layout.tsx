@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Script from 'next/script'
+import { UserProvider } from './contexts/UserContext'
 
 export const metadata: Metadata = {
   title: 'AI Garden Design',
@@ -23,7 +24,9 @@ export default function RootLayout({
         <Script id="plausible-setup">
           {`window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }`}
         </Script>
-        <main>{children}</main>
+        <UserProvider>
+          <main>{children}</main>
+        </UserProvider>
       </body>
     </html>
   )

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function BillingPage() {
   // 假设这些数据从后端获取
@@ -30,10 +31,10 @@ export default function BillingPage() {
   ];
 
   return (
-    <div className="ml-0">
+    <div className="w-full min-h-full">
       <h1 className="text-2xl font-semibold text-gray-800 mb-6">Orders And Services</h1>
 
-      <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden mb-8">
         <div className="p-6">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
@@ -44,9 +45,12 @@ export default function BillingPage() {
               <button className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-md transition">
                 Purchase
               </button>
-              <button className="px-5 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-md transition">
+              <Link 
+                href="/dashboard/pricing"
+                className="px-5 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-md transition inline-flex items-center"
+              >
                 View Pricing
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -75,7 +79,7 @@ export default function BillingPage() {
         </div>
       </div>
 
-      <div className="text-center mt-8 text-sm text-gray-500">
+      <div className="text-center mt-8 text-sm text-gray-500 pb-4">
         Secure payment provided by Stripe
       </div>
     </div>

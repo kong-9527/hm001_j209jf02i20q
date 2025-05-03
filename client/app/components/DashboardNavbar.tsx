@@ -4,11 +4,15 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CreateProjectModal } from './CreateProjectModal';
+import { useUser } from '../contexts/UserContext';
 
 export default function DashboardNavbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isProjectOpen, setIsProjectOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  
+  // 使用用户上下文
+  const { user, loading } = useUser();
   
   const projectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const profileTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -59,6 +63,31 @@ export default function DashboardNavbar() {
     // 创建完成后可以执行其他操作
   };
   
+  // 获取用户头像或首字母
+  const getUserAvatar = () => {
+    if (user?.head_pic) {
+      // 如果有头像，显示头像
+      return (
+        <Image 
+          src={user.head_pic} 
+          alt={user.nick_name || user.email}
+          width={32}
+          height={32}
+          className="h-8 w-8 rounded-full"
+        />
+      );
+    } else if (user?.nick_name) {
+      // 如果没有头像，显示昵称首字母
+      return <span>{user.nick_name.charAt(0).toUpperCase()}</span>;
+    } else if (user?.email) {
+      // 如果没有昵称，显示邮箱首字母
+      return <span>{user.email.charAt(0).toUpperCase()}</span>;
+    } else {
+      // 默认情况
+      return <span>U</span>;
+    }
+  };
+  
   useEffect(() => {
     // 组件卸载时清除所有定时器
     return () => {
@@ -72,13 +101,6 @@ export default function DashboardNavbar() {
       <nav className="bg-white border-b border-gray-200">
         <div className="flex justify-between items-center px-4 h-14">
           <div className="flex items-center">
-            {/* 布局切换按钮 */}
-            {/* <button className="p-2 text-gray-500 hover:text-gray-700 mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              </svg>
-            </button> */}
-            
             {/* 项目选择 */}
             <div className="flex items-center">
               <div className="text-sm font-medium">Project:</div>
@@ -137,12 +159,14 @@ export default function DashboardNavbar() {
           </div>
           
           <div className="flex items-center gap-4">
-            {/* 令牌显示 */}
+            {/* 积分显示 */}
             <div className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-purple-600">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
               </svg>
-              <span className="text-xs font-medium">Credits: 50</span>
+              <span className="text-xs font-medium">
+                {loading ? 'Loading...' : `points: ${user?.points || '0'}`}
+              </span>
             </div>
             
             {/* 用户头像 */}
@@ -152,15 +176,17 @@ export default function DashboardNavbar() {
               onMouseLeave={handleProfileMouseLeave}
             >
               <button 
-                className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium"
+                className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium overflow-hidden"
               >
-                H
+                {loading ? 'U' : getUserAvatar()}
               </button>
               
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-10">
                   <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-sm font-medium">user@example.com</p>
+                    <p className="text-sm font-medium">
+                      {loading ? 'Loading...' : (user?.email || 'user@example.com')}
+                    </p>
                   </div>
                   <Link href="/dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Settings
