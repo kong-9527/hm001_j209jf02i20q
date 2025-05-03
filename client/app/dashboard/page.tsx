@@ -1,43 +1,98 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { CreateProjectModal } from '@/app/components/CreateProjectModal';
+import { getCurrentUser, logout } from '../services/authService';
 
 export default function Dashboard() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  
-  const handleCreateProject = (projectName: string) => {
-    // 这里可以添加创建项目的逻辑，例如跳转到新创建的项目页面
-    console.log(`Created project: ${projectName}`);
-    // 创建后可以重定向到projects页面
-    window.location.href = '/dashboard/projects';
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await getCurrentUser();
+        if (userData) {
+          setUser(userData);
+        } else {
+          // 如果没有用户数据，重定向到登录页面
+          router.push('/signin');
+        }
+      } catch (error) {
+        console.error('获取用户数据失败:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [router]);
+
+  const handleLogout = async () => {
+    const success = await logout();
+    if (success) {
+      router.push('/signin');
+    }
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center">
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">Welcome to AI Garden Designer!</h1>
-      
-      <p className="text-gray-600 mb-8">
-        Start by creating your first garden project!
-      </p>
-      
-      <button 
-        onClick={() => setIsCreateModalOpen(true)}
-        className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-primary/90 transition-colors shadow-md"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-        Create Your First Project
-      </button>
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
+      </div>
+    );
+  }
 
-      {isCreateModalOpen && (
-        <CreateProjectModal 
-          onClose={() => setIsCreateModalOpen(false)}
-          onSubmit={handleCreateProject}
-        />
-      )}
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-800">仪表板</h1>
+          <div className="flex items-center">
+            {user && (
+              <div className="flex items-center">
+                <span className="mr-4 text-gray-700">欢迎, {user.nick_name}</span>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 transition-colors"
+                >
+                  退出
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">个人信息</h2>
+          {user && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">邮箱</p>
+                  <p>{user.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">昵称</p>
+                  <p>{user.nick_name || '未设置'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">积分</p>
+                  <p>{user.points || '0'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">注册方式</p>
+                  <p>{user.register_type === 1 ? '邮箱注册' : '谷歌登录'}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 } 
