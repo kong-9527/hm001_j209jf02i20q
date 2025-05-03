@@ -54,12 +54,92 @@ export const googleCallback = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7天
     });
 
-    // 重定向到前端的仪表板页面
-    // CLIENT_URL 应在 .env 文件中配置
-    return res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/dashboard`);
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    
+    // 检查是否为弹窗模式
+    const isPopup = req.query.popup === 'true';
+    
+    if (isPopup) {
+      // 弹窗模式：返回HTML，包含关闭弹窗并向父窗口发送消息的脚本
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Google 登录成功</title>
+        </head>
+        <body>
+          <script>
+            // 向父窗口发送登录成功消息
+            if (window.opener) {
+              window.opener.postMessage(
+                { 
+                  type: 'google-auth-success',
+                  user: ${JSON.stringify(user)}
+                }, 
+                "${clientUrl}"
+              );
+              window.close();
+            } else {
+              // 如果没有父窗口，则重定向到仪表板
+              window.location.href = "${clientUrl}/dashboard";
+            }
+          </script>
+          <div style="text-align: center; padding-top: 100px;">
+            <h3>登录成功！</h3>
+            <p>正在关闭窗口...</p>
+          </div>
+        </body>
+        </html>
+      `;
+      return res.send(html);
+    } else {
+      // 普通模式：重定向到前端的仪表板页面
+      return res.redirect(`${clientUrl}/dashboard`);
+    }
   } catch (error) {
     console.error('Google 认证回调处理失败:', error);
-    return res.redirect('/signin?error=server_error');
+    
+    // 检查是否为弹窗模式
+    const isPopup = req.query.popup === 'true';
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    
+    if (isPopup) {
+      // 弹窗模式：返回错误消息
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Google 登录失败</title>
+        </head>
+        <body>
+          <script>
+            // 向父窗口发送登录失败消息
+            if (window.opener) {
+              window.opener.postMessage(
+                { 
+                  type: 'google-auth-error',
+                  error: "登录失败，请重试"
+                }, 
+                "${clientUrl}"
+              );
+              window.close();
+            } else {
+              // 如果没有父窗口，则重定向到登录页
+              window.location.href = "${clientUrl}/signin?error=server_error";
+            }
+          </script>
+          <div style="text-align: center; padding-top: 100px;">
+            <h3>登录失败！</h3>
+            <p>正在关闭窗口...</p>
+          </div>
+        </body>
+        </html>
+      `;
+      return res.send(html);
+    } else {
+      // 普通模式：重定向到登录页
+      return res.redirect('/signin?error=server_error');
+    }
   }
 };
 
