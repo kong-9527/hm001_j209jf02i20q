@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { format } from 'date-fns';
 import axios from 'axios';
+import crypto from 'crypto';
 import { Goods, PayOrder, UserOrder, User } from '../models';
 
 // 第三方支付平台响应结构
@@ -15,12 +16,101 @@ interface CheckoutResponse {
   mode: string;
 }
 
+// 回调参数接口
+interface RedirectParams {
+  request_id?: string | null;
+  checkout_id?: string | null;
+  order_id?: string | null;
+  customer_id?: string | null;
+  subscription_id?: string | null;
+  product_id?: string | null;
+}
+
+// Creem API密钥
+const CREEM_API_KEY = process.env.CREEM_API_KEY || '';
+
+// 如果未设置API密钥，显示警告
+if (!CREEM_API_KEY) {
+  console.warn('⚠️ 严重警告: CREEM API密钥未设置! ⚠️');
+  console.warn('支付验证功能将无法正常工作。');
+  console.warn('请在.env文件中设置CREEM_API_KEY环境变量。');
+  console.warn('示例: CREEM_API_KEY=your_api_key_here');
+  
+  // 如果是生产环境，可能需要中断启动
+  if (process.env.NODE_ENV === 'production') {
+    console.error('生产环境中缺少必要的API密钥，这可能导致严重的安全风险。');
+    // 注释以下行以允许继续启动
+    // process.exit(1);
+  }
+}
+
 // 生成订单号
 const generateOrderNumber = (): string => {
   // 生成规则：G_后面加上当前时刻的年月日时分秒14位数字，再后面是6位随机
   const dateStr = format(new Date(), 'yyyyMMddHHmmss');
   const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
   return `G_${dateStr}${random}`;
+};
+
+// 生成签名
+const generateSignature = (params: RedirectParams, apiKey: string): string => {
+  // 按字典顺序对参数键进行排序，确保顺序一致性
+  const sortedParams = Object.keys(params).sort().reduce((acc: Record<string, string | null>, key) => {
+    const typedKey = key as keyof RedirectParams;
+    const value = params[typedKey];
+    // 只添加非undefined的值
+    if (value !== undefined) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+  
+  // 过滤并格式化参数字符串
+  const data = Object.entries(sortedParams)
+    .filter(([, value]) => value !== undefined && value !== null) // 过滤掉undefined和null值
+    .map(([key, value]) => `${key}=${value}`)
+    .concat(`salt=${apiKey}`) // 添加salt参数
+    .join('|');
+  
+  console.log('签名数据字符串:', data);
+  
+  // 生成SHA-256哈希
+  return crypto.createHash('sha256').update(data).digest('hex');
+};
+
+// 验证签名
+const verifySignature = (params: any, signature: string): boolean => {
+  // 如果API密钥未设置，无法验证签名
+  if (!CREEM_API_KEY) {
+    console.error('无法验证签名: CREEM API密钥未设置');
+    return false;
+  }
+  
+  // 提取需要验证的参数，只添加实际存在的参数
+  const redirectParams: RedirectParams = {};
+  
+  // 有条件地添加参数，只处理存在的参数
+  if (params.request_id) redirectParams.request_id = params.request_id;
+  if (params.checkout_id) redirectParams.checkout_id = params.checkout_id;
+  if (params.order_id) redirectParams.order_id = params.order_id;
+  if (params.customer_id) redirectParams.customer_id = params.customer_id;
+  if (params.subscription_id) redirectParams.subscription_id = params.subscription_id;
+  if (params.product_id) redirectParams.product_id = params.product_id;
+  
+  // 添加调试日志
+  console.log('支付回调参数:', params);
+  console.log('用于签名验证的参数:', redirectParams);
+  
+  // 生成签名
+  const calculatedSignature = generateSignature(redirectParams, CREEM_API_KEY);
+  
+  // 添加日志比较签名
+  console.log('收到的签名:', signature);
+  console.log('计算的签名:', calculatedSignature);
+  console.log('签名验证结果:', calculatedSignature === signature);
+  
+  // 比较计算的签名和提供的签名
+  return calculatedSignature === signature;
 };
 
 // 创建订单并获取支付链接
@@ -43,6 +133,14 @@ export const createOrder = async (req: Request, res: Response) => {
     // 验证商品ID
     if (!goodsId) {
       return res.status(400).json({ success: false, message: '缺少商品ID' });
+    }
+
+    // 检查API密钥是否设置
+    if (!CREEM_API_KEY) {
+      return res.status(500).json({ 
+        success: false, 
+        message: '支付功能未正确配置，请联系管理员' 
+      });
     }
 
     // 查询商品信息
@@ -94,20 +192,28 @@ export const createOrder = async (req: Request, res: Response) => {
       utime: Math.floor(Date.now() / 1000)
     });
 
+    // 获取基础URL (支持https)
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://yourdomain.com' // 生产环境域名，请替换为实际域名
+      : 'https://localhost:3000'; // 开发环境使用https
+
+    // 支付成功后的回调URL
+    const successUrl = `${baseUrl}/dashboard/billing/payment`;
+
     // 请求第三方支付平台获取结账链接
-    const creamApiKey = process.env.CREEM_API_KEY || 'creem_5UxTP8KTjKQVrDTwOC52sk';
     const postData = {
       product_id: goodsItem.creem_product_id,
       request_id: orderNumber,
       units: 1,
       customer: {
         email: userData.email
-      }
+      },
+      success_url: successUrl // 指定支付成功后的回调URL
     };
 
     const response = await axios.post('https://api.creem.io/v1/checkouts', postData, {
       headers: {
-        'x-api-key': creamApiKey,
+        'x-api-key': CREEM_API_KEY,
         'Content-Type': 'application/json'
       }
     });
@@ -144,6 +250,140 @@ export const createOrder = async (req: Request, res: Response) => {
   }
 };
 
+// 处理支付回调
+export const handlePaymentCallback = async (req: Request, res: Response) => {
+  try {
+    console.log('收到支付回调请求:', req.body);
+    
+    // 获取请求中的参数（POST请求体中的参数）
+    const callbackParams = req.body;
+    const checkout_id = callbackParams.checkout_id;
+    const signature = callbackParams.signature;
+    
+    // 验证必要参数
+    if (!checkout_id) {
+      console.error('缺少checkout_id参数');
+      return res.status(400).json({ 
+        success: false, 
+        message: '缺少checkout_id参数',
+        status: 'error'
+      });
+    }
+    
+    console.log(`正在查找checkout_id=${checkout_id}的订单`);
+    
+    // 查找对应的支付订单
+    const payOrder = await PayOrder.findOne({
+      where: { platform_num: checkout_id }
+    });
+    
+    if (!payOrder) {
+      console.error(`找不到platform_num=${checkout_id}的支付订单`);
+      return res.status(404).json({ 
+        success: false, 
+        message: '找不到对应的支付订单',
+        status: 'error'
+      });
+    }
+    
+    console.log(`找到订单: ID=${payOrder.id}, pay_num=${payOrder.pay_num}`);
+    
+    // 将所有回调参数保存到订单的return_request字段
+    await payOrder.update({
+      return_request: JSON.parse(JSON.stringify(callbackParams)) as any,
+      utime: Math.floor(Date.now() / 1000)
+    });
+    
+    console.log('已保存回调参数到订单');
+    
+    // 验证签名
+    let isValidSignature = false;
+    if (signature) {
+      console.log('开始验证签名');
+      isValidSignature = verifySignature(callbackParams, signature);
+      console.log(`签名验证结果: ${isValidSignature ? '成功' : '失败'}`);
+    } else {
+      console.warn('未提供签名参数，跳过验证');
+    }
+    
+    // 更新订单状态（如果签名有效）
+    if (isValidSignature) {
+      console.log('签名验证成功，更新订单状态为已支付');
+      await payOrder.update({
+        platform_status: '1', // 支付成功
+        utime: Math.floor(Date.now() / 1000)
+      });
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: '支付成功',
+        status: 'success',
+        orderNumber: payOrder.pay_num,
+        goodsName: payOrder.goods_name
+      });
+    } else {
+      console.log('签名验证失败或未提供，订单状态保持不变');
+      return res.status(200).json({ 
+        success: true, 
+        message: '支付回调已记录，但签名验证失败或缺失',
+        status: 'pending',
+        orderNumber: payOrder.pay_num,
+        goodsName: payOrder.goods_name
+      });
+    }
+  } catch (error) {
+    console.error('处理支付回调失败:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: '处理支付回调失败',
+      status: 'error'
+    });
+  }
+};
+
+// 查询支付状态
+export const getPaymentStatus = async (req: Request, res: Response) => {
+  try {
+    const { checkoutId } = req.params;
+    
+    if (!checkoutId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: '缺少checkoutId参数' 
+      });
+    }
+    
+    // 查询订单状态
+    const payOrder = await PayOrder.findOne({
+      where: { platform_num: checkoutId }
+    });
+    
+    if (!payOrder) {
+      return res.status(404).json({ 
+        success: false, 
+        message: '找不到对应的支付订单' 
+      });
+    }
+    
+    const paymentStatus = payOrder.platform_status === '1' ? 'success' : 'pending';
+    
+    return res.status(200).json({
+      success: true,
+      status: paymentStatus,
+      orderNumber: payOrder.pay_num,
+      goodsName: payOrder.goods_name
+    });
+  } catch (error) {
+    console.error('查询支付状态失败:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: '查询支付状态失败' 
+    });
+  }
+};
+
 export default {
-  createOrder
+  createOrder,
+  handlePaymentCallback,
+  getPaymentStatus
 }; 

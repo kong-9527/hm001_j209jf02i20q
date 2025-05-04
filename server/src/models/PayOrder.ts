@@ -17,6 +17,7 @@ interface PayOrderAttributes {
   price_original: number | null;
   price_pay: number | null;
   checkout_response: JSON | null;
+  return_request: JSON | null;
   ctime: number | null;
   utime: number | null;
 }
@@ -40,6 +41,7 @@ class PayOrder extends Model<PayOrderAttributes, PayOrderCreationAttributes> imp
   public price_original!: number | null;
   public price_pay!: number | null;
   public checkout_response!: JSON | null;
+  public return_request!: JSON | null;
   public ctime!: number | null;
   public utime!: number | null;
 }
@@ -113,6 +115,11 @@ PayOrder.init(
       type: DataTypes.JSON,
       allowNull: true,
       comment: '支付平台返回数据',
+    },
+    return_request: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: '支付回调请求参数',
     },
     ctime: {
       type: DataTypes.INTEGER,

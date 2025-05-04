@@ -27,6 +27,18 @@ export const createCheckout = async (goodsId: number) => {
   }
 };
 
+// 查询支付状态
+export const getPaymentStatus = async (checkoutId: string) => {
+  try {
+    const response = await api.get(`/payment/status/${checkoutId}`);
+    return response.data;
+  } catch (error) {
+    console.error('查询支付状态失败:', error);
+    throw error;
+  }
+};
+
 export default {
   createCheckout,
+  getPaymentStatus
 }; 
