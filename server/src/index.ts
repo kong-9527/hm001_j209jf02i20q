@@ -32,6 +32,7 @@ import cookieParser from 'cookie-parser';
 import { sequelize } from './models';
 import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
+import goodsRoutes from './routes/goodsRoutes';
 import passport from './config/passport';
 import checkEnvVariables from './utils/envCheck';
 
@@ -76,6 +77,7 @@ app.get('/', (req, res) => {
 // API 路由
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/goods', goodsRoutes);
 
 // 启动服务器
 app.listen(PORT, () => {

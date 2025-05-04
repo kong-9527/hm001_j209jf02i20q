@@ -12,6 +12,7 @@ interface GoodsAttributes {
   price_original: number | null;
   price_pay: number | null;
   price_per_month: number | null;
+  price_compare: number | null;
   creem_product_id: string | null;
   features: JSON | null;
 }
@@ -30,6 +31,7 @@ class Goods extends Model<GoodsAttributes, GoodsCreationAttributes> implements G
   public price_original!: number | null;
   public price_pay!: number | null;
   public price_per_month!: number | null;
+  public price_compare!: number | null;
   public creem_product_id!: string | null;
   public features!: JSON | null;
 }
@@ -72,6 +74,10 @@ Goods.init(
       allowNull: true,
     },
     price_per_month: {
+      type: DataTypes.FLOAT(10, 2),
+      allowNull: true,
+    },
+    price_compare: {
       type: DataTypes.FLOAT(10, 2),
       allowNull: true,
     },

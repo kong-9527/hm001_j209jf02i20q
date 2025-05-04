@@ -1,25 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getPricingPlans } from '../services/goodsService';
 
 interface PlanFeature {
-  text: string;
-  included: boolean;
+  feature: string;
 }
 
 interface PricingPlan {
-  name: string;
-  description: string;
-  originalPrice?: number;
-  price: number | string;
+  id: number;
+  goods_name: string;
+  goods_description: string;
+  price_original?: number;
+  price_compare?: number;
+  price_pay: number;
+  price_per_month: number;
+  design_num: number;
+  goods_version: number;
+  creem_product_id: string;
+  features: PlanFeature[];
+  buttonText?: string;
+  buttonLink?: string;
+  isPrimary?: boolean;
+  photosCount?: string;
   period?: string;
   yearlyPrice?: string;
-  photosCount?: string;
-  features: PlanFeature[];
-  buttonText: string;
-  buttonLink: string;
-  isPrimary?: boolean;
   showViewBilling?: boolean;
 }
 
@@ -29,76 +35,123 @@ interface PricingPlansProps {
 
 const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans" }) => {
   const [isYearly, setIsYearly] = useState(true);
+  const [allPlans, setAllPlans] = useState<PricingPlan[]>([]);
+  const [displayPlans, setDisplayPlans] = useState<PricingPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const plans: PricingPlan[] = [
-    {
-      name: 'Beginner',
-      description: 'Ideal entry-level plan for consistent design generation.',
-      originalPrice: 19,
-      price: 9,
-      period: '/month',
-      yearlyPrice: 'billed yearly $99',
-      photosCount: 'Take 50 AI Photos (per month)',
-      features: [
-        { text: 'Create your own styles', included: true },
-        { text: 'Personal-use only', included: true },
-        { text: 'No watermark', included: true },
-        { text: 'Up to 4 projects', included: true },
-        { text: 'Up to 4 parallel generations', included: true },
-        { text: 'Standard support', included: true },
-        { text: 'Early feature access', included: true },
-        { text: 'Access to AI Plant Advisor', included: true },
-      ],
-      buttonText: 'Subscribe →',
-      buttonLink: '/checkout/starter',
-      showViewBilling: true,
-    },
-    {
-      name: 'Pro',
-      description: 'Perfect for professionals requiring advanced features.',
-      originalPrice: 49,
-      price: 21,
-      period: '/month',
-      yearlyPrice: 'billed yearly $249',
-      photosCount: 'Take 200 AI Photos (per month)',
-      features: [
-        { text: 'Create your own styles', included: true },
-        { text: 'Commercial license', included: true },
-        { text: 'No watermark', included: true },
-        { text: 'Up to 50 projects', included: true },
-        { text: 'Up to 8 parallel generations', included: true },
-        { text: 'Priority support', included: true },
-        { text: 'Early feature access', included: true },
-        { text: 'Access to AI Plant Advisor', included: true },
-      ],
-      buttonText: 'Subscribe →',
-      buttonLink: '/checkout/pro',
-      isPrimary: true,
-      showViewBilling: true,
-    },
-    {
-      name: 'Premium',
-      description: 'Comprehensive solution for serious creators and businesses.',
-      originalPrice: 99,
-      price: 42,
-      period: '/month',
-      yearlyPrice: 'billed yearly $499',
-      photosCount: 'Take 500 AI Photos (per month)',
-      features: [
-        { text: 'Create your own styles', included: true },
-        { text: 'Commercial license', included: true },
-        { text: 'No watermark', included: true },
-        { text: 'Up to 1000 projects', included: true },
-        { text: 'Up to 16 parallel generations', included: true },
-        { text: 'Priority support', included: true },
-        { text: 'Early feature access', included: true },
-        { text: 'Access to AI Plant Advisor', included: true },
-      ],
-      buttonText: 'Subscribe →',
-      buttonLink: '/checkout/premium',
-      showViewBilling: true,
-    },
-  ];
+  useEffect(() => {
+    // 从数据库获取价格数据
+    const fetchPlans = async () => {
+      try {
+        setLoading(true);
+        const data = await getPricingPlans();
+        
+        if (data) {
+          // 处理从API获取的数据
+          const formattedPlans = data.map((plan: any) => {
+            // 确保features是一个数组
+            let parsedFeatures = [];
+            try {
+              // 如果features是字符串，尝试解析
+              if (typeof plan.features === 'string') {
+                parsedFeatures = JSON.parse(plan.features);
+              } else if (Array.isArray(plan.features)) {
+                parsedFeatures = plan.features;
+              }
+            } catch (e) {
+              console.error('解析features失败:', e);
+              parsedFeatures = [];
+            }
+            
+            return {
+              ...plan,
+              // 格式化显示文本
+              isPrimary: plan.goods_name === 'Pro', // 设置Pro计划为主要计划
+              buttonText: 'Subscribe →',
+              buttonLink: `/checkout/${plan.goods_name.toLowerCase()}?id=${plan.id}&version=${plan.goods_version}&product=${plan.creem_product_id}`,
+              period: '/month',
+              // 确保价格为数字
+              price_per_month: parseFloat(plan.price_per_month || 0),
+              price_pay: parseFloat(plan.price_pay || 0),
+              price_compare: plan.price_compare ? parseFloat(plan.price_compare) : null,
+              photosCount: `Take ${plan.design_num} AI Photos (per month)`,
+              showViewBilling: true,
+              features: parsedFeatures
+            };
+          });
+          
+          setAllPlans(formattedPlans);
+          // 根据当前选择的计费周期筛选计划
+          filterPlansByBillingCycle(formattedPlans, isYearly);
+        }
+      } catch (err) {
+        console.error('Failed to fetch pricing plans:', err);
+        setError('Failed to load pricing plans. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlans();
+  }, []);
+
+  // 根据计费周期筛选计划
+  const filterPlansByBillingCycle = (plans: PricingPlan[], yearly: boolean) => {
+    // yearly对应goods_version=2，monthly对应goods_version=1
+    const version = yearly ? 2 : 1;
+    const filtered = plans.filter(plan => plan.goods_version === version);
+    setDisplayPlans(filtered);
+  };
+
+  // 当计费周期改变时，更新显示的计划
+  useEffect(() => {
+    if (allPlans.length > 0) {
+      filterPlansByBillingCycle(allPlans, isYearly);
+    }
+  }, [isYearly, allPlans]);
+
+  // 切换计费周期
+  const toggleBillingCycle = () => {
+    setIsYearly(!isYearly);
+  };
+
+  // 加载状态显示
+  if (loading) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto mb-6"></div>
+            <div className="flex flex-wrap justify-center gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="w-full md:w-80 h-96 bg-gray-200 rounded-lg"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // 错误状态显示
+  if (error) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="text-red-500 mb-4">
+            <p>{error}</p>
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
+          >
+            Retry
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="pricing" className="py-16 bg-white">
@@ -137,7 +190,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
 
         {/* 定价卡片 */}
         <div className="flex flex-wrap justify-center gap-6">
-          {plans.map((plan, index) => (
+          {displayPlans.map((plan, index) => (
             <div 
               key={index}
               className={`rounded-lg overflow-hidden w-full md:w-80 ${
@@ -147,24 +200,26 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
               }`}
             >
               <div className={`px-6 py-8 ${plan.isPrimary ? 'bg-gray-50' : 'bg-white'}`}>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                <p className="text-gray-600 h-12 mb-4">{plan.description}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.goods_name}</h3>
+                <p className="text-gray-600 h-12 mb-4">{plan.goods_description}</p>
                 
                 <div className="mb-6">
-                  {plan.originalPrice && (
+                  {plan.price_compare && plan.price_per_month < plan.price_compare && (
                     <span className="text-gray-400 line-through text-sm">
-                      ${plan.originalPrice}/month
+                      ${plan.price_compare}/month
                     </span>
                   )}
                   <div className="flex items-baseline">
-                    <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
+                    <span className="text-4xl font-bold text-gray-900">
+                      ${plan.price_per_month}
+                    </span>
                     {plan.period && (
                       <span className="ml-1 text-gray-600">{plan.period}</span>
                     )}
                   </div>
-                  {plan.yearlyPrice && (
+                  {isYearly && (
                     <div className="text-sm text-gray-500 mt-1">
-                      {plan.yearlyPrice}
+                      billed yearly ${plan.price_pay}
                     </div>
                   )}
                 </div>
@@ -176,20 +231,23 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
                 )}
 
                 <Link 
-                  href={plan.buttonLink}
+                  href={plan.buttonLink || '#'}
                   className={`block w-full text-center py-3 px-4 rounded-md font-medium transition-colors ${
                     plan.isPrimary
                       ? 'bg-teal-600 hover:bg-teal-700 text-white'
                       : 'bg-white border border-gray-300 hover:bg-gray-50 text-gray-800'
                   }`}
                 >
-                  {plan.buttonText}
+                  {plan.buttonText || 'Subscribe →'}
                 </Link>
 
                 {plan.showViewBilling && (
                   <div className="text-center mt-4">
-                    <button className="text-sm text-gray-500 hover:text-gray-700">
-                      View monthly billing →
+                    <button 
+                      className="text-sm text-gray-500 hover:text-gray-700"
+                      onClick={toggleBillingCycle}
+                    >
+                      {isYearly ? 'View monthly billing →' : 'View yearly billing →'}
                     </button>
                   </div>
                 )}
@@ -198,7 +256,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
               <div className="bg-gray-50 px-6 py-8">
                 <p className="font-medium text-gray-700 mb-4">Features:</p>
                 <ul className="space-y-3">
-                  {plan.features.map((feature, featureIndex) => (
+                  {plan.features && plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start">
                       <svg
                         className="h-5 w-5 text-teal-500 mr-2 mt-0.5"
@@ -212,7 +270,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
                           clipRule="evenodd"
                         />
                       </svg>
-                      <span className="text-gray-600">{feature.text}</span>
+                      <span className="text-gray-600">{feature.feature}</span>
                     </li>
                   ))}
                 </ul>
