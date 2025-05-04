@@ -18,6 +18,7 @@ interface PricingPlan {
   price_per_month: number;
   design_num: number;
   goods_version: number;
+  during: number;
   creem_product_id: string;
   features: PlanFeature[];
   buttonText?: string;
@@ -72,8 +73,8 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
               buttonLink: `/checkout/${plan.goods_name.toLowerCase()}?id=${plan.id}&version=${plan.goods_version}&product=${plan.creem_product_id}`,
               period: '/month',
               // 确保价格为数字
-              price_per_month: parseFloat(plan.price_per_month || 0),
-              price_pay: parseFloat(plan.price_pay || 0),
+              price_per_month: parseFloat(plan.price_per_month),
+              price_pay: parseFloat(plan.price_pay),
               price_compare: plan.price_compare ? parseFloat(plan.price_compare) : null,
               photosCount: `Take ${plan.design_num} AI Photos (per month)`,
               showViewBilling: true,

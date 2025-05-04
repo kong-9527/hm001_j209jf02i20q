@@ -14,6 +14,7 @@ export const getPricingPlans = async (req: Request, res: Response) => {
         'goods_description', 
         'price_original', 
         'price_pay',
+        'during',
         'price_compare',
         'price_per_month',
         'goods_version',

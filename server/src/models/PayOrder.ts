@@ -11,10 +11,12 @@ interface PayOrderAttributes {
   platform_status: string | null;
   goods_id: number | null;
   goods_name: string | null;
+  platform_product_id: string | null;
   goods_month: number | null;
   price_type: number | null;
   price_original: number | null;
   price_pay: number | null;
+  checkout_response: JSON | null;
   ctime: number | null;
   utime: number | null;
 }
@@ -31,11 +33,13 @@ class PayOrder extends Model<PayOrderAttributes, PayOrderCreationAttributes> imp
   public platform_num!: string | null;
   public platform_status!: string | null;
   public goods_id!: number | null;
-  public goods_name!: string | null;
+  public goods_name!: string | null; 
+  public platform_product_id!: string | null;
   public goods_month!: number | null;
   public price_type!: number | null;
   public price_original!: number | null;
   public price_pay!: number | null;
+  public checkout_response!: JSON | null;
   public ctime!: number | null;
   public utime!: number | null;
 }
@@ -80,6 +84,11 @@ PayOrder.init(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
+    platform_product_id: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      comment: '支付平台商品id',
+    },
     goods_month: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -99,6 +108,11 @@ PayOrder.init(
       type: DataTypes.FLOAT(255, 2),
       allowNull: true,
       comment: '实际支付价格',
+    },
+    checkout_response: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: '支付平台返回数据',
     },
     ctime: {
       type: DataTypes.INTEGER,
