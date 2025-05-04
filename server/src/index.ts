@@ -33,6 +33,7 @@ import { sequelize } from './models';
 import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
 import goodsRoutes from './routes/goodsRoutes';
+import paymentRoutes from './routes/paymentRoutes';
 import passport from './config/passport';
 import checkEnvVariables from './utils/envCheck';
 
@@ -78,6 +79,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/goods', goodsRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // 启动服务器
 app.listen(PORT, () => {

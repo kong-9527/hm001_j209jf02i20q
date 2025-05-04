@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { getPricingPlans } from '../services/goodsService';
+import { createCheckout } from '../services/paymentService';
+import { getCurrentUser } from '../services/authService';
 
 interface PlanFeature {
   feature: string;
@@ -35,11 +38,13 @@ interface PricingPlansProps {
 }
 
 const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans" }) => {
+  const router = useRouter();
   const [isYearly, setIsYearly] = useState(true);
   const [allPlans, setAllPlans] = useState<PricingPlan[]>([]);
   const [displayPlans, setDisplayPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<number | null>(null);
 
   useEffect(() => {
     // 从数据库获取价格数据
@@ -115,6 +120,38 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
   // 切换计费周期
   const toggleBillingCycle = () => {
     setIsYearly(!isYearly);
+  };
+
+  // 处理订阅按钮点击
+  const handleSubscribe = async (goodsId: number) => {
+    try {
+      setIsSubmitting(goodsId);
+      
+      // 检查用户是否已登录
+      const user = await getCurrentUser();
+      
+      if (!user) {
+        // 用户未登录，跳转到登录页面
+        router.push('/signin');
+        return;
+      }
+      
+      // 用户已登录，创建支付订单并获取支付链接
+      const result = await createCheckout(goodsId);
+      
+      if (result && result.success && result.checkoutUrl) {
+        // 跳转到支付平台页面
+        window.location.href = result.checkoutUrl;
+      } else {
+        console.error('获取支付链接失败');
+        alert('获取支付链接失败，请稍后再试');
+      }
+    } catch (error) {
+      console.error('订阅过程中发生错误:', error);
+      alert('订阅失败，请稍后再试');
+    } finally {
+      setIsSubmitting(null);
+    }
   };
 
   // 加载状态显示
@@ -231,16 +268,17 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
                   </div>
                 )}
 
-                <Link 
-                  href={plan.buttonLink || '#'}
+                <button 
+                  onClick={() => handleSubscribe(plan.id)}
+                  disabled={isSubmitting === plan.id}
                   className={`block w-full text-center py-3 px-4 rounded-md font-medium transition-colors ${
                     plan.isPrimary
                       ? 'bg-teal-600 hover:bg-teal-700 text-white'
                       : 'bg-white border border-gray-300 hover:bg-gray-50 text-gray-800'
-                  }`}
+                  } ${isSubmitting === plan.id ? 'opacity-75 cursor-not-allowed' : ''}`}
                 >
-                  {plan.buttonText || 'Subscribe →'}
-                </Link>
+                  {isSubmitting === plan.id ? 'Processing...' : (plan.buttonText || 'Subscribe →')}
+                </button>
 
                 {plan.showViewBilling && (
                   <div className="text-center mt-4">
