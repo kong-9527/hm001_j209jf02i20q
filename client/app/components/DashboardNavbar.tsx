@@ -69,7 +69,7 @@ export default function DashboardNavbar() {
   const handleLogout = async () => {
     const success = await logout();
     if (success) {
-      router.push('/signin');
+      router.push('/');
     }
   };
   
