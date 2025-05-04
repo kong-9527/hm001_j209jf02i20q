@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import axios from 'axios';
 import crypto from 'crypto';
-import { Goods, PayOrder, UserOrder, User } from '../models';
+import { Goods, PayOrder, UserOrder, User, PointsLog } from '../models';
 
 // 第三方支付平台响应结构
 interface CheckoutResponse {
@@ -313,6 +313,67 @@ export const handlePaymentCallback = async (req: Request, res: Response) => {
         platform_status: '1', // 支付成功
         utime: Math.floor(Date.now() / 1000)
       });
+      
+      // 查询商品信息
+      const goodsItem = await Goods.findByPk(payOrder.goods_id || 0);
+      if (!goodsItem) {
+        console.error(`找不到goods_id=${payOrder.goods_id}的商品`);
+        return res.status(404).json({ 
+          success: false, 
+          message: '找不到对应的商品信息',
+          status: 'error'
+        });
+      }
+      
+      // 获取当前日期
+      const currentDate = new Date();
+      // 计算会员结束日期：当前日期 + 商品的during天数
+      const endDate = addDays(currentDate, goodsItem.during || 0);
+      
+      // 1. 在user_order表中创建新记录
+      await UserOrder.create({
+        related_id: payOrder.pay_num, // 使用支付订单号作为关联ID
+        user_id: payOrder.user_id || 0,
+        goods_id: payOrder.goods_id,
+        order_type: 1, // 订单类型
+        points_num: goodsItem.design_num, // 商品设计点数
+        points_remain: goodsItem.design_num, // 剩余点数初始等于总点数
+        member_start_date: currentDate, // 会员开始日期为当前日期
+        member_end_date: endDate, // 会员结束日期
+        ctime: Math.floor(Date.now() / 1000),
+        utime: Math.floor(Date.now() / 1000)
+      });
+      
+      // 2. 在points_log表中创建新记录
+      await PointsLog.create({
+        user_id: payOrder.user_id || 0,
+        points_type: '1', // 1表示增加积分 (字符串类型)
+        points_num: goodsItem.design_num, // 商品设计点数
+        log_type: 1, // 1表示订单充值
+        log_content: '订单', // 日志内容
+        related_id: payOrder.pay_num, // 使用支付订单号作为关联ID
+        ctime: Math.floor(Date.now() / 1000),
+        utime: Math.floor(Date.now() / 1000)
+      });
+      
+      // 3. 更新user表中的points值
+      const user = await User.findByPk(payOrder.user_id || 0);
+      if (user) {
+        // 获取用户当前积分，如果为null则默认为0
+        const currentPoints = parseInt(user.points || '0', 10);
+        // 计算新的积分总数：当前积分 + 商品设计点数
+        const newPoints = currentPoints + goodsItem.design_num;
+        
+        // 更新用户积分
+        await user.update({
+          points: newPoints.toString(),
+          utime: Math.floor(Date.now() / 1000)
+        });
+        
+        console.log(`已更新用户ID=${payOrder.user_id}的积分，从${currentPoints}增加到${newPoints}`);
+      } else {
+        console.error(`找不到user_id=${payOrder.user_id}的用户信息`);
+      }
       
       return res.status(200).json({ 
         success: true, 

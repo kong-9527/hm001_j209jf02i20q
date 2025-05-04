@@ -5,7 +5,7 @@ import User from './User';
 // 定义用户订单表的接口
 interface UserOrderAttributes {
   id: number;
-  related_id: number | null;
+  related_id: string | null;
   user_id: number;
   goods_id: number | null;
   order_type: number;
@@ -23,7 +23,7 @@ interface UserOrderCreationAttributes extends Optional<UserOrderAttributes, 'id'
 // 用户订单模型类
 class UserOrder extends Model<UserOrderAttributes, UserOrderCreationAttributes> implements UserOrderAttributes {
   public id!: number;
-  public related_id!: number | null;
+  public related_id!: string | null;
   public user_id!: number;
   public goods_id!: number | null;
   public order_type!: number;
@@ -44,7 +44,7 @@ UserOrder.init(
       primaryKey: true,
     },
     related_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
     },
     user_id: {
