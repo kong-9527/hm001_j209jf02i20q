@@ -114,7 +114,17 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 relative">
+      {/* Logo返回首页链接 */}
+      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-gray-800 hover:text-teal-600 transition-colors">
+        <div className="w-8 h-8 bg-teal-600 rounded-md flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-white">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5" />
+          </svg>
+        </div>
+        <span className="font-medium">AI Garden Design</span>
+      </Link>
+      
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Login</h1>
         

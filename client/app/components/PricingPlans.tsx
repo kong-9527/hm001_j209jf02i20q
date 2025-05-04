@@ -32,26 +32,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
 
   const plans: PricingPlan[] = [
     {
-      name: 'Pay As You Go',
-      description: 'For individuals who want flexibility without a subscription.',
-      price: '$15',
-      period: 'one-time',
-      photosCount: 'Take 15 AI Photos (credits)',
-      features: [
-        { text: 'No custom styles', included: true },
-        { text: 'Personal-use only', included: true },
-        { text: 'Includes watermark', included: true },
-        { text: '1 project', included: true },
-        { text: '1 generation at a time', included: true },
-        { text: 'Basic support', included: true },
-        { text: 'No commitment', included: true },
-        { text: 'Access to AI Plant Advisor', included: true },
-      ],
-      buttonText: 'Buy Now',
-      buttonLink: '/checkout/pay-as-you-go',
-    },
-    {
-      name: 'Starter',
+      name: 'Beginner',
       description: 'Ideal entry-level plan for consistent design generation.',
       originalPrice: 19,
       price: 9,
@@ -155,11 +136,11 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
         </div>
 
         {/* 定价卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex flex-wrap justify-center gap-6">
           {plans.map((plan, index) => (
             <div 
               key={index}
-              className={`rounded-lg overflow-hidden ${
+              className={`rounded-lg overflow-hidden w-full md:w-80 ${
                 plan.isPrimary 
                   ? 'border-2 border-teal-600 shadow-lg' 
                   : 'border border-gray-200 shadow-sm'
