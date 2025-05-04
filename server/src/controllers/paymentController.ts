@@ -165,15 +165,6 @@ export const createOrder = async (req: Request, res: Response) => {
     // 生成订单号
     const orderNumber = generateOrderNumber();
 
-    // 创建用户订单记录
-    await UserOrder.create({
-      user_id: userId,
-      goods_id: goodsId,
-      order_type: 1, // 订单类型：1为普通订单
-      ctime: Math.floor(Date.now() / 1000),
-      utime: Math.floor(Date.now() / 1000)
-    });
-
     // 创建支付订单记录
     const payOrder = await PayOrder.create({
       user_id: userId,
