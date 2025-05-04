@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Script from 'next/script';
 import { loginWithGooglePopup } from '../services/authService';
+import { useUser } from '../contexts/UserContext';
 
 export default function SignUp() {
   const router = useRouter();
@@ -16,6 +17,16 @@ export default function SignUp() {
   const [passwordError, setPasswordError] = useState('');
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  
+  // 使用用户上下文来检查登录状态
+  const { user, loading, isAuthenticated, refreshUser } = useUser();
+
+  // 检查登录状态并重定向
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [loading, isAuthenticated, router]);
 
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -87,8 +98,10 @@ export default function SignUp() {
       // Use popup method for login
       const user = await loginWithGooglePopup();
       
-      // Redirect to dashboard after successful login
+      // 刷新用户信息，确保上下文状态更新
       if (user) {
+        await refreshUser();
+        // 等待用户信息刷新后再跳转
         router.push('/dashboard');
       }
     } catch (error) {
@@ -98,29 +111,18 @@ export default function SignUp() {
       setIsGoogleLoading(false);
     }
   };
+  
+  // 如果正在加载，显示加载状态
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-gray-50 text-gray-800 px-4 relative">
-      <Script 
-        defer 
-        data-domain="aigardendesign.org" 
-        src="https://plausible.io/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"
-      />
-      <Script id="plausible-setup">
-        {`window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }`}
-      </Script>
-      
-      {/* Back to home link */}
-      <Link 
-        href="/" 
-        className="absolute top-6 left-6 flex items-center text-gray-600 hover:text-primary transition-colors"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-        </svg>
-        Back to Home
-      </Link>
-      
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Sign up</h1>
         

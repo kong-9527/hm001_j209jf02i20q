@@ -4,9 +4,10 @@ import sequelize from '../config/database';
 // 定义支付订单表的接口
 interface PayOrderAttributes {
   id: number;
+  user_id: number | null;
   pay_num: string | null;
   platform: string | null;
-  platform_num: number | null;
+  platform_num: string | null;
   platform_status: string | null;
   goods_id: number | null;
   goods_name: string | null;
@@ -24,9 +25,10 @@ interface PayOrderCreationAttributes extends Optional<PayOrderAttributes, 'id'> 
 // 支付订单模型类
 class PayOrder extends Model<PayOrderAttributes, PayOrderCreationAttributes> implements PayOrderAttributes {
   public id!: number;
+  public user_id!: number | null;
   public pay_num!: string | null;
   public platform!: string | null;
-  public platform_num!: number | null;
+  public platform_num!: string | null;
   public platform_status!: string | null;
   public goods_id!: number | null;
   public goods_name!: string | null;
@@ -46,6 +48,10 @@ PayOrder.init(
       autoIncrement: true,
       primaryKey: true,
     },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     pay_num: {
       type: DataTypes.STRING(255),
       allowNull: true,
@@ -57,7 +63,7 @@ PayOrder.init(
       comment: '支付平台类型',
     },
     platform_num: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(255),
       allowNull: true,
       comment: '支付平台流水号',
     },

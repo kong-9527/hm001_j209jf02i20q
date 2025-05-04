@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import { getGoogleLoginUrl, loginWithGooglePopup } from '../services/authService';
+import { useUser } from '../contexts/UserContext';
 
 export default function SignIn() {
   const router = useRouter();
@@ -14,6 +15,16 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  
+  // 使用用户上下文来检查登录状态
+  const { user, loading, isAuthenticated, refreshUser } = useUser();
+
+  // 检查登录状态并重定向
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [loading, isAuthenticated, router]);
 
   // Check for error parameters in URL
   useEffect(() => {
@@ -79,8 +90,10 @@ export default function SignIn() {
       // Use popup method for login
       const user = await loginWithGooglePopup();
       
-      // Redirect to dashboard after successful login
+      // 刷新用户信息，确保上下文状态更新
       if (user) {
+        await refreshUser();
+        // 等待用户信息刷新后再跳转
         router.push('/dashboard');
       }
     } catch (error) {
@@ -90,29 +103,18 @@ export default function SignIn() {
       setIsGoogleLoading(false);
     }
   };
+  
+  // 如果正在加载，显示加载状态
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-gray-50 text-gray-800 px-4 relative">
-      <Script 
-        defer 
-        data-domain="aigardendesign.org" 
-        src="https://plausible.io/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"
-      />
-      <Script id="plausible-setup">
-        {`window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }`}
-      </Script>
-      
-      {/* Back to home link */}
-      <Link 
-        href="/" 
-        className="absolute top-6 left-6 flex items-center text-gray-600 hover:text-primary transition-colors"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-        </svg>
-        Back to Home
-      </Link>
-      
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Login</h1>
         
@@ -199,7 +201,7 @@ export default function SignIn() {
         </div>
         
         <div className="mt-6 text-center text-sm text-gray-500">
-          By logging in, you agree to our <Link href="/terms" className="text-teal-600">Terms</Link> and <Link href="/privacy" className="text-teal-600">Privacy Policy</Link>
+          By signing in, you agree to our <Link href="/terms" className="text-teal-600">Terms</Link> and <Link href="/privacy" className="text-teal-600">Privacy Policy</Link>
         </div>
       </div>
     </div>

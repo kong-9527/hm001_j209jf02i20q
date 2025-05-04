@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import { getCurrentUser } from '../services/authService';
+import { getCurrentUser, logout as logoutService } from '../services/authService';
+import { useRouter } from 'next/navigation';
 
 // 用户信息接口
 export interface UserInfo {
@@ -19,7 +20,9 @@ interface UserContextState {
   user: UserInfo | null;
   loading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
   refreshUser: () => Promise<void>;
+  logout: () => Promise<boolean>;
 }
 
 // 创建上下文
@@ -35,6 +38,7 @@ export function UserProvider({ children }: UserProviderProps) {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   // 获取用户数据
   const fetchUser = async () => {
@@ -46,6 +50,7 @@ export function UserProvider({ children }: UserProviderProps) {
     } catch (err) {
       console.error('获取用户信息失败:', err);
       setError('获取用户信息失败');
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -54,6 +59,21 @@ export function UserProvider({ children }: UserProviderProps) {
   // 刷新用户数据的函数
   const refreshUser = async () => {
     await fetchUser();
+  };
+
+  // 登出函数
+  const logout = async () => {
+    try {
+      const success = await logoutService();
+      if (success) {
+        setUser(null);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('退出登录失败:', error);
+      return false;
+    }
   };
 
   // 组件挂载时获取用户数据
@@ -66,7 +86,9 @@ export function UserProvider({ children }: UserProviderProps) {
     user,
     loading,
     error,
-    refreshUser
+    isAuthenticated: !!user,
+    refreshUser,
+    logout
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

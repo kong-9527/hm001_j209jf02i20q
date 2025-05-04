@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { CreateProjectModal } from './CreateProjectModal';
 import { useUser } from '../contexts/UserContext';
 
@@ -12,7 +13,8 @@ export default function DashboardNavbar() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   
   // 使用用户上下文
-  const { user, loading } = useUser();
+  const { user, loading, logout } = useUser();
+  const router = useRouter();
   
   const projectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const profileTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -61,6 +63,14 @@ export default function DashboardNavbar() {
     // 这里处理创建项目的逻辑
     console.log('Creating project:', projectName);
     // 创建完成后可以执行其他操作
+  };
+  
+  // 处理登出
+  const handleLogout = async () => {
+    const success = await logout();
+    if (success) {
+      router.push('/signin');
+    }
   };
   
   // 获取用户头像或首字母
@@ -195,9 +205,12 @@ export default function DashboardNavbar() {
                     Billing
                   </Link>
                   <div className="border-t border-gray-100 mt-1"></div>
-                  <Link href="/signin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <button 
+                    onClick={handleLogout} 
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
                     Sign out
-                  </Link>
+                  </button>
                 </div>
               )}
             </div>
