@@ -12,6 +12,7 @@ interface UserAttributes {
   points: string | null;
   ctime: number | null;
   utime: number | null;
+  google_id: string | null; // 添加Google ID字段
 }
 
 // 创建时的可选属性
@@ -28,6 +29,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public points!: string | null;
   public ctime!: number | null;
   public utime!: number | null;
+  public google_id!: string | null; // 添加Google ID字段
 }
 
 // 初始化模型
@@ -70,6 +72,11 @@ User.init(
     utime: {
       type: DataTypes.INTEGER,
       allowNull: true,
+    },
+    google_id: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      comment: 'Google授权ID',
     },
   },
   {

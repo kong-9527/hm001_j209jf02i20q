@@ -27,6 +27,7 @@ if (GOOGLE_CLIENT_ID) {
         // 设置Google认证回调URL中的参数
         const authOptions = {
           scope: ['profile', 'email'],
+          prompt: 'select_account', // 强制显示账户选择界面
           state: JSON.stringify({ popup: true }) // 通过state参数传递popup状态
         };
         return passport.authenticate('google', authOptions)(req, res, next);
@@ -34,7 +35,10 @@ if (GOOGLE_CLIENT_ID) {
       
       next();
     },
-    passport.authenticate('google', { scope: ['profile', 'email'] })
+    passport.authenticate('google', { 
+      scope: ['profile', 'email'],
+      prompt: 'select_account' // 强制显示账户选择界面
+    })
   );
 
   // Google 回调路由

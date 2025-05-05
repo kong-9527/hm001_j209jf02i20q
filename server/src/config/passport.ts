@@ -7,6 +7,7 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { User } from '../models';
 import { generateAvatarFromNickName } from '../utils/avatarGenerator';
+import { Op } from 'sequelize';
 
 /**
  * Google OAuth 配置
@@ -37,21 +38,42 @@ if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
       },
       async (req, accessToken, refreshToken, profile, done) => {
         try {
-          // 检查用户是否已存在
+          // 获取Google ID和邮箱
+          const googleId = profile.id;
           const email = profile.emails && profile.emails[0].value;
+          
+          if (!googleId) {
+            return done(new Error('未能获取Google ID'), false);
+          }
+          
           if (!email) {
             return done(new Error('未能获取邮箱地址'), false);
           }
 
-          let user = await User.findOne({ where: { email } });
+          // 优先通过google_id查找用户，其次使用email
+          let user = await User.findOne({ 
+            where: { 
+              [Op.or]: [
+                { google_id: googleId },
+                { email: email }
+              ]
+            } 
+          });
 
           if (user) {
-            // 用户已存在，直接返回用户信息
+            // 用户存在，但可能没有google_id（旧用户通过邮箱匹配）
+            if (!user.google_id) {
+              // 更新用户的google_id
+              await user.update({ 
+                google_id: googleId,
+                register_type: 2 // 确保注册类型为Google
+              });
+            }
             return done(null, user);
           } else {
             // 创建新用户
             const now = Math.floor(Date.now() / 1000);
-            const nickName = email.split('@')[0]; // 使用邮箱前缀作为昵称
+            const nickName = profile.displayName || email.split('@')[0]; // 优先使用Google显示名称
             
             // 根据昵称生成头像
             const avatarUrl = generateAvatarFromNickName(nickName);
@@ -64,7 +86,8 @@ if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
               head_pic: avatarUrl, // 使用生成的头像URL
               points: "0",
               ctime: now,
-              utime: now
+              utime: now,
+              google_id: googleId // 存储Google ID
             });
             
             return done(null, newUser);

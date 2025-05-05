@@ -7,6 +7,13 @@ import Script from 'next/script';
 import { getGoogleLoginUrl, loginWithGooglePopup } from '../services/authService';
 import { useUser } from '../contexts/UserContext';
 
+// 添加全局函数用于弹窗授权成功后刷新用户状态
+declare global {
+  interface Window {
+    refreshUserAfterAuth?: () => void;
+  }
+}
+
 export default function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -18,6 +25,20 @@ export default function SignIn() {
   
   // 使用用户上下文来检查登录状态
   const { user, loading, isAuthenticated, refreshUser } = useUser();
+
+  // 设置全局刷新函数
+  useEffect(() => {
+    // 添加全局函数，供弹窗调用
+    window.refreshUserAfterAuth = async () => {
+      await refreshUser();
+      router.push('/dashboard');
+    };
+
+    return () => {
+      // 清理函数
+      window.refreshUserAfterAuth = undefined;
+    };
+  }, [refreshUser, router]);
 
   // 检查登录状态并重定向
   useEffect(() => {
@@ -135,7 +156,7 @@ export default function SignIn() {
         )}
         
         <div className="bg-white rounded-lg p-8 shadow-md">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <input
                 type="email"
@@ -177,7 +198,7 @@ export default function SignIn() {
             <span className="px-3 text-gray-500">OR</span>
             <div className="flex-grow h-px bg-gray-300"></div>
           </div>
-          
+           */}
           <button
             onClick={handleGoogleLogin}
             disabled={isGoogleLoading}
@@ -203,11 +224,11 @@ export default function SignIn() {
             )}
           </button>
           
-          <div className="mt-6 text-center">
+          {/* <div className="mt-6 text-center">
             <p className="text-gray-600">
               Don't have an account? <Link href="/register" className="text-teal-600 hover:underline font-medium">Register</Link>
             </p>
-          </div>
+          </div> */}
         </div>
         
         <div className="mt-6 text-center text-sm text-gray-500">

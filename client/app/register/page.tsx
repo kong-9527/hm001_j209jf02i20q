@@ -8,6 +8,13 @@ import Script from 'next/script';
 import { loginWithGooglePopup } from '../services/authService';
 import { useUser } from '../contexts/UserContext';
 
+// 添加全局函数用于弹窗授权成功后刷新用户状态
+declare global {
+  interface Window {
+    refreshUserAfterAuth?: () => void;
+  }
+}
+
 export default function SignUp() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -20,6 +27,20 @@ export default function SignUp() {
   
   // 使用用户上下文来检查登录状态
   const { user, loading, isAuthenticated, refreshUser } = useUser();
+
+  // 设置全局刷新函数
+  useEffect(() => {
+    // 添加全局函数，供弹窗调用
+    window.refreshUserAfterAuth = async () => {
+      await refreshUser();
+      router.push('/dashboard');
+    };
+
+    return () => {
+      // 清理函数
+      window.refreshUserAfterAuth = undefined;
+    };
+  }, [refreshUser, router]);
 
   // 检查登录状态并重定向
   useEffect(() => {

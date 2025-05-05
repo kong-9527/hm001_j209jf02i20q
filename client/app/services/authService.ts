@@ -56,22 +56,45 @@ export const loginWithGooglePopup = () => {
       return;
     }
     
+    // 设置超时检查，避免无限等待
+    const authTimeout = setTimeout(() => {
+      if (popup && !popup.closed) {
+        popup.close();
+      }
+      clearInterval(checkPopup);
+      reject(new Error('Authentication timeout. Please try again.'));
+    }, 120000); // 2分钟超时
+    
     // Poll to check if user is logged in
     // This is a fallback mechanism in case the window.postMessage doesn't work
     const checkPopup = setInterval(async () => {
       // Check if popup is closed
       if (!popup || popup.closed) {
         clearInterval(checkPopup);
+        clearTimeout(authTimeout);
+        
+        // 强制一次延迟，确保cookie已经设置完成
+        await new Promise(r => setTimeout(r, 500));
+        
         // Check if user is logged in after popup is closed
-        getCurrentUser()
-          .then(user => {
-            if (user) {
-              resolve(user);
-            } else {
-              reject(new Error('Login failed or canceled'));
-            }
-          })
-          .catch(err => reject(err));
+        try {
+          const user = await getCurrentUser();
+          if (user) {
+            resolve(user);
+          } else {
+            // 再次尝试获取用户，有时会有延迟
+            setTimeout(async () => {
+              const retryUser = await getCurrentUser();
+              if (retryUser) {
+                resolve(retryUser);
+              } else {
+                reject(new Error('Login failed or canceled'));
+              }
+            }, 1000);
+          }
+        } catch (err) {
+          reject(err);
+        }
         return;
       }
       
@@ -84,20 +107,37 @@ export const loginWithGooglePopup = () => {
         // If the popup URL contains success indicator
         if (popupUrl.includes('/auth-success')) {
           clearInterval(checkPopup);
+          clearTimeout(authTimeout);
           popup.close();
           
+          // 强制一次延迟，确保cookie已经设置完成
+          await new Promise(r => setTimeout(r, 500));
+          
           // Get the current user information
-          const user = await getCurrentUser();
-          if (user) {
-            resolve(user);
-          } else {
-            reject(new Error('Failed to get user information'));
+          try {
+            const user = await getCurrentUser();
+            if (user) {
+              resolve(user);
+            } else {
+              // 再次尝试获取用户，有时会有延迟
+              setTimeout(async () => {
+                const retryUser = await getCurrentUser();
+                if (retryUser) {
+                  resolve(retryUser);
+                } else {
+                  reject(new Error('Failed to get user information'));
+                }
+              }, 1000);
+            }
+          } catch (error) {
+            reject(error);
           }
         }
         
         // If the popup URL contains error indicator
         if (popupUrl.includes('/auth-error')) {
           clearInterval(checkPopup);
+          clearTimeout(authTimeout);
           popup.close();
           reject(new Error('Login failed'));
         }

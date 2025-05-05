@@ -42,7 +42,8 @@ export const googleCallback = async (req: Request, res: Response) => {
         id: user.id,
         email: user.email,
         nickName: user.nick_name,
-        registerType: user.register_type 
+        registerType: user.register_type,
+        googleId: user.google_id
       },
       JWT_SECRET,
       { expiresIn: '7d' }
@@ -221,7 +222,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     
     // 获取用户信息
     const user = await User.findByPk(decoded.id, {
-      attributes: ['id', 'email', 'nick_name', 'register_type', 'head_pic', 'points', 'ctime']
+      attributes: ['id', 'email', 'nick_name', 'register_type', 'head_pic', 'points', 'ctime', 'google_id']
     });
     
     if (!user) {

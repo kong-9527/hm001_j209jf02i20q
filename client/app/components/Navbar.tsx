@@ -42,9 +42,9 @@ export default function Navbar() {
           <Link href="/signin" className="bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-medium">
             Sign in
           </Link>
-          <Link href="/register" className="bg-white border border-gray-300 text-gray-900 rounded-md px-4 py-2 text-sm font-medium">
+          {/* <Link href="/register" className="bg-white border border-gray-300 text-gray-900 rounded-md px-4 py-2 text-sm font-medium">
             Register
-          </Link>
+          </Link> */}
         </div>
       </nav>
     </header>
