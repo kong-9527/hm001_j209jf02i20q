@@ -113,7 +113,7 @@ export default function BillingPage() {
         <div className="p-6">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <span className="text-gray-700 mr-2 font-medium">Credits:</span>
+              <span className="text-gray-700 mr-2 font-medium">Points:</span>
               <span className="text-emerald-600 font-medium">{currentCredits}</span>
             </div>
             <div className="flex gap-2">
@@ -150,7 +150,7 @@ export default function BillingPage() {
               <thead>
                 <tr className="text-left bg-gray-50">
                   <th className="px-6 py-3 text-gray-500 font-medium text-sm">Pricing Version</th>
-                  <th className="px-6 py-3 text-gray-500 font-medium text-sm">Received Credits</th>
+                  <th className="px-6 py-3 text-gray-500 font-medium text-sm">Received Points</th>
                   <th className="px-6 py-3 text-gray-500 font-medium text-sm">Refresh Date</th>
                   <th className="px-6 py-3 text-gray-500 font-medium text-sm">Purchased Date</th>
                 </tr>
@@ -171,7 +171,7 @@ export default function BillingPage() {
       </div>
 
       <div className="text-center mt-8 text-sm text-gray-500 pb-4">
-        Secure payment provided by Stripe
+        Secure payment provided by Creem
       </div>
     </div>
   );
