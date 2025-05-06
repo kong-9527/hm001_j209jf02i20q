@@ -67,6 +67,25 @@ export default function DashboardNavbar() {
   
   // 处理登出
   const handleLogout = async () => {
+    // 清理 Google 登录相关的全局状态
+    window.googleLoginInProgress = false;
+    
+    // 清理定时器
+    if (window.googleLoginInterval) {
+      clearInterval(window.googleLoginInterval);
+      window.googleLoginInterval = undefined;
+    }
+    
+    if (window.googleLoginTimeout) {
+      clearTimeout(window.googleLoginTimeout);
+      window.googleLoginTimeout = undefined;
+    }
+    
+    // 清理 localStorage 中的登录标记
+    localStorage.removeItem('googleAuthSuccess');
+    localStorage.removeItem('googleAuthTimestamp');
+    
+    // 调用登出服务
     const success = await logout();
     if (success) {
       router.push('/');

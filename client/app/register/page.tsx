@@ -1,17 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Script from 'next/script';
-import { loginWithGooglePopup } from '../services/authService';
+import { loginWithGooglePopup, getCurrentUser } from '../services/authService';
 import { useUser } from '../contexts/UserContext';
 
 // 添加全局函数用于弹窗授权成功后刷新用户状态
 declare global {
   interface Window {
     refreshUserAfterAuth?: () => void;
+    googleLoginPopup?: Window | null;
+    googleLoginTimeout?: NodeJS.Timeout;
+    googleLoginInterval?: NodeJS.Timeout;
+    googleLoginInProgress?: boolean;
   }
 }
 
@@ -27,24 +31,151 @@ export default function SignUp() {
   
   // 使用用户上下文来检查登录状态
   const { user, loading, isAuthenticated, refreshUser } = useUser();
+  
+  // 存储用于检查登录状态的定时器ID
+  const loginCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const popupTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 设置全局刷新函数
   useEffect(() => {
-    // 添加全局函数，供弹窗调用
+    // 定义全局函数用于弹窗调用
     window.refreshUserAfterAuth = async () => {
-      await refreshUser();
-      router.push('/dashboard');
+      console.log('refreshUserAfterAuth called from popup in register page');
+      
+      try {
+        // 刷新用户信息
+        await refreshUser();
+        console.log('User refreshed successfully, redirecting to dashboard');
+        
+        // 重置loading状态
+        setIsGoogleLoading(false);
+        
+        // 延迟一点跳转，确保状态已更新
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 100);
+      } catch (error) {
+        console.error('Failed to refresh user:', error);
+        setIsGoogleLoading(false);
+        setErrorMessage('Login succeeded but failed to refresh user info. Please try again.');
+      }
     };
+
+    console.log('Global refreshUserAfterAuth function set in register page');
 
     return () => {
       // 清理函数
       window.refreshUserAfterAuth = undefined;
+      console.log('Global refreshUserAfterAuth function cleaned up in register page');
+      
+      // 清理登录检查定时器
+      if (loginCheckIntervalRef.current) {
+        clearInterval(loginCheckIntervalRef.current);
+      }
+      if (popupTimeoutRef.current) {
+        clearTimeout(popupTimeoutRef.current);
+      }
+      
+      // 清理全局定时器
+      if (window.googleLoginInterval) {
+        clearInterval(window.googleLoginInterval);
+        window.googleLoginInterval = undefined;
+      }
+      if (window.googleLoginTimeout) {
+        clearTimeout(window.googleLoginTimeout);
+        window.googleLoginTimeout = undefined;
+      }
     };
   }, [refreshUser, router]);
+  
+  // 定期检查用户是否已经登录的函数
+  const startLoginCheck = () => {
+    // 清理旧的定时器
+    if (loginCheckIntervalRef.current) {
+      clearInterval(loginCheckIntervalRef.current);
+    }
+    
+    console.log('Starting login check interval in register page');
+    
+    // 定期检查用户状态
+    loginCheckIntervalRef.current = setInterval(async () => {
+      console.log('Checking user login status from register page...');
+      
+      try {
+        // 检查localStorage是否有登录成功标记
+        const authSuccess = localStorage.getItem('googleAuthSuccess');
+        const authTimestamp = localStorage.getItem('googleAuthTimestamp');
+        
+        if (authSuccess === 'true' && authTimestamp) {
+          const timestamp = parseInt(authTimestamp);
+          const now = Date.now();
+          // 检查时间戳是否在60秒内
+          if (now - timestamp < 60000) {
+            console.log('Auth success detected from localStorage in register page!');
+            
+            // 清理localStorage的登录标记
+            localStorage.removeItem('googleAuthSuccess');
+            localStorage.removeItem('googleAuthTimestamp');
+            
+            // 清理定时器
+            clearInterval(loginCheckIntervalRef.current!);
+            loginCheckIntervalRef.current = null;
+            
+            // 更新状态
+            setIsGoogleLoading(false);
+            
+            // 刷新用户信息
+            await refreshUser();
+            
+            // 跳转到dashboard
+            router.push('/dashboard');
+            return;
+          }
+        }
+        
+        // 如果没有localStorage标记，则尝试获取用户信息
+        const user = await getCurrentUser();
+        if (user) {
+          console.log('User detected from interval check, authenticated!');
+          
+          // 清理定时器
+          clearInterval(loginCheckIntervalRef.current!);
+          loginCheckIntervalRef.current = null;
+          
+          // 更新状态
+          setIsGoogleLoading(false);
+          
+          // 刷新用户信息
+          await refreshUser();
+          
+          // 跳转到dashboard
+          router.push('/dashboard');
+        }
+      } catch (err) {
+        console.error('Error checking user status:', err);
+      }
+    }, 1000); // 每秒检查一次
+    
+    // 设置超时，防止无限检查
+    popupTimeoutRef.current = setTimeout(() => {
+      if (loginCheckIntervalRef.current) {
+        clearInterval(loginCheckIntervalRef.current);
+        loginCheckIntervalRef.current = null;
+        
+        // 如果用户还在Google登录中，则重置状态
+        if (isGoogleLoading) {
+          console.log('Login check timeout, resetting state');
+          setIsGoogleLoading(false);
+          setErrorMessage('Login timeout. Please try again.');
+        }
+      }
+    }, 60000); // 1分钟超时
+  };
 
   // 检查登录状态并重定向
   useEffect(() => {
     if (!loading && isAuthenticated) {
+      console.log('User already authenticated, redirecting to dashboard');
       router.push('/dashboard');
     }
   }, [loading, isAuthenticated, router]);
@@ -58,7 +189,7 @@ export default function SignUp() {
     const value = e.target.value;
     setEmail(value);
     if (value && !validateEmail(value)) {
-      setEmailError('Please enter a valid email address');
+      setEmailError('请输入有效的电子邮件地址');
     } else {
       setEmailError('');
     }
@@ -69,7 +200,7 @@ export default function SignUp() {
     setPassword(value);
     
     if (confirmPassword && value !== confirmPassword) {
-      setPasswordError('Passwords do not match');
+      setPasswordError('密码不匹配');
     } else {
       setPasswordError('');
     }
@@ -80,7 +211,7 @@ export default function SignUp() {
     setConfirmPassword(value);
     
     if (value && password !== value) {
-      setPasswordError('Passwords do not match');
+      setPasswordError('密码不匹配');
     } else {
       setPasswordError('');
     }
@@ -94,12 +225,12 @@ export default function SignUp() {
     }
     
     if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address');
+      setEmailError('请输入有效的电子邮件地址');
       return;
     }
     
     if (password !== confirmPassword) {
-      setPasswordError('Passwords do not match');
+      setPasswordError('密码不匹配');
       return;
     }
     
@@ -113,23 +244,100 @@ export default function SignUp() {
   // Handle Google login (popup method)
   const handleGoogleLogin = async () => {
     try {
+      // 先检查全局登录状态，如果异常则重置
+      if (window.googleLoginInProgress) {
+        console.log('Google login flag is true, but no popup is open. Resetting state.');
+        window.googleLoginInProgress = false;
+        
+        // 清理可能存在的登录检查定时器
+        if (loginCheckIntervalRef.current) {
+          clearInterval(loginCheckIntervalRef.current);
+          loginCheckIntervalRef.current = null;
+        }
+        if (popupTimeoutRef.current) {
+          clearTimeout(popupTimeoutRef.current);
+          popupTimeoutRef.current = null;
+        }
+        
+        // 清理全局定时器
+        if (window.googleLoginInterval) {
+          clearInterval(window.googleLoginInterval);
+          window.googleLoginInterval = undefined;
+        }
+        if (window.googleLoginTimeout) {
+          clearTimeout(window.googleLoginTimeout);
+          window.googleLoginTimeout = undefined;
+        }
+      }
+      
+      // 避免重复点击
+      if (isGoogleLoading) {
+        console.log('Google login loading state is true, ignoring click');
+        return;
+      }
+      
       setIsGoogleLoading(true);
       setErrorMessage('');
       
-      // Use popup method for login
-      const user = await loginWithGooglePopup();
+      // 设置全局标志表示登录正在进行中
+      window.googleLoginInProgress = true;
       
-      // 刷新用户信息，确保上下文状态更新
-      if (user) {
-        await refreshUser();
-        // 等待用户信息刷新后再跳转
-        router.push('/dashboard');
-      }
-    } catch (error) {
-      console.error('Google login error:', error);
-      setErrorMessage('Google login failed, please try again later or use email registration');
-    } finally {
+      console.log('Opening Google login popup in register page');
+      
+      // 开始登录状态检查
+      startLoginCheck();
+      
+      // 使用弹窗方法进行登录
+      loginWithGooglePopup().then(user => {
+        console.log('Google login popup returned successfully with user data');
+        window.googleLoginInProgress = false;
+        
+        // 清理登录检查定时器
+        if (loginCheckIntervalRef.current) {
+          clearInterval(loginCheckIntervalRef.current);
+          loginCheckIntervalRef.current = null;
+        }
+        if (popupTimeoutRef.current) {
+          clearTimeout(popupTimeoutRef.current);
+          popupTimeoutRef.current = null;
+        }
+        
+        setIsGoogleLoading(false);
+        refreshUser().then(() => {
+          router.push('/dashboard');
+        });
+      }).catch(error => {
+        console.error('Google login popup error:', error);
+        window.googleLoginInProgress = false;
+        
+        // 清理登录检查定时器
+        if (loginCheckIntervalRef.current) {
+          clearInterval(loginCheckIntervalRef.current);
+          loginCheckIntervalRef.current = null;
+        }
+        if (popupTimeoutRef.current) {
+          clearTimeout(popupTimeoutRef.current);
+          popupTimeoutRef.current = null;
+        }
+        
+        setIsGoogleLoading(false);
+        
+        // 处理特定错误
+        if (error.message === 'Authentication was cancelled by the user') {
+          setErrorMessage('Google登录已取消，您可以重试或使用邮箱注册');
+        } else if (error.message === 'Authentication timeout. Please try again.') {
+          setErrorMessage('Google登录超时，请重试');
+        } else if (error.message === 'Login window was closed before authorization completed') {
+          setErrorMessage('登录窗口被关闭，请重试');
+        } else {
+          setErrorMessage('Google登录失败，请稍后重试或使用邮箱注册');
+        }
+      });
+    } catch (error: any) {
+      console.error('Failed to initiate Google login:', error);
+      window.googleLoginInProgress = false;
       setIsGoogleLoading(false);
+      setErrorMessage('无法启动Google登录，请稍后重试');
     }
   };
   
