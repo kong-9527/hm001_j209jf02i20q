@@ -38,7 +38,19 @@ export const getPaymentStatus = async (checkoutId: string) => {
   }
 };
 
+// 获取用户订单
+export const getUserOrders = async () => {
+  try {
+    const response = await api.get('/payment/user-orders');
+    return response.data;
+  } catch (error) {
+    console.error('获取用户订单失败:', error);
+    throw error;
+  }
+};
+
 export default {
   createCheckout,
-  getPaymentStatus
+  getPaymentStatus,
+  getUserOrders
 }; 

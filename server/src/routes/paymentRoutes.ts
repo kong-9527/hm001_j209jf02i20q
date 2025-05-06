@@ -13,4 +13,7 @@ router.post('/callback', paymentController.handlePaymentCallback);
 // 获取支付状态
 router.get('/status/:checkoutId', paymentController.getPaymentStatus);
 
+// 获取用户订单
+router.get('/user-orders', authenticateJWT, paymentController.getUserOrders);
+
 export default router; 

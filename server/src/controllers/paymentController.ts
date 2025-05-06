@@ -434,8 +434,44 @@ export const getPaymentStatus = async (req: Request, res: Response) => {
   }
 };
 
+// 获取用户订单列表
+export const getUserOrders = async (req: Request, res: Response) => {
+  try {
+    // 检查用户是否登录
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: '未登录', redirect: '/signin' });
+    }
+    
+    // @ts-ignore - 忽略类型检查
+    const userId = req.user.id;
+    
+    if (!userId) {
+      return res.status(401).json({ success: false, message: '用户ID无效' });
+    }
+
+    // 查询用户订单，按ctime倒序排序
+    const userOrders = await UserOrder.findAll({
+      where: { user_id: userId },
+      order: [['ctime', 'DESC']],
+      include: [
+        {
+          model: Goods,
+          as: 'goods',
+          attributes: ['goods_name']
+        }
+      ]
+    });
+
+    return res.status(200).json({ success: true, data: userOrders });
+  } catch (error) {
+    console.error('获取用户订单失败:', error);
+    return res.status(500).json({ success: false, message: '服务器错误' });
+  }
+};
+
 export default {
   createOrder,
   handlePaymentCallback,
-  getPaymentStatus
+  getPaymentStatus,
+  getUserOrders
 }; 

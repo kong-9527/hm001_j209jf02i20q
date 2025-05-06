@@ -1,6 +1,7 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 import User from './User';
+import Goods from './Goods';
 
 // 定义用户订单表的接口
 interface UserOrderAttributes {
@@ -97,6 +98,12 @@ UserOrder.init(
 UserOrder.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user',
+});
+
+// 建立与Goods模型的关联
+UserOrder.belongsTo(Goods, {
+  foreignKey: 'goods_id',
+  as: 'goods',
 });
 
 export default UserOrder; 
