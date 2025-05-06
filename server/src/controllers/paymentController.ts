@@ -327,8 +327,8 @@ export const handlePaymentCallback = async (req: Request, res: Response) => {
         user_id: payOrder.user_id || 0,
         goods_id: payOrder.goods_id,
         order_type: 1, // 订单类型
-        points_num: goodsItem.design_num, // 商品设计点数
-        points_remain: goodsItem.design_num, // 剩余点数初始等于总点数
+        points_num: goodsItem.points, // 使用商品的points字段
+        points_remain: goodsItem.points, // 剩余点数初始等于总点数
         member_start_date: currentDate, // 会员开始日期为当前日期
         member_end_date: endDate, // 会员结束日期
         ctime: Math.floor(Date.now() / 1000),
@@ -339,7 +339,7 @@ export const handlePaymentCallback = async (req: Request, res: Response) => {
       await PointsLog.create({
         user_id: payOrder.user_id || 0,
         points_type: '1', // 1表示增加积分 (字符串类型)
-        points_num: goodsItem.design_num, // 商品设计点数
+        points_num: goodsItem.points, // 使用商品的points字段
         log_type: 1, // 1表示订单充值
         log_content: '订单', // 日志内容
         related_id: payOrder.pay_num, // 使用支付订单号作为关联ID
@@ -352,8 +352,8 @@ export const handlePaymentCallback = async (req: Request, res: Response) => {
       if (user) {
         // 获取用户当前积分，如果为null则默认为0
         const currentPoints = parseInt(user.points || '0', 10);
-        // 计算新的积分总数：当前积分 + 商品设计点数
-        const newPoints = currentPoints + goodsItem.design_num;
+        // 计算新的积分总数：当前积分 + 商品points数
+        const newPoints = currentPoints + goodsItem.points;
         
         // 更新用户积分
         await user.update({

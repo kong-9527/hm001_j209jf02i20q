@@ -7,6 +7,7 @@ interface GoodsAttributes {
   goods_name: string | null;
   goods_description: string | null;
   design_num: number;
+  points: number;
   goods_version: number | null;
   during: number | null;
   price_original: number | null;
@@ -26,6 +27,7 @@ class Goods extends Model<GoodsAttributes, GoodsCreationAttributes> implements G
   public goods_name!: string | null;
   public goods_description!: string | null;
   public design_num!: number;
+  public points!: number;
   public goods_version!: number | null;
   public during!: number | null;
   public price_original!: number | null;
@@ -53,6 +55,10 @@ Goods.init(
       allowNull: true,
     },
     design_num: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    points: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
