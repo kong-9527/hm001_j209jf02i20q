@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import Script from 'next/script'
 import { UserProvider } from './contexts/UserContext'
+import { SessionProvider } from './contexts/SessionContext'
 
 export const metadata: Metadata = {
   title: 'AI Garden Design',
@@ -25,7 +26,9 @@ export default function RootLayout({
           {`window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }`}
         </Script>
         <UserProvider>
-          <main>{children}</main>
+          <SessionProvider>
+            <main>{children}</main>
+          </SessionProvider>
         </UserProvider>
       </body>
     </html>

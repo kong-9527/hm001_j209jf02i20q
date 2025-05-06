@@ -7,12 +7,13 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User as UserModel } from '../models';
 import { generateAvatarFromNickName } from '../utils/avatarGenerator';
+import User from '../models/User';
 
 // 扩展Request类型以包含user属性
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user?: User;
     }
   }
 }
@@ -23,6 +24,11 @@ declare global {
  * 请确保在项目根目录下的 .env 文件中设置以下环境变量：
  * 
  * JWT_SECRET=一个安全的随机字符串，用于签名JWT令牌
+ * 
+ * 会话超时机制说明：
+ * 1. JWT令牌有效期为30分钟
+ * 2. 前端应在用户有活动时调用refreshSession接口刷新令牌
+ * 3. 如果用户30分钟内无活动，令牌将过期，需要重新登录
  */
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 // 会话超时时间 (30分钟)
