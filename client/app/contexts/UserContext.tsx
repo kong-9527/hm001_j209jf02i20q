@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import { getCurrentUser, logout as logoutService } from '../services/authService';
+import { getCurrentUser, logout as logoutService, refreshSession as refreshSessionService } from '../services/authService';
 import { useRouter } from 'next/navigation';
 
 // 用户信息接口
@@ -23,6 +23,7 @@ interface UserContextState {
   isAuthenticated: boolean;
   refreshUser: () => Promise<void>;
   logout: () => Promise<boolean>;
+  refreshSession: () => Promise<boolean>;
 }
 
 // 创建上下文
@@ -76,6 +77,17 @@ export function UserProvider({ children }: UserProviderProps) {
     }
   };
 
+  // 刷新会话函数
+  const refreshSession = async () => {
+    try {
+      const success = await refreshSessionService();
+      return success;
+    } catch (error) {
+      console.error('刷新会话失败:', error);
+      return false;
+    }
+  };
+
   // 组件挂载时获取用户数据
   useEffect(() => {
     fetchUser();
@@ -88,7 +100,8 @@ export function UserProvider({ children }: UserProviderProps) {
     error,
     isAuthenticated: !!user,
     refreshUser,
-    logout
+    logout,
+    refreshSession
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

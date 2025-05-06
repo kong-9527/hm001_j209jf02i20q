@@ -5,8 +5,17 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../models';
+import { User as UserModel } from '../models';
 import { generateAvatarFromNickName } from '../utils/avatarGenerator';
+
+// 扩展Request类型以包含user属性
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
 
 /**
  * JWT 配置
@@ -16,11 +25,43 @@ import { generateAvatarFromNickName } from '../utils/avatarGenerator';
  * JWT_SECRET=一个安全的随机字符串，用于签名JWT令牌
  */
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+// 会话超时时间 (30分钟)
+const SESSION_TIMEOUT = 30 * 60; // 秒
 
 // 如果未设置 JWT 密钥，在控制台显示警告
 if (JWT_SECRET === 'your-secret-key') {
   console.warn('警告: 使用默认的 JWT 密钥！在生产环境中，请在 .env 文件中设置 JWT_SECRET 环境变量。');
 }
+
+/**
+ * 创建JWT令牌和设置Cookie
+ * @param user 用户对象
+ * @param res Express响应对象
+ * @returns JWT令牌
+ */
+const createTokenAndSetCookie = (user: any, res: Response) => {
+  // 生成 JWT 令牌
+  const token = jwt.sign(
+    { 
+      id: user.id,
+      email: user.email,
+      nickName: user.nick_name,
+      registerType: user.register_type,
+      googleId: user.google_id
+    },
+    JWT_SECRET,
+    { expiresIn: `${SESSION_TIMEOUT}s` } // 设置为30分钟
+  );
+
+  // 将令牌保存到 Cookie
+  res.cookie('authToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: SESSION_TIMEOUT * 1000 // 毫秒
+  });
+
+  return token;
+};
 
 /**
  * 处理 Google 认证回调
@@ -36,25 +77,8 @@ export const googleCallback = async (req: Request, res: Response) => {
       return res.redirect('/signin?error=authentication_failed');
     }
 
-    // 生成 JWT 令牌
-    const token = jwt.sign(
-      { 
-        id: user.id,
-        email: user.email,
-        nickName: user.nick_name,
-        registerType: user.register_type,
-        googleId: user.google_id
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    // 将令牌保存到 Cookie
-    res.cookie('authToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7天
-    });
+    // 创建令牌并设置Cookie
+    createTokenAndSetCookie(user, res);
 
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
     
@@ -221,7 +245,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     
     // 获取用户信息
-    const user = await User.findByPk(decoded.id, {
+    const user = await (UserModel as any).findByPk(decoded.id, {
       attributes: ['id', 'email', 'nick_name', 'register_type', 'head_pic', 'points', 'ctime', 'google_id']
     });
     
@@ -233,6 +257,45 @@ export const getCurrentUser = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('获取当前用户信息失败:', error);
     return res.status(401).json({ message: '令牌无效或已过期' });
+  }
+};
+
+/**
+ * 刷新用户会话
+ * 当用户有活动时调用此函数，重置会话超时时间
+ */
+export const refreshSession = async (req: Request, res: Response) => {
+  try {
+    // 从 Cookie 中获取令牌
+    const token = req.cookies.authToken;
+    
+    if (!token) {
+      return res.status(401).json({ message: '未授权，请先登录' });
+    }
+    
+    try {
+      // 验证令牌
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      
+      // 获取用户信息
+      const user = await (UserModel as any).findByPk(decoded.id);
+      
+      if (!user) {
+        return res.status(404).json({ message: '用户不存在' });
+      }
+      
+      // 创建新令牌并设置Cookie
+      createTokenAndSetCookie(user, res);
+      
+      return res.status(200).json({ message: '会话已刷新' });
+    } catch (error) {
+      // 令牌已过期或无效，需要重新登录
+      res.clearCookie('authToken');
+      return res.status(401).json({ message: '会话已过期，请重新登录' });
+    }
+  } catch (error) {
+    console.error('刷新会话失败:', error);
+    return res.status(500).json({ message: '服务器错误' });
   }
 };
 

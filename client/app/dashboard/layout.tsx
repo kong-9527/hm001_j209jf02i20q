@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar';
 import DashboardNavbar from '../components/DashboardNavbar';
 import { NotificationProvider } from '../components/NotificationCenter';
 import { useUser } from '../contexts/UserContext';
+import IdleTimer from '../components/IdleTimer';
 
 export default function DashboardLayout({
   children,
@@ -37,20 +38,23 @@ export default function DashboardLayout({
   }
 
   return (
-    <NotificationProvider>
-      <div className="flex h-screen bg-gray-50 overflow-hidden">
-        <Sidebar />
-        
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <DashboardNavbar />
+    <>
+      <IdleTimer timeout={30 * 60 * 1000} /> {/* 30分钟无操作自动登出 */}
+      <NotificationProvider>
+        <div className="flex h-screen bg-gray-50 overflow-hidden">
+          <Sidebar />
           
-          <main className="flex-1 overflow-auto p-4">
-            <div className="h-auto pb-8">
-              {children}
-            </div>
-          </main>
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <DashboardNavbar />
+            
+            <main className="flex-1 overflow-auto p-4">
+              <div className="h-auto pb-8">
+                {children}
+              </div>
+            </main>
+          </div>
         </div>
-      </div>
-    </NotificationProvider>
+      </NotificationProvider>
+    </>
   );
 } 

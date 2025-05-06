@@ -30,6 +30,17 @@ export const logout = async () => {
   }
 };
 
+// Refresh user session
+export const refreshSession = async () => {
+  try {
+    await api.post('/auth/refresh-session');
+    return true;
+  } catch (error) {
+    console.error('Session refresh failed:', error);
+    return false;
+  }
+};
+
 // Google login URL
 export const getGoogleLoginUrl = () => {
   return `${API_URL}/auth/google`;

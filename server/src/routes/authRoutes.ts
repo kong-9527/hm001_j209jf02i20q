@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import passport from '../config/passport';
-import { googleCallback, getCurrentUser, logout } from '../controllers/authController';
+import { googleCallback, getCurrentUser, logout, refreshSession } from '../controllers/authController';
 
 const router = Router();
 
@@ -167,5 +167,8 @@ router.get('/me', getCurrentUser);
 
 // 用户登出
 router.get('/logout', logout);
+
+// 刷新用户会话
+router.post('/refresh-session', refreshSession);
 
 export default router; 
