@@ -22,8 +22,10 @@ export const getGardenDesigns = async (req: Request, res: Response) => {
     }
     
     // 从请求参数中获取项目ID并转换为数字
-    const { project_id } = req.query;
+    const { project_id, is_del, is_like } = req.query;
     console.log('Raw project_id from query:', project_id);
+    console.log('Raw is_del from query:', is_del);
+    console.log('Raw is_like from query:', is_like);
     
     if (!project_id) {
       console.log('Validation failed: Missing project_id');
@@ -39,15 +41,27 @@ export const getGardenDesigns = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Project ID must be a number' });
     }
     
-    // 查询数据库获取花园设计图片
-    console.log('Executing database query with params:', { user_id, project_id: projectId, is_del: 0 });
+    // 构建查询条件
+    const whereCondition: any = {
+      user_id,
+      project_id: projectId,
+    };
     
+    // 如果提供了is_del参数，将其添加到查询条件中
+    if (is_del !== undefined) {
+      whereCondition.is_del = Number(is_del);
+    }
+    
+    // 如果提供了is_like参数，将其添加到查询条件中
+    if (is_like !== undefined) {
+      whereCondition.is_like = Number(is_like);
+    }
+    
+    console.log('Executing database query with params:', whereCondition);
+    
+    // 查询数据库获取花园设计图片
     const gardenDesigns = await GardenDesign.findAll({
-      where: {
-        user_id,
-        project_id: projectId,
-        is_del: 0 // 只获取未删除的图片
-      },
+      where: whereCondition,
       order: [
         ['ctime', 'DESC'] // 按创建时间倒序排序
       ]

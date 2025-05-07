@@ -5,7 +5,7 @@ import type { DragEvent } from 'react';
 import Image from 'next/image';
 import gardenStylesData from '../../data/gardenStyles';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
-import { getGardenDesignImages, getGardenDesignList, GardenDesignImage } from '@/app/services/gardenDesignService';
+import { getGardenDesignImages, getGardenDesignList, getDeletedGardenDesigns, getLikedGardenDesigns, GardenDesignImage } from '@/app/services/gardenDesignService';
 import { useProject } from '@/app/contexts/ProjectContext';
 
 // 定义图片数据类型
@@ -44,6 +44,7 @@ export default function PhotoGenerator() {
   const [recentImagesState, setRecentImagesState] = useState<'empty' | 'single' | 'multiple' | 'many'>('empty'); // 默认显示为空状态
   const [recentImages, setRecentImages] = useState<GardenDesignImage[]>([]);
   const [designImages, setDesignImages] = useState<GardenDesignImage[]>([]);
+  const [deletedImages, setDeletedImages] = useState<GardenDesignImage[]>([]);
   const [debugInput, setDebugInput] = useState('');
   const [draggedImage, setDraggedImage] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -792,15 +793,6 @@ export default function PhotoGenerator() {
     }))
   };
   
-  // 添加20个模拟图片数据用于All页签
-  const allImageData = Array(20).fill(0).map((_, index) => ({
-    id: index + 1,
-    src: `/uploads/garden-sample${index % 5 + 1}.png`,
-    alt: `花园设计 ${index + 1}`,
-    date: `2024/${3 + Math.floor(index/5)}/${5 + index % 25}`,
-    style: `${["日式庭院", "英式花园", "现代简约", "热带风情", "地中海风格"][index % 5]}`
-  }));
-  
   // 处理拖拽开始
   const handleDragStart = (e: DragEvent<HTMLDivElement>, imageSrc: string) => {
     e.dataTransfer.setData('text/plain', imageSrc);
@@ -919,7 +911,74 @@ export default function PhotoGenerator() {
     setDebugInput('');
   };
   
-  // 获取花园设计图片数据
+  // 处理标签切换并加载相应数据
+  const handleTabChange = (tab: 'all' | 'liked' | 'deleted') => {
+    // 设置当前标签
+    setImageTab(tab);
+    
+    // 获取当前项目ID，如果不存在则返回
+    const projectId = currentProject?.id;
+    if (!projectId) {
+      console.log('No current project, skipping data fetch');
+      return;
+    }
+    
+    // 根据标签类型加载相应数据
+    if (tab === 'all') {
+      // 获取所有未删除的图片
+      fetchGardenDesignList(projectId);
+    } else if (tab === 'liked') {
+      // 获取已收藏的图片
+      fetchLikedGardenDesigns(projectId);
+    } else if (tab === 'deleted') {
+      // 获取已删除的图片
+      fetchDeletedGardenDesigns(projectId);
+    }
+  };
+  
+  // 抽取获取花园设计图片列表的函数，便于复用
+  const fetchGardenDesignList = async (projectId: number) => {
+    console.log('Fetching garden design list for project:', projectId);
+    
+    try {
+      const images = await getGardenDesignList(projectId);
+      console.log('Received garden design list:', images);
+      setDesignImages(images);
+    } catch (error) {
+      console.error('Failed to fetch garden design list:', error);
+      setDesignImages([]);
+    }
+  };
+  
+  // 抽取获取已收藏花园设计图片的函数，便于复用
+  const fetchLikedGardenDesigns = async (projectId: number) => {
+    console.log('Fetching liked garden designs for project:', projectId);
+    
+    try {
+      const images = await getLikedGardenDesigns(projectId);
+      console.log('Received liked garden designs:', images);
+      setDesignImages(images);
+    } catch (error) {
+      console.error('Failed to fetch liked garden designs:', error);
+      setDesignImages([]);
+    }
+  };
+  
+  // 抽取获取已删除花园设计图片的函数，便于复用
+  const fetchDeletedGardenDesigns = async (projectId: number) => {
+    console.log('Fetching deleted garden designs for project:', projectId);
+    
+    try {
+      const images = await getDeletedGardenDesigns(projectId);
+      console.log('Received deleted garden designs:', images);
+      setDeletedImages(images);
+    } catch (error) {
+      console.error('Failed to fetch deleted garden designs:', error);
+      setDeletedImages([]);
+    }
+  };
+  
+  // 获取花园设计图片数据 - 最近图片
   useEffect(() => {
     const fetchGardenDesignImages = async () => {
       if (!currentProject) {
@@ -953,28 +1012,23 @@ export default function PhotoGenerator() {
     fetchGardenDesignImages();
   }, [currentProject]);
   
-  // 获取花园设计图片列表数据
+  // 获取花园设计图片列表数据 - 初始加载
   useEffect(() => {
-    const fetchGardenDesignList = async () => {
-      if (!currentProject) {
-        console.log('No current project, skipping design list API call');
-        return;
-      }
-      
-      console.log('Fetching garden design list for project:', currentProject.id);
-      
-      try {
-        const images = await getGardenDesignList(currentProject.id);
-        console.log('Received garden design list:', images);
-        setDesignImages(images);
-      } catch (error) {
-        console.error('Failed to fetch garden design list:', error);
-        setDesignImages([]);
-      }
-    };
+    if (!currentProject) {
+      console.log('No current project, skipping design list API call');
+      return;
+    }
     
-    fetchGardenDesignList();
-  }, [currentProject]);
+    // 根据当前选中的标签页加载相应数据
+    console.log('Initial data load for tab:', imageTab);
+    if (imageTab === 'all') {
+      fetchGardenDesignList(currentProject.id);
+    } else if (imageTab === 'liked') {
+      fetchLikedGardenDesigns(currentProject.id);
+    } else if (imageTab === 'deleted') {
+      fetchDeletedGardenDesigns(currentProject.id);
+    }
+  }, [currentProject, imageTab]);
   
   // 为每种状态定义对应的图片数据 - 使用API获取的真实数据
   const getRecentImagesData = () => {
@@ -1187,10 +1241,7 @@ export default function PhotoGenerator() {
   
   // 渲染收藏图片
   const renderLikedImages = () => {
-    // 过滤出已收藏的图片
-    const likedImages = designImages.filter(image => image.is_like === 1);
-    
-    if (likedImages.length === 0) {
+    if (designImages.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center p-16">
           <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -1205,7 +1256,7 @@ export default function PhotoGenerator() {
     }
     
     // 按照ctime倒序排序
-    const sortedImages = [...likedImages].sort((a, b) => {
+    const sortedImages = [...designImages].sort((a, b) => {
       return (b.ctime || 0) - (a.ctime || 0);
     });
     
@@ -1275,8 +1326,9 @@ export default function PhotoGenerator() {
     );
   };
   
-  // 渲染删除的图片 - 当前API中没有删除状态，这里保持原样
+  // 渲染删除的图片 - 修改为从数据库获取已删除的图片
   const renderDeletedImages = () => {
+    if (deletedImages.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-16">
         <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -1284,16 +1336,79 @@ export default function PhotoGenerator() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Deleted Images</h3>
-        <p className="text-sm text-gray-500 text-center mb-4">Images you've deleted will appear here for 30 days</p>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No Deleted Images</h3>
+          <p className="text-sm text-gray-500 text-center mb-4">Images you've deleted will appear here for 30 days</p>
+        </div>
+      );
+    }
+    
+    // 按照ctime倒序排序
+    const sortedImages = [...deletedImages].sort((a, b) => {
+      return (b.ctime || 0) - (a.ctime || 0);
+    });
+    
+    return (
+      <div className="max-h-[calc(100vh-21em)] overflow-y-auto p-6 scrollbar-thin">
+        <div className="grid grid-cols-2 gap-2">
+          {sortedImages.map((image) => (
+            <div  
+              key={image.id} 
+              className="relative aspect-square bg-gray-100 rounded-md overflow-hidden group"
+            >
+              <Image 
+                src={image.pic_result || ''}
+                alt={image.style_name || 'Garden design'}
+                fill
+                sizes="100%"
+                style={{objectFit: 'cover'}}
+                className="opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
+                onClick={() => handleImageClick(image)}
+              />
+              
+              {/* 显示风格名称 */}
+              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
+                {image.style_name} (Deleted)
+              </div>
+              
+              {/* 操作按钮 */}
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
+                {/* 恢复按钮 */}
+                <button 
+                  className="p-1.5 rounded-full bg-white text-green-600 hover:bg-green-50 shadow-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // 恢复图片的逻辑
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                  </svg>
+                </button>
+                
+                {/* 永久删除按钮 */}
+                <button 
+                  className="p-1.5 rounded-full bg-white text-red-500 hover:bg-red-50 shadow-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // 永久删除图片的逻辑
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
   
   // 处理图片点击 - 修改为使用GardenDesignImage类型
   const handleImageClick = (image: GardenDesignImage) => {
-    setSelectedImage(image);
-    setShowImageDetail(true);
+      setSelectedImage(image);
+      setShowImageDetail(true);
   };
 
   // 关闭图片详情弹窗
@@ -1344,7 +1459,7 @@ export default function PhotoGenerator() {
               
               {selectedImage.pic_orginial && (
                 <>
-                  <div className="text-gray-500">View Original Image</div>
+              <div className="text-gray-500">View Original Image</div>
                   <div className="text-emerald-600 font-medium cursor-pointer" 
                        onClick={() => window.open(selectedImage.pic_orginial || '', '_blank')}>
                     Click here
@@ -1813,7 +1928,7 @@ export default function PhotoGenerator() {
                     {/* Tab buttons */}
                     <div className="flex rounded-md shadow-sm">
                       <button 
-                        onClick={() => setImageTab('all')}
+                        onClick={() => handleTabChange('all')}
                         className={`px-3 py-1.5 text-sm font-medium border ${
                           imageTab === 'all' 
                             ? 'bg-gray-800 text-white border-gray-800' 
@@ -1823,7 +1938,7 @@ export default function PhotoGenerator() {
                         All
                       </button>
                       <button 
-                        onClick={() => setImageTab('liked')}
+                        onClick={() => handleTabChange('liked')}
                         className={`px-3 py-1.5 text-sm font-medium border-t border-b border-r ${
                           imageTab === 'liked' 
                             ? 'bg-gray-800 text-white border-gray-800' 
@@ -1833,7 +1948,7 @@ export default function PhotoGenerator() {
                         Like
                       </button>
                       <button 
-                        onClick={() => setImageTab('deleted')}
+                        onClick={() => handleTabChange('deleted')}
                         className={`px-3 py-1.5 text-sm font-medium border-t border-b border-r ${
                           imageTab === 'deleted' 
                             ? 'bg-gray-800 text-white border-gray-800' 
