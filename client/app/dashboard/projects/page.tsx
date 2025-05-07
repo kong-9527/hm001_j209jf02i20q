@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { CreateProjectModal } from '@/app/components/CreateProjectModal';
 import { EditProjectModal } from '@/app/components/EditProjectModal';
@@ -20,33 +20,56 @@ export default function ProjectsPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   // 使用事件总线
-  const { emit } = useEventBus();
+  const { emit, on } = useEventBus();
   
   // 加载项目列表
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const projectsData = await getUserProjects();
-        setProjects(projectsData);
-      } catch (err) {
-        setError('Failed to load projects');
-        console.error('Error loading projects:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchProjects();
+  const fetchProjects = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const projectsData = await getUserProjects();
+      
+      // 对项目进行排序，按照创建时间降序（最新创建的项目排在前面）
+      const sortedProjects = projectsData.sort((a, b) => {
+        return Number(b.ctime) - Number(a.ctime);
+      });
+      
+      setProjects(sortedProjects);
+    } catch (err) {
+      setError('Failed to load projects');
+      console.error('Error loading projects:', err);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+  
+  // 初始加载项目列表
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+  
+  // 监听项目更新事件
+  useEffect(() => {
+    // 订阅项目刷新事件，当在DashboardNavbar中创建项目后，刷新项目列表
+    const unsubscribe = on('projects_updated', ({ refreshProjectsPage }) => {
+      if (refreshProjectsPage) {
+        console.log('Refreshing projects page by event');
+        fetchProjects();
+      }
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [on, fetchProjects]);
   
   // 创建新项目
   const handleCreateProject = async (projectData: { project_name: string; project_pic?: string }) => {
     try {
       const newProject = await createProject(projectData);
-      const updatedProjects = [...projects, newProject];
-      setProjects(updatedProjects);
+      
+      // 创建项目后，重新获取完整的项目列表以确保排序正确
+      await fetchProjects();
       
       // 保存选中的项目ID到localStorage
       localStorage.setItem('selectedProjectId', newProject.id.toString());
@@ -63,10 +86,8 @@ export default function ProjectsPage() {
     try {
       const updatedProject = await updateProject(projectId, projectData);
       
-      // 更新本地项目列表
-      setProjects(projects.map(project => 
-        project.id === projectId ? updatedProject : project
-      ));
+      // 编辑后重新获取完整的项目列表以确保数据一致性
+      await fetchProjects();
       
       // 判断编辑的是否为当前选中的项目
       const selectedProjectId = localStorage.getItem('selectedProjectId');
@@ -102,17 +123,16 @@ export default function ProjectsPage() {
         const selectedProjectId = localStorage.getItem('selectedProjectId');
         const isSelectedProject = selectedProjectId && parseInt(selectedProjectId) === deletingProject.id;
         
-        // 更新本地项目列表
-        const updatedProjects = projects.filter(project => project.id !== deletingProject.id);
-        setProjects(updatedProjects);
+        // 删除后重新获取项目列表
+        await fetchProjects();
         
         // 根据删除后的项目列表和是否删除了当前选中的项目来决定如何更新
         if (isSelectedProject) {
           // 删除的是当前选中的项目
-          if (updatedProjects.length > 0) {
+          if (projects.length > 0) {
             // 如果还有其他项目，选中第一个
-            localStorage.setItem('selectedProjectId', updatedProjects[0].id.toString());
-            emit('projects_updated', { selectedProjectId: updatedProjects[0].id });
+            localStorage.setItem('selectedProjectId', projects[0].id.toString());
+            emit('projects_updated', { selectedProjectId: projects[0].id });
           } else {
             // 如果没有项目了，清除选中的项目
             localStorage.removeItem('selectedProjectId');

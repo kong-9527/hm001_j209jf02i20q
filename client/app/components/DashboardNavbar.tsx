@@ -21,7 +21,7 @@ export default function DashboardNavbar() {
   const { user, loading, logout } = useUser();
   const router = useRouter();
   // 使用事件总线
-  const { on } = useEventBus();
+  const { on, emit } = useEventBus();
   
   const projectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const profileTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -142,6 +142,9 @@ export default function DashboardNavbar() {
         localStorage.setItem('selectedProjectId', newProject.id.toString());
         // 重定向到garden-design页面
         router.push('/dashboard/garden-design');
+      } else {
+        // 通知项目列表页面更新
+        emit('projects_updated', { selectedProjectId: newProject.id, refreshProjectsPage: true });
       }
     } catch (error) {
       console.error('Error creating project:', error);
