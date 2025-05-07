@@ -74,4 +74,117 @@ export const getGardenDesigns = async (req: Request, res: Response) => {
     console.error('Error fetching garden designs:', error);
     return res.status(500).json({ error: 'Failed to fetch garden designs' });
   }
+};
+
+/**
+ * 更新花园设计图片的收藏状态
+ * @route PUT /api/garden-designs/:id/like
+ */
+export const updateLikeStatus = async (req: Request, res: Response) => {
+  try {
+    console.log('API call received: PUT /api/garden-designs/:id/like');
+    console.log('Request params:', req.params);
+    console.log('Request body:', req.body);
+    
+    // 从请求中获取用户ID
+    const user_id = getUserIdFromRequest(req);
+    console.log('Extracted user_id:', user_id);
+    
+    if (!user_id) {
+      console.log('Authentication failed: No user ID found');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    // 获取图片ID
+    const { id } = req.params;
+    const designId = Number(id);
+    
+    if (isNaN(designId)) {
+      console.log('Validation failed: Invalid design ID format');
+      return res.status(400).json({ error: 'Design ID must be a number' });
+    }
+    
+    // 获取要设置的收藏状态
+    const { is_like } = req.body;
+    
+    if (is_like === undefined || ![0, 1].includes(Number(is_like))) {
+      console.log('Validation failed: Invalid like status');
+      return res.status(400).json({ error: 'is_like must be 0 or 1' });
+    }
+    
+    // 查找该图片并确保它属于当前用户
+    const gardenDesign = await GardenDesign.findOne({
+      where: {
+        id: designId,
+        user_id
+      }
+    });
+    
+    if (!gardenDesign) {
+      console.log('Design not found or does not belong to user');
+      return res.status(404).json({ error: 'Garden design not found' });
+    }
+    
+    // 更新收藏状态
+    await gardenDesign.update({ is_like: Number(is_like) });
+    
+    console.log(`Updated design ${designId} like status to ${is_like}`);
+    
+    return res.status(200).json(gardenDesign);
+  } catch (error) {
+    console.error('Error updating garden design like status:', error);
+    return res.status(500).json({ error: 'Failed to update garden design like status' });
+  }
+};
+
+/**
+ * 软删除花园设计图片（标记为已删除）
+ * @route PUT /api/garden-designs/:id/delete
+ */
+export const softDeleteDesign = async (req: Request, res: Response) => {
+  try {
+    console.log('API call received: PUT /api/garden-designs/:id/delete');
+    console.log('Request params:', req.params);
+    
+    // 从请求中获取用户ID
+    const user_id = getUserIdFromRequest(req);
+    console.log('Extracted user_id:', user_id);
+    
+    if (!user_id) {
+      console.log('Authentication failed: No user ID found');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    // 获取图片ID
+    const { id } = req.params;
+    const designId = Number(id);
+    
+    if (isNaN(designId)) {
+      console.log('Validation failed: Invalid design ID format');
+      return res.status(400).json({ error: 'Design ID must be a number' });
+    }
+    
+    // 查找该图片并确保它属于当前用户
+    const gardenDesign = await GardenDesign.findOne({
+      where: {
+        id: designId,
+        user_id
+      }
+    });
+    
+    if (!gardenDesign) {
+      console.log('Design not found or does not belong to user');
+      return res.status(404).json({ error: 'Garden design not found' });
+    }
+    
+    // 更新删除状态为已删除(is_del=1)
+    await gardenDesign.update({ is_del: 1 });
+    
+    console.log(`Soft deleted design ${designId}`);
+    
+    return res.status(200).json(gardenDesign);
+  } catch (error) {
+    console.error('Error deleting garden design:', error);
+    return res.status(500).json({ error: 'Failed to delete garden design' });
+  }
 }; 

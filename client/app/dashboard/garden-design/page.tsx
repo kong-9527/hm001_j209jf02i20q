@@ -5,7 +5,7 @@ import type { DragEvent } from 'react';
 import Image from 'next/image';
 import gardenStylesData from '../../data/gardenStyles';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
-import { getGardenDesignImages, getGardenDesignList, getDeletedGardenDesigns, getLikedGardenDesigns, GardenDesignImage } from '@/app/services/gardenDesignService';
+import { getGardenDesignImages, getGardenDesignList, getDeletedGardenDesigns, getLikedGardenDesigns, updateGardenDesignLikeStatus, deleteGardenDesign, GardenDesignImage } from '@/app/services/gardenDesignService';
 import { useProject } from '@/app/contexts/ProjectContext';
 
 // 定义图片数据类型
@@ -1199,7 +1199,11 @@ export default function PhotoGenerator() {
               {image.status !== 1 && (
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
                   {/* 添加下载按钮 */}
-                  <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm">
+                  <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(image.pic_result || '', '_blank');
+                          }}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                     </svg>
@@ -1208,10 +1212,7 @@ export default function PhotoGenerator() {
                   {/* 添加收藏按钮 */}
                   <button 
                     className={`p-1.5 rounded-full bg-white ${image.is_like === 1 ? 'text-red-500' : 'text-gray-500 hover:text-red-500'} hover:bg-red-50 shadow-sm`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // 收藏图片的逻辑
-                    }}
+                    onClick={(e) => handleLikeToggle(e, image)}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill={image.is_like === 1 ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -1221,10 +1222,7 @@ export default function PhotoGenerator() {
                   {/* 添加删除按钮 */}
                   <button 
                     className="p-1.5 rounded-full bg-white text-gray-500 hover:text-red-500 hover:bg-red-50 shadow-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // 删除图片的逻辑
-                    }}
+                    onClick={(e) => handleDelete(e, image)}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -1287,7 +1285,11 @@ export default function PhotoGenerator() {
               {/* 操作按钮 */}
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
                 {/* 添加下载按钮 */}
-                <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm">
+                <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(image.pic_result || '', '_blank');
+                        }}>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                   </svg>
@@ -1296,10 +1298,7 @@ export default function PhotoGenerator() {
                 {/* 添加收藏按钮，这里应该始终是红色高亮状态 */}
                 <button 
                   className="p-1.5 rounded-full bg-white text-red-500 hover:bg-red-50 shadow-sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // 取消收藏图片的逻辑
-                  }}
+                  onClick={(e) => handleLikeToggle(e, image)}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -1309,10 +1308,7 @@ export default function PhotoGenerator() {
                 {/* 添加删除按钮 */}
                 <button 
                   className="p-1.5 rounded-full bg-white text-gray-500 hover:text-red-500 hover:bg-red-50 shadow-sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // 删除图片的逻辑
-                  }}
+                  onClick={(e) => handleDelete(e, image)}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -1478,6 +1474,40 @@ export default function PhotoGenerator() {
               </button>
               <button 
                 className={`flex-1 py-3 rounded-md border ${selectedImage.is_like === 1 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'} transition`}
+                onClick={async () => {
+                  if (selectedImage) {
+                    const newLikeStatus = selectedImage.is_like === 1 ? 0 : 1;
+                    try {
+                      // 调用API更新收藏状态
+                      await updateGardenDesignLikeStatus(selectedImage.id, newLikeStatus);
+                      
+                      // 更新图片详情状态
+                      setSelectedImage({...selectedImage, is_like: newLikeStatus});
+                      
+                      // 更新设计图片列表
+                      setDesignImages(prevImages => 
+                        prevImages.map(img => 
+                          img.id === selectedImage.id ? { ...img, is_like: newLikeStatus } : img
+                        )
+                      );
+                      
+                      // 更新最近图片列表
+                      setRecentImages(prevImages => 
+                        prevImages.map(img => 
+                          img.id === selectedImage.id ? { ...img, is_like: newLikeStatus } : img
+                        )
+                      );
+                      
+                      // 如果在"liked"标签页并且取消了喜欢，关闭详情窗口
+                      if (imageTab === 'liked' && newLikeStatus === 0) {
+                        setShowImageDetail(false);
+                      }
+                      
+                    } catch (error) {
+                      console.error('Failed to update like status:', error);
+                    }
+                  }
+                }}
               >
                 {selectedImage.is_like === 1 ? 'Liked' : 'Like'}
               </button>
@@ -1496,6 +1526,64 @@ export default function PhotoGenerator() {
         </div>
       </div>
     );
+  };
+  
+  // 处理图片喜欢状态更新
+  const handleLikeToggle = async (e: React.MouseEvent, image: GardenDesignImage) => {
+    e.stopPropagation(); // 阻止事件冒泡，避免触发图片点击事件
+
+    try {
+      // 切换喜欢状态：如果当前是喜欢的，则设置为不喜欢，反之亦然
+      const newLikeStatus = image.is_like === 1 ? 0 : 1;
+      
+      // 调用API更新喜欢状态
+      await updateGardenDesignLikeStatus(image.id, newLikeStatus);
+      
+      // 更新图片列表中的状态
+      setDesignImages(prevImages => 
+        prevImages.map(img => 
+          img.id === image.id ? { ...img, is_like: newLikeStatus } : img
+        )
+      );
+      
+      // 更新最近图片列表中的状态（如果存在）
+      setRecentImages(prevImages => 
+        prevImages.map(img => 
+          img.id === image.id ? { ...img, is_like: newLikeStatus } : img
+        )
+      );
+      
+      // 如果在"liked"标签页并且取消了喜欢，则从列表中移除该图片
+      if (imageTab === 'liked' && newLikeStatus === 0) {
+        setDesignImages(prevImages => prevImages.filter(img => img.id !== image.id));
+      }
+    } catch (error) {
+      console.error('Failed to update like status:', error);
+      // 可以添加错误提示
+    }
+  };
+
+  // 处理图片删除
+  const handleDelete = async (e: React.MouseEvent, image: GardenDesignImage) => {
+    e.stopPropagation(); // 阻止事件冒泡，避免触发图片点击事件
+
+    if (!window.confirm('确定要删除这张图片吗？')) {
+      return;
+    }
+
+    try {
+      // 调用API软删除图片
+      await deleteGardenDesign(image.id);
+      
+      // 从当前图片列表中移除该图片
+      setDesignImages(prevImages => prevImages.filter(img => img.id !== image.id));
+      
+      // 更新最近图片列表，如果该图片存在于最近图片列表中，也需要移除
+      setRecentImages(prevImages => prevImages.filter(img => img.id !== image.id));
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+      // 可以添加错误提示
+    }
   };
   
   return (

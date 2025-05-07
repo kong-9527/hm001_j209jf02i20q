@@ -146,4 +146,74 @@ export const getDeletedGardenDesigns = async (projectId: number): Promise<Garden
     console.error('Error fetching deleted garden design list:', error);
     throw error;
   }
+};
+
+/**
+ * 更新图片的收藏状态
+ */
+export const updateGardenDesignLikeStatus = async (imageId: number, isLike: number): Promise<GardenDesignImage> => {
+  try {
+    const user = await getCurrentUser();
+    
+    if (!user) {
+      throw new Error('Authentication required');
+    }
+    
+    console.log(`Calling API: ${API_URL}/garden-designs/${imageId}/like`);
+    
+    const response = await fetch(`${API_URL}/garden-designs/${imageId}/like`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ is_like: isLike }),
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('API error response:', errorData);
+      throw new Error(errorData.error || 'Failed to update garden design like status');
+    }
+    
+    const data = await response.json();
+    console.log('API success response for like status update:', data);
+    return data;
+  } catch (error) {
+    console.error('Error updating garden design like status:', error);
+    throw error;
+  }
+};
+
+/**
+ * 软删除图片
+ */
+export const deleteGardenDesign = async (imageId: number): Promise<GardenDesignImage> => {
+  try {
+    const user = await getCurrentUser();
+    
+    if (!user) {
+      throw new Error('Authentication required');
+    }
+    
+    console.log(`Calling API: ${API_URL}/garden-designs/${imageId}/delete`);
+    
+    const response = await fetch(`${API_URL}/garden-designs/${imageId}/delete`, {
+      method: 'PUT',
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('API error response:', errorData);
+      throw new Error(errorData.error || 'Failed to delete garden design');
+    }
+    
+    const data = await response.json();
+    console.log('API success response for delete:', data);
+    return data;
+  } catch (error) {
+    console.error('Error deleting garden design:', error);
+    throw error;
+  }
 }; 
