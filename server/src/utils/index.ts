@@ -1,3 +1,4 @@
-export * from './avatarGenerator';
+export * from './envCheck';
 export * from './debugEnv';
-export * from './envCheck'; 
+export * from './avatarGenerator';
+export * from './auth'; 

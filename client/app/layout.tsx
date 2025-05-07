@@ -4,6 +4,7 @@ import Script from 'next/script'
 import { UserProvider } from './contexts/UserContext'
 import { SessionProvider } from './contexts/SessionContext'
 import { EventBusProvider } from './contexts/EventBus'
+import { ProjectProvider } from './contexts/ProjectContext'
 
 export const metadata: Metadata = {
   title: 'AI Garden Design',
@@ -29,7 +30,9 @@ export default function RootLayout({
         <UserProvider>
           <SessionProvider>
             <EventBusProvider>
-              <main>{children}</main>
+              <ProjectProvider>
+                <main>{children}</main>
+              </ProjectProvider>
             </EventBusProvider>
           </SessionProvider>
         </UserProvider>

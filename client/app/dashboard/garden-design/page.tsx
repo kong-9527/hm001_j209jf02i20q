@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState, FormEvent, useRef, DragEvent, useEffect } from 'react';
+import React, { useState, FormEvent, useRef, useEffect } from 'react';
+import type { DragEvent } from 'react';
 import Image from 'next/image';
 import gardenStylesData from '../../data/gardenStyles';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
+import { getGardenDesignImages, GardenDesignImage } from '@/app/services/gardenDesignService';
+import { useProject } from '@/app/contexts/ProjectContext';
 
 // 定义图片数据类型
 interface ImageData {
@@ -38,11 +41,13 @@ interface GardenStyle {
 export default function PhotoGenerator() {
   const [selectedTab, setSelectedTab] = useState('premade');
   const [uploadedImage, setUploadedImage] = useState(true); // 默认已上传图片状态，实际应用中默认为false
-  const [recentImagesState, setRecentImagesState] = useState<'empty' | 'single' | 'multiple' | 'many'>('single'); // 默认显示单图状态
+  const [recentImagesState, setRecentImagesState] = useState<'empty' | 'single' | 'multiple' | 'many'>('empty'); // 默认显示为空状态
+  const [recentImages, setRecentImages] = useState<GardenDesignImage[]>([]);
   const [debugInput, setDebugInput] = useState('');
   const [draggedImage, setDraggedImage] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const uploadAreaRef = useRef<HTMLDivElement>(null);
+  const { currentProject } = useProject();
   
   // 结构相似度相关状态
   const [resemblancePercent, setResemblancePercent] = useState(75); // 默认75%
@@ -909,37 +914,52 @@ export default function PhotoGenerator() {
   const handleDebugSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // 控制图片上传状态
-    if (debugInput.includes('2：有图')) {
-      setUploadedImage(true);
-      console.log("设置为已上传状态");
-    } else if (debugInput.includes('2：空')) {
-      setUploadedImage(false);
-      console.log("设置为未上传状态");
-    }
-    
-    // 控制最近图片状态
-    if (debugInput.includes('1：空')) {
-      setRecentImagesState('empty');
-      console.log("设置为空状态");
-    } else if (debugInput.includes('1：有图')) {
-      setRecentImagesState('single');
-      console.log("设置为单图状态");
-    } else if (debugInput.includes('1：多图')) {
-      setRecentImagesState('multiple');
-      console.log("设置为多图状态");
-    } else if (debugInput.includes('1:20图') || debugInput.includes('1:20图')) {
-      setRecentImagesState('many');
-      console.log("设置为20图状态");
-    }
-    
     // 清空输入框
     setDebugInput('');
+  };
+  
+  // 获取花园设计图片数据
+  useEffect(() => {
+    const fetchGardenDesignImages = async () => {
+      if (!currentProject) {
+        console.log('No current project, skipping API call');
+        return;
+      }
+      
+      console.log('Fetching garden design images for project:', currentProject.id);
+      
+      try {
+        const images = await getGardenDesignImages(currentProject.id);
+        console.log('Received garden design images:', images);
+        setRecentImages(images);
+        
+        // 根据图片数量设置状态
+        if (images.length === 0) {
+          setRecentImagesState('empty');
+        } else if (images.length <= 4) {
+          setRecentImagesState('single');
+        } else if (images.length <= 8) {
+          setRecentImagesState('multiple');
+        } else {
+          setRecentImagesState('many');
+        }
+      } catch (error) {
+        console.error('Failed to fetch garden design images:', error);
+        setRecentImagesState('empty');
+      }
+    };
     
-    // 可以在控制台输出当前状态，方便调试
-    console.log('Debug input:', debugInput);
-    console.log('Uploaded image state:', uploadedImage);
-    console.log('Recent images state:', recentImagesState);
+    fetchGardenDesignImages();
+  }, [currentProject]);
+  
+  // 为每种状态定义对应的图片数据 - 使用API获取的真实数据
+  const getRecentImagesData = () => {
+    // 对images按照ctime倒序排序
+    const sortedImages = [...recentImages].sort((a, b) => {
+      return (b.ctime || 0) - (a.ctime || 0);
+    });
+    
+    return sortedImages;
   };
   
   // 渲染最近图片内容
@@ -958,7 +978,7 @@ export default function PhotoGenerator() {
       case 'single':
       case 'multiple':
       case 'many':
-        const imageData = imageDataMap[recentImagesState];
+        const imageData = getRecentImagesData();
         
         // 单张图片不需要滚动容器
         if (recentImagesState === 'single') {
@@ -969,19 +989,19 @@ export default function PhotoGenerator() {
                   key={image.id} 
                   className="relative aspect-square bg-gray-100 rounded-md overflow-hidden cursor-move"
                   draggable
-                  onDragStart={(e) => handleDragStart(e, image.src)}
+                  onDragStart={(e) => handleDragStart(e, image.pic_orginial || '')}
                   onDragEnd={handleDragEnd}
                 >
                   <Image 
-                    src={image.src}
-                    alt={image.alt}
+                    src={image.pic_orginial || ''}
+                    alt={image.style_name || 'Garden design'}
                     fill
                     sizes="100%"
                     style={{objectFit: 'cover'}}
                     className="hover:opacity-80 transition-opacity cursor-pointer"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1">
-                    {image.date}
+                    {image.ctime ? new Date(image.ctime * 1000).toISOString().split('T')[0].replace(/-/g, '/') : ''}
                   </div>
                 </div>
               ))}
@@ -998,19 +1018,19 @@ export default function PhotoGenerator() {
                   key={image.id} 
                   className="relative aspect-square bg-gray-100 rounded-md overflow-hidden cursor-move"
                   draggable
-                  onDragStart={(e) => handleDragStart(e, image.src)}
+                  onDragStart={(e) => handleDragStart(e, image.pic_orginial || '')}
                   onDragEnd={handleDragEnd}
                 >
                   <Image 
-                    src={image.src}
-                    alt={image.alt}
+                    src={image.pic_orginial || ''}
+                    alt={image.style_name || 'Garden design'}
                     fill
                     sizes="100%"
                     style={{objectFit: 'cover'}}
                     className="hover:opacity-80 transition-opacity cursor-pointer"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1">
-                    {image.date}
+                    {image.ctime ? new Date(image.ctime * 1000).toISOString().split('T')[0].replace(/-/g, '/') : ''}
                   </div>
                 </div>
               ))}

@@ -36,6 +36,7 @@ import goodsRoutes from './routes/goodsRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import projectRoutes from './routes/projectRoutes';
+import gardenDesignRoutes from './routes/gardenDesignRoutes';
 import passport from './config/passport';
 import checkEnvVariables from './utils/envCheck';
 
@@ -87,6 +88,7 @@ app.use('/api/goods', goodsRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/garden-designs', gardenDesignRoutes);
 
 // 启动服务器
 app.listen(PORT, () => {

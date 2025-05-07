@@ -2,15 +2,16 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useUser } from './UserContext';
+import { getUserProjects, Project as ServiceProject } from '../services/projectService';
 
-// 定义项目类型
+// 定义项目类型 - 与服务中的类型保持一致
 interface Project {
   id: number;
   project_name: string;
   project_pic: string | null;
   user_id: number;
-  ctime: number;
-  utime: number;
+  ctime: string; // 更改为字符串类型，与服务类型保持一致
+  utime: string; // 更改为字符串类型，与服务类型保持一致
 }
 
 // 定义上下文类型
@@ -39,11 +40,11 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/projects');
-      if (!response.ok) {
-        throw new Error('Failed to fetch projects');
-      }
-      const data = await response.json();
+      
+      // 使用服务函数获取项目列表
+      const data = await getUserProjects();
+      console.log('Fetched projects:', data);
+      
       setProjects(data);
       
       // 如果没有当前选中的项目，且有项目列表，则自动选择第一个项目
@@ -52,6 +53,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Error fetching projects:', err);
     } finally {
       setLoading(false);
     }
