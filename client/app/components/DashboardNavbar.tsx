@@ -59,9 +59,9 @@ export default function DashboardNavbar() {
     setIsCreateModalOpen(true);
   };
   
-  const handleCreateProject = (projectName: string) => {
+  const handleCreateProject = (projectData: { project_name: string; project_pic?: string }) => {
     // 这里处理创建项目的逻辑
-    console.log('Creating project:', projectName);
+    console.log('Creating project:', projectData);
     // 创建完成后可以执行其他操作
   };
   
