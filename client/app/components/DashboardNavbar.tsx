@@ -55,7 +55,7 @@ export default function DashboardNavbar() {
           }
         } 
         // 如果没有保存的项目ID，但有项目，则选中第一个
-        else {
+        else if (!selectedProject) {
           setSelectedProject(projectsData[0]);
           localStorage.setItem('selectedProjectId', projectsData[0].id.toString());
         }
@@ -81,14 +81,9 @@ export default function DashboardNavbar() {
   // 监听项目更新事件
   useEffect(() => {
     // 订阅项目更新事件
-    const unsubscribe = on('projects_updated', ({ selectedProjectId }) => {
+    const unsubscribe = on('projects_updated', ({ selectedProjectId, refreshProjectsPage }) => {
       console.log('Projects updated event received, refreshing projects list');
       fetchProjects();
-      
-      // 如果事件中包含了选中项目ID，则更新选中的项目
-      if (selectedProjectId) {
-        localStorage.setItem('selectedProjectId', selectedProjectId.toString());
-      }
     });
     
     // 清理订阅
@@ -133,18 +128,37 @@ export default function DashboardNavbar() {
   const handleCreateProject = async (projectData: { project_name: string; project_pic?: string }) => {
     try {
       const newProject = await createProject(projectData);
+      
+      // 获取当前是否已有选中的项目
+      const hasSelectedProject = selectedProject !== null;
+      const currentSelectedProjectId = selectedProject?.id;
+      
+      // 更新项目列表
       const updatedProjects = [...projects, newProject];
       setProjects(updatedProjects);
       
-      // 如果这是第一个创建的项目，则自动选中它
-      if (updatedProjects.length === 1) {
+      if (!hasSelectedProject) {
+        // 如果当前没有选中的项目，则选中新创建的项目
         setSelectedProject(newProject);
         localStorage.setItem('selectedProjectId', newProject.id.toString());
-        // 重定向到garden-design页面
-        router.push('/dashboard/garden-design');
+        
+        // 如果这是第一个创建的项目，则重定向到garden-design页面
+        if (updatedProjects.length === 1) {
+          router.push('/dashboard/garden-design');
+        } else {
+          // 通知项目列表页面更新，但保持当前选中的项目
+          emit('projects_updated', { 
+            selectedProjectId: newProject.id, 
+            refreshProjectsPage: true 
+          });
+        }
       } else {
-        // 通知项目列表页面更新
-        emit('projects_updated', { selectedProjectId: newProject.id, refreshProjectsPage: true });
+        // 如果当前已有选中的项目，则保持不变
+        // 通知项目列表页面更新，保持当前选中的项目
+        emit('projects_updated', { 
+          selectedProjectId: currentSelectedProjectId, 
+          refreshProjectsPage: true 
+        });
       }
     } catch (error) {
       console.error('Error creating project:', error);

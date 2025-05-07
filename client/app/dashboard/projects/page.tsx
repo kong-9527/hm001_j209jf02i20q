@@ -71,11 +71,19 @@ export default function ProjectsPage() {
       // 创建项目后，重新获取完整的项目列表以确保排序正确
       await fetchProjects();
       
-      // 保存选中的项目ID到localStorage
-      localStorage.setItem('selectedProjectId', newProject.id.toString());
+      // 获取当前选中的项目ID
+      const currentSelectedProjectId = localStorage.getItem('selectedProjectId');
+      const hasSelectedProject = currentSelectedProjectId !== null;
       
-      // 通知DashboardNavbar更新项目列表和选中的项目
-      emit('projects_updated', { selectedProjectId: newProject.id });
+      if (!hasSelectedProject) {
+        // 如果当前没有选中的项目，则选中新创建的
+        localStorage.setItem('selectedProjectId', newProject.id.toString());
+        // 通知DashboardNavbar更新项目列表和选中的项目
+        emit('projects_updated', { selectedProjectId: newProject.id });
+      } else {
+        // 如果已有选中的项目，则保持当前选中状态
+        emit('projects_updated', { selectedProjectId: parseInt(currentSelectedProjectId!) });
+      }
     } catch (err) {
       console.error('Error creating project:', err);
     }
