@@ -9,6 +9,14 @@ if (JWT_SECRET === 'your-secret-key') {
   console.warn('警告: 使用默认的JWT密钥。在生产环境中，请在.env文件中设置JWT_SECRET环境变量。');
 }
 
+// 定义JWT解析后的用户类型
+interface JwtPayload {
+  id: number;
+  email?: string;
+  name?: string;
+  [key: string]: any;
+}
+
 // JWT认证中间件
 export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
   // 从cookie中获取token
@@ -24,7 +32,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
   try {
     // 验证token
-    const user = jwt.verify(token, JWT_SECRET);
+    const user = jwt.verify(token, JWT_SECRET) as JwtPayload;
     
     // 将用户信息添加到请求对象中
     req.user = user;

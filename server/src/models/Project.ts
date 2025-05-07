@@ -8,8 +8,8 @@ interface ProjectAttributes {
   project_name: string | null;
   project_pic: string | null;
   user_id: number | null;
-  ctime: Date | null;
-  utime: Date | null;
+  ctime: number | null;
+  utime: number | null;
 }
 
 // 创建时的可选属性
@@ -21,8 +21,8 @@ class Project extends Model<ProjectAttributes, ProjectCreationAttributes> implem
   public project_name!: string | null;
   public project_pic!: string | null;
   public user_id!: number | null;
-  public ctime!: Date | null;
-  public utime!: Date | null;
+  public ctime!: number | null;
+  public utime!: number | null;
 }
 
 // 初始化模型
@@ -46,11 +46,11 @@ Project.init(
       allowNull: true,
     },
     ctime: {
-      type: DataTypes.DATE,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     utime: {
-      type: DataTypes.DATE,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
   },

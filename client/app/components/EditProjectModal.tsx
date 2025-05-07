@@ -1,28 +1,49 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import ImageUploader from './ImageUploader';
 
 interface EditProjectModalProps {
   onClose: () => void;
-  onSubmit: (projectId: number, projectName: string) => void;
+  onSubmit: (projectId: number, projectData: { project_name: string; project_pic?: string }) => void;
   projectId: number;
   currentName: string;
+  currentPic?: string | null;
 }
 
-export function EditProjectModal({ onClose, onSubmit, projectId, currentName }: EditProjectModalProps) {
+export function EditProjectModal({ 
+  onClose, 
+  onSubmit, 
+  projectId, 
+  currentName,
+  currentPic = null
+}: EditProjectModalProps) {
   const [projectName, setProjectName] = useState(currentName);
+  const [projectPic, setProjectPic] = useState<string | null>(currentPic);
   
   useEffect(() => {
     setProjectName(currentName);
-  }, [currentName]);
+    setProjectPic(currentPic);
+  }, [currentName, currentPic]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectName.trim()) return;
     
-    onSubmit(projectId, projectName);
+    const projectData = {
+      project_name: projectName,
+      ...(projectPic && { project_pic: projectPic })
+    };
+    
+    onSubmit(projectId, projectData);
     onClose();
   };
+  
+  const handleImageUploaded = (imageUrl: string) => {
+    setProjectPic(imageUrl);
+  };
+  
+  const isFormChanged = projectName !== currentName || projectPic !== currentPic;
   
   return (
     <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50">
@@ -32,13 +53,26 @@ export function EditProjectModal({ onClose, onSubmit, projectId, currentName }: 
           
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Project Name
+              </label>
               <input
                 type="text"
-                placeholder="Project name"
+                placeholder="Enter project name"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 required
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Garden Photo
+              </label>
+              <ImageUploader 
+                onImageUploaded={handleImageUploaded}
+                currentImage={projectPic}
               />
             </div>
             
@@ -53,9 +87,9 @@ export function EditProjectModal({ onClose, onSubmit, projectId, currentName }: 
               <button
                 type="submit"
                 className={`px-4 py-2 text-sm font-medium text-white rounded-md ${
-                  projectName.trim() ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-300'
+                  projectName.trim() && isFormChanged ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-300'
                 }`}
-                disabled={!projectName.trim() || projectName === currentName}
+                disabled={!projectName.trim() || !isFormChanged}
               >
                 Save Changes
               </button>

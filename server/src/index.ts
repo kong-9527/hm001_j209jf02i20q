@@ -34,6 +34,8 @@ import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
 import goodsRoutes from './routes/goodsRoutes';
 import paymentRoutes from './routes/paymentRoutes';
+import uploadRoutes from './routes/uploadRoutes';
+import projectRoutes from './routes/projectRoutes';
 import passport from './config/passport';
 import checkEnvVariables from './utils/envCheck';
 
@@ -61,6 +63,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 
+// 静态文件服务
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // 测试数据库连接
 sequelize.authenticate()
   .then(() => {
@@ -80,6 +85,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/goods', goodsRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/projects', projectRoutes);
 
 // 启动服务器
 app.listen(PORT, () => {

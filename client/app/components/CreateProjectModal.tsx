@@ -1,21 +1,32 @@
 'use client';
 
 import { useState } from 'react';
+import ImageUploader from './ImageUploader';
 
 interface CreateProjectModalProps {
   onClose: () => void;
-  onSubmit: (projectName: string) => void;
+  onSubmit: (projectData: { project_name: string; project_pic?: string }) => void;
 }
 
 export function CreateProjectModal({ onClose, onSubmit }: CreateProjectModalProps) {
   const [projectName, setProjectName] = useState('');
+  const [projectPic, setProjectPic] = useState<string | null>(null);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectName.trim()) return;
     
-    onSubmit(projectName);
+    const projectData = {
+      project_name: projectName,
+      ...(projectPic && { project_pic: projectPic })
+    };
+    
+    onSubmit(projectData);
     onClose();
+  };
+  
+  const handleImageUploaded = (imageUrl: string) => {
+    setProjectPic(imageUrl);
   };
   
   return (
@@ -26,13 +37,26 @@ export function CreateProjectModal({ onClose, onSubmit }: CreateProjectModalProp
           
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Project Name
+              </label>
               <input
                 type="text"
-                placeholder="Project name"
+                placeholder="Enter project name"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 required
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Garden Photo
+              </label>
+              <ImageUploader 
+                onImageUploaded={handleImageUploaded}
+                currentImage={projectPic}
               />
             </div>
             
