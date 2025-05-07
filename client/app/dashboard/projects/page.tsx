@@ -7,6 +7,7 @@ import { EditProjectModal } from '@/app/components/EditProjectModal';
 import { DeleteConfirmModal } from '@/app/components/DeleteConfirmModal';
 import { getUserProjects, createProject, updateProject, deleteProject, Project } from '@/app/services/projectService';
 import { useRouter } from 'next/navigation';
+import { useEventBus } from '@/app/contexts/EventBus';
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -18,6 +19,8 @@ export default function ProjectsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  // 使用事件总线
+  const { emit } = useEventBus();
   
   // 加载项目列表
   useEffect(() => {
@@ -48,10 +51,8 @@ export default function ProjectsPage() {
       // 保存选中的项目ID到localStorage
       localStorage.setItem('selectedProjectId', newProject.id.toString());
       
-      // 如果这是第一个创建的项目，则重定向到garden-design页面
-      if (projects.length === 0) {
-        router.push('/dashboard/garden-design');
-      }
+      // 通知DashboardNavbar更新项目列表和选中的项目
+      emit('projects_updated', { selectedProjectId: newProject.id });
     } catch (err) {
       console.error('Error creating project:', err);
     }
@@ -61,9 +62,19 @@ export default function ProjectsPage() {
   const handleEditProject = async (projectId: number, projectData: { project_name: string; project_pic?: string }) => {
     try {
       const updatedProject = await updateProject(projectId, projectData);
+      
+      // 更新本地项目列表
       setProjects(projects.map(project => 
         project.id === projectId ? updatedProject : project
       ));
+      
+      // 判断编辑的是否为当前选中的项目
+      const selectedProjectId = localStorage.getItem('selectedProjectId');
+      
+      // 通知DashboardNavbar更新项目列表
+      emit('projects_updated', { 
+        selectedProjectId: selectedProjectId ? parseInt(selectedProjectId) : null 
+      });
     } catch (err) {
       console.error('Error updating project:', err);
     }
@@ -86,7 +97,31 @@ export default function ProjectsPage() {
     if (deletingProject) {
       try {
         await deleteProject(deletingProject.id);
-        setProjects(projects.filter(project => project.id !== deletingProject.id));
+        
+        // 获取当前选中的项目ID
+        const selectedProjectId = localStorage.getItem('selectedProjectId');
+        const isSelectedProject = selectedProjectId && parseInt(selectedProjectId) === deletingProject.id;
+        
+        // 更新本地项目列表
+        const updatedProjects = projects.filter(project => project.id !== deletingProject.id);
+        setProjects(updatedProjects);
+        
+        // 根据删除后的项目列表和是否删除了当前选中的项目来决定如何更新
+        if (isSelectedProject) {
+          // 删除的是当前选中的项目
+          if (updatedProjects.length > 0) {
+            // 如果还有其他项目，选中第一个
+            localStorage.setItem('selectedProjectId', updatedProjects[0].id.toString());
+            emit('projects_updated', { selectedProjectId: updatedProjects[0].id });
+          } else {
+            // 如果没有项目了，清除选中的项目
+            localStorage.removeItem('selectedProjectId');
+            emit('projects_updated', { selectedProjectId: null });
+          }
+        } else {
+          // 删除的不是当前选中的项目，只需通知更新项目列表
+          emit('projects_updated', { selectedProjectId: selectedProjectId ? parseInt(selectedProjectId) : null });
+        }
       } catch (err) {
         console.error('Error deleting project:', err);
       } finally {

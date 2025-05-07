@@ -18,17 +18,8 @@ export default function Dashboard() {
         if (userData) {
           setUser(userData);
           
-          // 获取用户项目列表
-          const projects = await getUserProjects();
-          
-          // 根据项目数量决定重定向目标
-          if (projects.length === 0) {
-            // 用户没有项目，重定向到项目管理页面
-            router.push('/dashboard/projects');
-          } else {
-            // 用户有项目，重定向到花园设计页面
-            router.push('/dashboard/garden-design');
-          }
+          // 无论项目数量如何，都重定向到项目管理页面
+          router.push('/dashboard/projects');
         } else {
           // 如果没有用户数据，重定向到登录页面
           router.push('/signin');

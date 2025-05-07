@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { CreateProjectModal } from './CreateProjectModal';
 import { useUser } from '../contexts/UserContext';
 import { getUserProjects, createProject, Project } from '../services/projectService';
+import { useEventBus } from '../contexts/EventBus';
 
 export default function DashboardNavbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -19,54 +20,82 @@ export default function DashboardNavbar() {
   // 使用用户上下文
   const { user, loading, logout } = useUser();
   const router = useRouter();
+  // 使用事件总线
+  const { on } = useEventBus();
   
   const projectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const profileTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 获取用户项目列表
-  useEffect(() => {
-    const fetchProjects = async () => {
-      if (!user) return;
+  const fetchProjects = async () => {
+    if (!user) return;
+    
+    try {
+      setIsLoading(true);
+      const projectsData = await getUserProjects();
+      setProjects(projectsData);
       
-      try {
-        setIsLoading(true);
-        const projectsData = await getUserProjects();
-        setProjects(projectsData);
+      // 当获取到项目列表后，判断是否有项目
+      if (projectsData.length > 0) {
+        // 读取localStorage中保存的项目ID
+        const savedProjectId = localStorage.getItem('selectedProjectId');
         
-        // 当获取到项目列表后，判断是否有项目
-        if (projectsData.length > 0) {
-          // 读取localStorage中保存的项目ID
-          const savedProjectId = localStorage.getItem('selectedProjectId');
+        if (savedProjectId) {
+          // 如果有保存的项目ID，查找匹配的项目
+          const savedProject = projectsData.find(p => p.id.toString() === savedProjectId);
           
-          if (savedProjectId) {
-            // 如果有保存的项目ID，查找匹配的项目
-            const savedProject = projectsData.find(p => p.id.toString() === savedProjectId);
-            
-            // 如果找到了匹配的项目，则选中它
-            if (savedProject && !selectedProject) {
-              setSelectedProject(savedProject);
-            }
-            // 如果没找到匹配的项目但有项目列表，选择第一个
-            else if (!selectedProject) {
-              setSelectedProject(projectsData[0]);
-              localStorage.setItem('selectedProjectId', projectsData[0].id.toString());
-            }
-          } 
-          // 如果没有保存的项目ID，但有项目且没有选中的项目，则选中第一个
-          else if (!selectedProject) {
+          // 如果找到了匹配的项目，则选中它
+          if (savedProject) {
+            setSelectedProject(savedProject);
+          }
+          // 如果没找到匹配的项目但有项目列表，选择第一个
+          else {
             setSelectedProject(projectsData[0]);
             localStorage.setItem('selectedProjectId', projectsData[0].id.toString());
           }
+        } 
+        // 如果没有保存的项目ID，但有项目，则选中第一个
+        else {
+          setSelectedProject(projectsData[0]);
+          localStorage.setItem('selectedProjectId', projectsData[0].id.toString());
         }
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        // 如果没有项目了，将selectedProject设为null
+        setSelectedProject(null);
+        localStorage.removeItem('selectedProjectId');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchProjects();
+  // 初始加载项目列表
+  useEffect(() => {
+    if (user) {
+      fetchProjects();
+    }
   }, [user]);
+  
+  // 监听项目更新事件
+  useEffect(() => {
+    // 订阅项目更新事件
+    const unsubscribe = on('projects_updated', ({ selectedProjectId }) => {
+      console.log('Projects updated event received, refreshing projects list');
+      fetchProjects();
+      
+      // 如果事件中包含了选中项目ID，则更新选中的项目
+      if (selectedProjectId) {
+        localStorage.setItem('selectedProjectId', selectedProjectId.toString());
+      }
+    });
+    
+    // 清理订阅
+    return () => {
+      unsubscribe();
+    };
+  }, [on]);
   
   const handleProjectMouseEnter = () => {
     if (projectTimerRef.current) {
