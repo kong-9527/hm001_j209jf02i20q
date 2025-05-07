@@ -6,11 +6,14 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { CreateProjectModal } from './CreateProjectModal';
 import { useUser } from '../contexts/UserContext';
+import { getUserProjects, createProject, Project } from '../services/projectService';
 
 export default function DashboardNavbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isProjectOpen, setIsProjectOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // 使用用户上下文
   const { user, loading, logout } = useUser();
@@ -18,13 +21,25 @@ export default function DashboardNavbar() {
   
   const projectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const profileTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const projects = [
-    { id: 1, name: "My Backyard Garden" },
-    { id: 2, name: "Front Yard Renovation" },
-    { id: 3, name: "Rooftop Garden" },
-    { id: 4, name: "Community Project" }
-  ];
+
+  // 获取用户项目列表
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (!user) return;
+      
+      try {
+        setIsLoading(true);
+        const projectsData = await getUserProjects();
+        setProjects(projectsData);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, [user]);
   
   const handleProjectMouseEnter = () => {
     if (projectTimerRef.current) {
@@ -59,10 +74,13 @@ export default function DashboardNavbar() {
     setIsCreateModalOpen(true);
   };
   
-  const handleCreateProject = (projectData: { project_name: string; project_pic?: string }) => {
-    // 这里处理创建项目的逻辑
-    console.log('Creating project:', projectData);
-    // 创建完成后可以执行其他操作
+  const handleCreateProject = async (projectData: { project_name: string; project_pic?: string }) => {
+    try {
+      const newProject = await createProject(projectData);
+      setProjects([...projects, newProject]);
+    } catch (error) {
+      console.error('Error creating project:', error);
+    }
   };
   
   // 处理登出
@@ -149,16 +167,20 @@ export default function DashboardNavbar() {
                 
                 {isProjectOpen && (
                   <div className="absolute left-0 mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-10">
-                    <div className="max-h-48 overflow-y-auto">
-                      {projects.map(project => (
-                        <button 
-                          key={project.id} 
-                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          {project.name}
-                        </button>
-                      ))}
-                    </div>
+                    {isLoading ? (
+                      <div className="px-4 py-2 text-sm text-gray-500">Loading...</div>
+                    ) : projects.length > 0 ? (
+                      <div className="max-h-48 overflow-y-auto">
+                        {projects.map(project => (
+                          <button 
+                            key={project.id} 
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            {project.project_name}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
                     
                     <div className="border-t border-gray-100 mt-1 pt-1">
                       <button 
