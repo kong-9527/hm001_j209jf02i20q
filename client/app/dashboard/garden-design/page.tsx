@@ -5,7 +5,7 @@ import type { DragEvent } from 'react';
 import Image from 'next/image';
 import gardenStylesData from '../../data/gardenStyles';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
-import { getGardenDesignImages, GardenDesignImage } from '@/app/services/gardenDesignService';
+import { getGardenDesignImages, getGardenDesignList, GardenDesignImage } from '@/app/services/gardenDesignService';
 import { useProject } from '@/app/contexts/ProjectContext';
 
 // 定义图片数据类型
@@ -43,6 +43,7 @@ export default function PhotoGenerator() {
   const [uploadedImage, setUploadedImage] = useState(true); // 默认已上传图片状态，实际应用中默认为false
   const [recentImagesState, setRecentImagesState] = useState<'empty' | 'single' | 'multiple' | 'many'>('empty'); // 默认显示为空状态
   const [recentImages, setRecentImages] = useState<GardenDesignImage[]>([]);
+  const [designImages, setDesignImages] = useState<GardenDesignImage[]>([]);
   const [debugInput, setDebugInput] = useState('');
   const [draggedImage, setDraggedImage] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -952,6 +953,29 @@ export default function PhotoGenerator() {
     fetchGardenDesignImages();
   }, [currentProject]);
   
+  // 获取花园设计图片列表数据
+  useEffect(() => {
+    const fetchGardenDesignList = async () => {
+      if (!currentProject) {
+        console.log('No current project, skipping design list API call');
+        return;
+      }
+      
+      console.log('Fetching garden design list for project:', currentProject.id);
+      
+      try {
+        const images = await getGardenDesignList(currentProject.id);
+        console.log('Received garden design list:', images);
+        setDesignImages(images);
+      } catch (error) {
+        console.error('Failed to fetch garden design list:', error);
+        setDesignImages([]);
+      }
+    };
+    
+    fetchGardenDesignList();
+  }, [currentProject]);
+  
   // 为每种状态定义对应的图片数据 - 使用API获取的真实数据
   const getRecentImagesData = () => {
     // 对images按照ctime倒序排序
@@ -1057,136 +1081,9 @@ export default function PhotoGenerator() {
     }
   };
   
-  // 创建模拟JSON数据，格式化的花园图片数据
-  const mockGardenImagesData = [
-    {
-      "id": 1,
-      "src": "/uploads/garden-sample.png",
-      "alt": "日式禅园",
-      "style": "日式庭院",
-      "tags": ["日式", "禅意", "枯山水"],
-      "createTime": "2024-03-15T09:30:00Z",
-      "liked": true,
-      "status": "processing", // 添加生成中状态
-      "size": "1024 * 768"
-    },
-    {
-      "id": 2,
-      "src": "/uploads/garden-sample.png",
-      "alt": "英国乡村庭院",
-      "style": "英式花园",
-      "tags": ["乡村", "花卉", "自然"],
-      "createTime": "2024-03-16T10:25:00Z",
-      "liked": false,
-      "size": "1024 * 768"
-    },
-    {
-      "id": 3,
-      "src": "/uploads/garden-sample.png",
-      "alt": "几何现代庭院",
-      "style": "现代简约",
-      "tags": ["几何", "简约", "都市"],
-      "createTime": "2024-03-17T14:10:00Z",
-      "liked": false,
-      "size": "1024 * 768"
-    },
-    {
-      "id": 4,
-      "src": "/uploads/garden-sample.png",
-      "alt": "热带雨林花园",
-      "style": "热带风情",
-      "tags": ["热带", "多彩", "雨林"],
-      "createTime": "2024-03-18T11:45:00Z",
-      "liked": true,
-      "size": "1024 * 768"
-    },
-    {
-      "id": 5,
-      "src": "/uploads/garden-sample.png",
-      "alt": "地中海庭院",
-      "style": "地中海风格",
-      "tags": ["蓝白", "阳光", "悠闲"],
-      "createTime": "2024-03-19T16:20:00Z",
-      "liked": false,
-      "size": "1024 * 768"
-    },
-    {
-      "id": 6,
-      "src": "/uploads/garden-sample.png",
-      "alt": "石庭枯山水",
-      "style": "Custom Style",
-      "tags": ["石头", "枯山水", "禅意"],
-      "createTime": "2024-03-20T09:15:00Z",
-      "liked": false,
-      "size": "1024 * 768",
-      "positiveWords": ["禅意", "石头", "简约", "平衡", "冥想"],
-      "negativeWords": ["喧嚣", "复杂", "杂乱", "过于色彩丰富", "不自然"]
-    },
-    {
-      "id": 7,
-      "src": "/uploads/garden-sample.png",
-      "alt": "维多利亚花园",
-      "style": "英式花园",
-      "tags": ["繁花", "古典", "优雅"],
-      "createTime": "2024-03-21T13:40:00Z",
-      "liked": true,
-      "size": "1024 * 768"
-    },
-    {
-      "id": 8,
-      "src": "/uploads/garden-sample.png",
-      "alt": "极简屋顶花园",
-      "style": "现代简约",
-      "tags": ["简约", "线条", "空间感"],
-      "createTime": "2024-03-22T15:55:00Z",
-      "liked": false,
-      "size": "1024 * 768"
-    },
-    {
-      "id": 9,
-      "src": "/uploads/garden-sample.png",
-      "alt": "巴厘岛风情花园",
-      "style": "热带风情",
-      "tags": ["棕榈", "热带", "度假"],
-      "createTime": "2024-03-23T10:30:00Z",
-      "liked": false,
-      "size": "1024 * 768"
-    },
-    {
-      "id": 10,
-      "src": "/uploads/garden-sample.png",
-      "alt": "爱琴海庭院",
-      "style": "地中海风格",
-      "tags": ["白墙", "蓝色", "阳光"],
-      "createTime": "2024-03-24T12:00:00Z",
-      "liked": true,
-      "size": "1024 * 768"
-    },
-    {
-      "id": 11,
-      "src": "/uploads/garden-sample.png",
-      "alt": "京都庭院",
-      "style": "日式庭院",
-      "tags": ["竹子", "流水", "冥想"],
-      "createTime": "2024-03-25T11:20:00Z",
-      "liked": false,
-      "size": "1024 * 768"
-    },
-    {
-      "id": 12,
-      "src": "/uploads/garden-sample.png",
-      "alt": "康沃尔郡花园",
-      "style": "英式花园",
-      "tags": ["玫瑰", "田园", "自然"],
-      "createTime": "2024-03-26T14:15:00Z",
-      "liked": false,
-      "size": "1024 * 768"
-    }
-  ];
-  
   // 渲染所有图片
   const renderAllImages = () => {
-    if (recentImagesState === 'empty') {
+    if (designImages.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center p-16">
           <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -1200,8 +1097,10 @@ export default function PhotoGenerator() {
       );
     }
     
-    // 使用模拟JSON数据
-    const imageData = mockGardenImagesData;
+    // 使用API数据，按照ctime倒序排序
+    const imageData = [...designImages].sort((a, b) => {
+      return (b.ctime || 0) - (a.ctime || 0);
+    });
     
     return (
       <div className="max-h-[calc(100vh-21em)] overflow-y-auto p-6 scrollbar-thin">
@@ -1209,20 +1108,20 @@ export default function PhotoGenerator() {
           {imageData.map((image) => (
             <div  
               key={image.id} 
-              className={`relative aspect-square bg-gray-100 rounded-md overflow-hidden ${image.status !== "processing" ? "group" : ""}`}
+              className={`relative aspect-square bg-gray-100 rounded-md overflow-hidden ${image.status !== 1 ? "group" : ""}`}
             >
               {/* 所有状态都显示背景图片 */}
               <Image 
-                src={image.src}
-                alt={image.alt}
+                src={image.pic_result || ''}
+                alt={image.style_name || 'Garden design'}
                 fill
                 sizes="100%"
                 style={{objectFit: 'cover'}}
-                className={`${image.status !== "processing" ? "hover:opacity-80 transition-opacity cursor-pointer" : "opacity-50"}`}
-                onClick={() => image.status !== "processing" && handleImageClick(image)}
+                className={`${image.status !== 1 ? "hover:opacity-80 transition-opacity cursor-pointer" : "opacity-50"}`}
+                onClick={() => image.status !== 1 && handleImageClick(image)}
               />
               
-              {image.status === "processing" && (
+              {image.status === 1 && (
                 // 生成中的状态显示 - 保留背景图片
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40">
                   <div className="w-12 h-12 mb-3 relative">
@@ -1239,11 +1138,11 @@ export default function PhotoGenerator() {
               
               {/* 显示风格名称 */}
               <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
-                {image.style}
+                {image.style_name}
               </div>
               
               {/* 只在非处理状态下显示操作按钮 */}
-              {image.status !== "processing" && (
+              {image.status !== 1 && (
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
                   {/* 添加下载按钮 */}
                   <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm">
@@ -1251,12 +1150,28 @@ export default function PhotoGenerator() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                     </svg>
                   </button>
-                  <button className={`p-1.5 rounded-full bg-white ${image.liked ? 'text-red-500' : 'text-gray-400'} hover:bg-red-100 shadow-sm`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill={image.liked ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                  
+                  {/* 添加收藏按钮 */}
+                  <button 
+                    className={`p-1.5 rounded-full bg-white ${image.is_like === 1 ? 'text-red-500' : 'text-gray-500 hover:text-red-500'} hover:bg-red-50 shadow-sm`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // 收藏图片的逻辑
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill={image.is_like === 1 ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                     </svg>
                   </button>
-                  <button className="p-1.5 rounded-full bg-white text-gray-700 hover:bg-gray-100 shadow-sm">
+                  
+                  {/* 添加删除按钮 */}
+                  <button 
+                    className="p-1.5 rounded-full bg-white text-gray-500 hover:text-red-500 hover:bg-red-50 shadow-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // 删除图片的逻辑
+                    }}
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                     </svg>
@@ -1272,20 +1187,95 @@ export default function PhotoGenerator() {
   
   // 渲染收藏图片
   const renderLikedImages = () => {
-    return (
-      <div className="flex flex-col items-center justify-center p-16">
-        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-400">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-          </svg>
+    // 过滤出已收藏的图片
+    const likedImages = designImages.filter(image => image.is_like === 1);
+    
+    if (likedImages.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center p-16">
+          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-400">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Liked Images</h3>
+          <p className="text-sm text-gray-500 text-center mb-4">Images you like will appear here</p>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No Liked Images</h3>
-        <p className="text-sm text-gray-500 text-center mb-4">You haven't liked any images yet</p>
+      );
+    }
+    
+    // 按照ctime倒序排序
+    const sortedImages = [...likedImages].sort((a, b) => {
+      return (b.ctime || 0) - (a.ctime || 0);
+    });
+    
+    // 与renderAllImages类似的渲染代码，这里简化了
+    return (
+      <div className="max-h-[calc(100vh-21em)] overflow-y-auto p-6 scrollbar-thin">
+        <div className="grid grid-cols-2 gap-2">
+          {sortedImages.map((image) => (
+            <div  
+              key={image.id} 
+              className="relative aspect-square bg-gray-100 rounded-md overflow-hidden group"
+            >
+              <Image 
+                src={image.pic_result || ''}
+                alt={image.style_name || 'Garden design'}
+                fill
+                sizes="100%"
+                style={{objectFit: 'cover'}}
+                className="hover:opacity-80 transition-opacity cursor-pointer"
+                onClick={() => handleImageClick(image)}
+              />
+              
+              {/* 显示风格名称 */}
+              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
+                {image.style_name}
+              </div>
+              
+              {/* 操作按钮 */}
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
+                {/* 添加下载按钮 */}
+                <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                </button>
+                
+                {/* 添加收藏按钮，这里应该始终是红色高亮状态 */}
+                <button 
+                  className="p-1.5 rounded-full bg-white text-red-500 hover:bg-red-50 shadow-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // 取消收藏图片的逻辑
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                  </svg>
+                </button>
+                
+                {/* 添加删除按钮 */}
+                <button 
+                  className="p-1.5 rounded-full bg-white text-gray-500 hover:text-red-500 hover:bg-red-50 shadow-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // 删除图片的逻辑
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
   
-  // 渲染删除图片
+  // 渲染删除的图片 - 当前API中没有删除状态，这里保持原样
   const renderDeletedImages = () => {
     return (
       <div className="flex flex-col items-center justify-center p-16">
@@ -1294,18 +1284,16 @@ export default function PhotoGenerator() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No Deleted Images</h3>
-        <p className="text-sm text-gray-500 text-center mb-4">Your deleted images will appear here</p>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Deleted Images</h3>
+        <p className="text-sm text-gray-500 text-center mb-4">Images you've deleted will appear here for 30 days</p>
       </div>
     );
   };
   
-  // 处理图片点击，打开详情弹窗
-  const handleImageClick = (image: any) => {
-    if (image.status !== 'processing') {
-      setSelectedImage(image);
-      setShowImageDetail(true);
-    }
+  // 处理图片点击 - 修改为使用GardenDesignImage类型
+  const handleImageClick = (image: GardenDesignImage) => {
+    setSelectedImage(image);
+    setShowImageDetail(true);
   };
 
   // 关闭图片详情弹窗
@@ -1325,8 +1313,8 @@ export default function PhotoGenerator() {
           <div className="relative w-full pt-6 px-6">
             <div className="relative w-full h-80 rounded-lg overflow-hidden">
               <Image 
-                src={selectedImage.src}
-                alt={selectedImage.alt}
+                src={selectedImage.pic_result || ''}
+                alt={selectedImage.style_name || 'Garden design'}
                 fill
                 style={{objectFit: 'cover'}}
                 className="w-full h-full"
@@ -1338,39 +1326,45 @@ export default function PhotoGenerator() {
           <div className="p-6">
             <div className="grid grid-cols-2 gap-y-4">
               <div className="text-gray-500">Style</div>
-              <div className="font-medium">{selectedImage.style}</div>
+              <div className="font-medium">{selectedImage.style_name || 'Unknown'}</div>
               
-              {/* 仅对Custom Style显示Positive/Negative Words */}
-              {selectedImage.style === "Custom Style" && (
-                <>
-                  <div className="text-gray-500">Positive Words</div>
-                  <div className="font-medium">{selectedImage.positiveWords?.join(', ') || 'Null'}</div>
-                  
-                  <div className="text-gray-500">Negative Words</div>
-                  <div className="font-medium">{selectedImage.negativeWords?.join(', ') || 'Null'}</div>
-                </>
-              )}
-              
-              <div className="text-gray-500">Structural Resemblance</div>
-              <div className="font-medium">22%</div>
-              
-              <div className="text-gray-500">Size</div>
-              <div className="font-medium">{selectedImage.size || '1024 * 768'}</div>
+              <div className="text-gray-500">Status</div>
+              <div className="font-medium">
+                {selectedImage.status === 1 ? 'Processing' : 
+                 selectedImage.status === 2 ? 'Success' : 
+                 selectedImage.status === 3 ? 'Failed' : 'Unknown'}
+              </div>
               
               <div className="text-gray-500">Created At</div>
-              <div className="font-medium">{new Date(selectedImage.createTime).toLocaleString()}</div>
+              <div className="font-medium">
+                {selectedImage.ctime 
+                  ? new Date(selectedImage.ctime * 1000).toLocaleString() 
+                  : 'Unknown'}
+              </div>
               
-              <div className="text-gray-500">View Original Image</div>
-              <div className="text-emerald-600 font-medium cursor-pointer">Click here</div>
+              {selectedImage.pic_orginial && (
+                <>
+                  <div className="text-gray-500">View Original Image</div>
+                  <div className="text-emerald-600 font-medium cursor-pointer" 
+                       onClick={() => window.open(selectedImage.pic_orginial || '', '_blank')}>
+                    Click here
+                  </div>
+                </>
+              )}
             </div>
             
             {/* 操作按钮 */}
             <div className="flex mt-6 gap-4">
-              <button className="flex-1 py-3 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition">
+              <button 
+                className="flex-1 py-3 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition"
+                onClick={() => window.open(selectedImage.pic_result || '', '_blank')}
+              >
                 Download Image
               </button>
-              <button className={`flex-1 py-3 rounded-md border ${selectedImage.liked ? 'bg-red-50 text-red-600 border-red-200' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'} transition`}>
-                {selectedImage.liked ? 'Liked' : 'Like'}
+              <button 
+                className={`flex-1 py-3 rounded-md border ${selectedImage.is_like === 1 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-white text-emerald-600 border-emerald-200 hover:bg-emerald-50'} transition`}
+              >
+                {selectedImage.is_like === 1 ? 'Liked' : 'Like'}
               </button>
             </div>
           </div>
