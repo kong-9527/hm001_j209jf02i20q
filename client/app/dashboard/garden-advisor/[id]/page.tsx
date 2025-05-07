@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import WithProjectCheck from '@/app/components/WithProjectCheck';
 
 export default function GardenAdvisorDetail() {
   const params = useParams();
@@ -34,6 +35,28 @@ export default function GardenAdvisorDetail() {
   };
 
   return (
+    <WithProjectCheck>
+      <div className="p-6">
+        <div className="flex items-center mb-8">
+          <Link 
+            href="/dashboard/garden-advisor" 
+            className="flex items-center text-gray-600 hover:text-primary mr-4"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            Back
+          </Link>
+          <h1 className="text-2xl font-semibold">Garden Plant Advisor</h1>
+        </div>
+        <h2 className="text-xl text-gray-800 mb-4" >Garden Plan</h2>
+        <div className="bg-green-100 rounded-lg shadow-sm py-3 px-6 mb-1">
+          <div className="flex justify-between items-start mb-5">
+            
+            {/* <div className="flex space-x-2">
+              <button className="px-4 py-2 bg-primary text-white rounded-md hover:bg-green-700 transition-colors">
+                Edit Plan
+              </button>
     <div className="p-6">
       <div className="flex items-center mb-8">
         <Link 
@@ -651,5 +674,6 @@ export default function GardenAdvisorDetail() {
         )}
       </div>
     </div>
+  </WithProjectCheck>
   );
 }

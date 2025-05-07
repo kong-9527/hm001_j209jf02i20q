@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import WithProjectCheck from '@/app/components/WithProjectCheck';
 
 export default function CreateGardenAdvisorPage() {
   // 添加步骤状态
@@ -417,19 +418,6 @@ export default function CreateGardenAdvisorPage() {
                           </svg>
                         )}
                       </div>
-                      {/* <div className={`w-10 h-10 mr-2 flex-shrink-0 flex items-center justify-center rounded-sm ${
-                        ['Flowers', 'Vegetables', 'Herbs', 'Ferns', 'Vines', 'Bulbs'].includes(type) 
-                        ? 'bg-[#D9EFDE]' 
-                        : 'bg-[#FFE8CC]'
-                      }`}>
-                        <img 
-                          src={`/plants/${['Flowers', 'Vegetables', 'Herbs', 'Ferns', 'Vines', 'Bulbs'].includes(type) 
-                            ? '2D903A66-E528-4d44-8785-CA38282FFC08.png' 
-                            : 'EA2D78EC-0577-4d3f-9F0D-52418077527B.png'}`} 
-                          alt="" 
-                          className="w-10 h-10 object-contain"
-                        />
-                      </div> */}
                       <span className={plantTypes.includes(type) ? 'text-primary font-medium' : ''}>{type}</span>
                     </label>
                   ))}
@@ -510,19 +498,6 @@ export default function CreateGardenAdvisorPage() {
                           </svg>
                         )}
                       </div>
-                      {/* <div className={`w-10 h-10 mr-2 flex-shrink-0 flex items-center justify-center rounded-sm ${
-                        ['Pollen', 'Trees', 'Weeds', 'Grass', 'Flowers'].includes(allergy) 
-                        ? 'bg-[#FFE8CC]' 
-                        : 'bg-[#F5E8F5]'
-                      }`}>
-                        <img 
-                          src={`/Allergies/${['Pollen', 'Trees', 'Weeds', 'Grass', 'Flowers'].includes(allergy) 
-                            ? 'EA2D78EC-0577-4d3f-9F0D-52418077527B.png' 
-                            : '2D903A66-E528-4d44-8785-CA38282FFC08.png'}`} 
-                          alt="" 
-                          className="w-10 h-10 object-contain"
-                        />
-                      </div> */}
                       <span className={allergies.includes(allergy) ? 'text-primary font-medium' : ''}>{allergy}</span>
                     </label>
                   ))}
@@ -841,73 +816,62 @@ export default function CreateGardenAdvisorPage() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-        <h1 className="text-2xl font-bold">Create Garden Advisor</h1>
-        
-        {/* 修改3步导航，让连接线更长 */}
-        <div className="mt-4 md:mt-0">
+    <WithProjectCheck>
+      <div className="p-6">
+        {/* Page header */}
+        <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center">
-            {[1, 2, 3].map((step) => (
-              <React.Fragment key={step}>
-                <div 
-                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                    currentStep === step 
-                      ? 'bg-primary text-white' 
-                      : currentStep > step 
-                        ? 'bg-green-100 text-primary border border-primary' 
-                        : 'bg-gray-100 text-gray-500'
-                  }`}
-                >
-                  {currentStep > step ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  ) : (
-                    <span>{step}</span>
-                  )}
-                </div>
-                
-                {step < 3 && (
-                  <div className={`w-40 h-1 mx-1 ${
-                    currentStep > step ? 'bg-primary' : 'bg-gray-200'
-                  }`}></div>
-                )}
-              </React.Fragment>
-            ))}
+            <Link href="/dashboard/garden-advisor" className="mr-4 text-gray-500 hover:text-gray-700">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+            </Link>
+            <h1 className="text-2xl font-semibold">Create Garden Plan</h1>
           </div>
-          <div className="flex justify-between text-xs text-gray-600 mt-1">
-            <span>General Info</span>
-            <span className="ml-1">Planting Plan</span>
-            <span>Spaces & Create</span>
+        </div>
+        
+        {/* Progress bar */}
+        <div className="mb-8">
+          <div className="flex justify-between mb-2">
+            <span className="text-sm font-medium">Step {currentStep} of {totalSteps}</span>
+            <span className="text-sm text-gray-500">{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
           </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div className="bg-primary h-2.5 rounded-full" style={{ width: `${(currentStep / totalSteps) * 100}%` }}></div>
+          </div>
+        </div>
+        
+        {/* Steps content */}
+        {showContentByStep(currentStep)}
+        
+        {/* Navigation buttons */}
+        <div className="mt-10 flex justify-between">
+          <button 
+            onClick={goToPrevStep}
+            className={`px-6 py-2 rounded-md border border-gray-300 
+              ${currentStep === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+            disabled={currentStep === 1}
+          >
+            Previous
+          </button>
+          
+          {currentStep < totalSteps ? (
+            <button 
+              onClick={goToNextStep}
+              className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+            >
+              Next
+            </button>
+          ) : (
+            <button 
+              onClick={createGardenPlan}
+              className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+            >
+              Create Plan
+            </button>
+          )}
         </div>
       </div>
-      
-      {/* "What You'll Get"信息框只在第1步显示 */}
-      {currentStep === 1 && (
-        <div className="bg-green-100 rounded-lg p-5 mb-8">
-          <div className="flex items-start">
-            <div className="mr-3 text-green-600 mt-1">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm mb-1 text-green-800">What Awaits You</h3>
-              <ul className="text-sm space-y-1 text-green-800">
-                <li>Tailored plant suggestions perfectly suited to your individual spaces</li>
-                <li>Professional care guidelines for every single plant</li>
-                <li>Enhance your garden layout to achieve the highest possible yield</li>
-                <li>Leverage our AI-driven insights to save both time and money</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 根据当前步骤显示内容 */}
-      {showContentByStep(currentStep)}
-    </div>
+    </WithProjectCheck>
   );
 } 
