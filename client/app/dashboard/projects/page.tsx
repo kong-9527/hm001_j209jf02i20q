@@ -6,6 +6,7 @@ import { CreateProjectModal } from '@/app/components/CreateProjectModal';
 import { EditProjectModal } from '@/app/components/EditProjectModal';
 import { DeleteConfirmModal } from '@/app/components/DeleteConfirmModal';
 import { getUserProjects, createProject, updateProject, deleteProject, Project } from '@/app/services/projectService';
+import { useRouter } from 'next/navigation';
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -16,6 +17,7 @@ export default function ProjectsPage() {
   const [deletingProject, setDeletingProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   
   // 加载项目列表
   useEffect(() => {
@@ -40,7 +42,16 @@ export default function ProjectsPage() {
   const handleCreateProject = async (projectData: { project_name: string; project_pic?: string }) => {
     try {
       const newProject = await createProject(projectData);
-      setProjects([...projects, newProject]);
+      const updatedProjects = [...projects, newProject];
+      setProjects(updatedProjects);
+      
+      // 保存选中的项目ID到localStorage
+      localStorage.setItem('selectedProjectId', newProject.id.toString());
+      
+      // 如果这是第一个创建的项目，则重定向到garden-design页面
+      if (projects.length === 0) {
+        router.push('/dashboard/garden-design');
+      }
     } catch (err) {
       console.error('Error creating project:', err);
     }

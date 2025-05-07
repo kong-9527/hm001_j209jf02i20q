@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getCurrentUser, logout } from '../services/authService';
+import { getUserProjects } from '../services/projectService';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -16,12 +17,26 @@ export default function Dashboard() {
         const userData = await getCurrentUser();
         if (userData) {
           setUser(userData);
+          
+          // 获取用户项目列表
+          const projects = await getUserProjects();
+          
+          // 根据项目数量决定重定向目标
+          if (projects.length === 0) {
+            // 用户没有项目，重定向到项目管理页面
+            router.push('/dashboard/projects');
+          } else {
+            // 用户有项目，重定向到花园设计页面
+            router.push('/dashboard/garden-design');
+          }
         } else {
           // 如果没有用户数据，重定向到登录页面
           router.push('/signin');
         }
       } catch (error) {
         console.error('Failed to retrieve user data:', error);
+        // 发生错误时，重定向到登录页面
+        router.push('/signin');
       } finally {
         setLoading(false);
       }

@@ -19,7 +19,7 @@ export const getUserProjects = async (req: Request, res: Response) => {
     
     const projects = await Project.findAll({
       where: { user_id: userId },
-      order: [['utime', 'DESC']]
+      order: [['ctime', 'DESC']]
     });
     
     return res.status(200).json(projects);
