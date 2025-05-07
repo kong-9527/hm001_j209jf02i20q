@@ -151,7 +151,7 @@ export default function ProjectsPage() {
                   <h3 className="text-lg font-medium mb-2">{project.project_name}</h3>
                   
                   <div className="text-sm text-gray-500">
-                    Created: {new Date(project.ctime).toLocaleDateString()}
+                    Created: {new Date(Number(project.ctime) * 1000).toLocaleDateString()}
                   </div>
                 </div>
                 

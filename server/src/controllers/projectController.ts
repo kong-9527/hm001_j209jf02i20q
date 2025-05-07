@@ -44,8 +44,8 @@ export const createProject = async (req: Request, res: Response) => {
       project_name,
       project_pic,
       user_id: userId,
-      ctime: Date.now(),
-      utime: Date.now()
+      ctime: Math.floor(Date.now() / 1000),
+      utime: Math.floor(Date.now() / 1000)
     });
     
     return res.status(201).json(newProject);
@@ -78,7 +78,7 @@ export const updateProject = async (req: Request, res: Response) => {
     await project.update({
       project_name,
       project_pic,
-      utime: Date.now()
+      utime: Math.floor(Date.now() / 1000)
     });
     
     return res.status(200).json(project);
