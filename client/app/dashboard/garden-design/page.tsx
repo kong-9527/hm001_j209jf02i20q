@@ -9,6 +9,7 @@ import { getGardenDesignImages, getGardenDesignList, getDeletedGardenDesigns, ge
 import { useProject } from '@/app/contexts/ProjectContext';
 import { useEventBus } from '@/app/contexts/EventBus';
 import { createCustomStyle, getUserCustomStyles, deleteCustomStyle, getCustomStyleById, updateCustomStyle } from '@/app/services/customStyleService';
+import { useNotification } from '@/app/components/NotificationCenter';
 
 // 定义图片数据类型
 interface ImageData {
@@ -72,6 +73,7 @@ export default function PhotoGenerator() {
   const uploadAreaRef = useRef<HTMLDivElement>(null);
   const { currentProject } = useProject();
   const { on } = useEventBus();
+  const { addNotification } = useNotification();
   
   console.log('Garden Design page render. Current project:', currentProject);
   
@@ -1887,8 +1889,8 @@ export default function PhotoGenerator() {
       // 如果没有当前项目，显示错误
       if (!currentProject?.id) {
         alert('请先选择或创建一个项目');
-        return;
-      }
+      return;
+    }
     
     console.log('Garden Design: 提交生成请求');
     console.log('- 图片URL:', uploadedImageUrl);
@@ -1924,7 +1926,7 @@ export default function PhotoGenerator() {
         const height = imgElement.naturalHeight;
         const sizeParam = `${width}*${height}`;
         console.log('- 图片尺寸:', sizeParam);
-        
+    
         // 调用API生成图片
         generateGardenDesign(
           uploadedImageUrl,
@@ -1937,6 +1939,13 @@ export default function PhotoGenerator() {
         )
         .then((response) => {
           console.log('生成成功，返回数据:', response);
+          // 显示成功提示
+          addNotification({
+            type: 'success',
+            message: 'Submission successful, your new garden is being generated',
+            duration: 5000 // 5秒后自动消失
+          });
+          
           // 重新加载图片列表
           fetchGardenDesignList(currentProject.id);
         })
