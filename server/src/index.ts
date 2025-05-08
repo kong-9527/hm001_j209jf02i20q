@@ -40,6 +40,7 @@ import gardenDesignRoutes from './routes/gardenDesignRoutes';
 import passport from './config/passport';
 import checkEnvVariables from './utils/envCheck';
 import customStyleRoutes from './routes/customStyleRoutes';
+import startTaskChecker from './services/taskStatusChecker';
 
 // 检查环境变量
 checkEnvVariables();
@@ -95,4 +96,8 @@ app.use('/api/custom-styles', customStyleRoutes);
 // 启动服务器
 app.listen(PORT, () => {
   console.log(`服务器运行在端口 ${PORT}`);
+  
+  // 启动任务状态检查服务
+  startTaskChecker();
+  console.log('Garden设计任务状态检查服务已启动');
 }); 

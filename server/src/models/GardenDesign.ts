@@ -73,7 +73,7 @@ GardenDesign.init(
       allowNull: true,
     },
     status: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
       comment: '1生成中 2成功 3失败',
     },
@@ -82,7 +82,7 @@ GardenDesign.init(
       allowNull: true,
     },
     style_id: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
       comment: '自定义时用99',
     },
@@ -110,12 +110,14 @@ GardenDesign.init(
       comment: '第三方任务ID',
     },
     is_like: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
+      comment: '0不喜欢 1喜欢',
     },
     is_del: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
+      comment: '0未删除 1已删除',
     },
     ctime: {
       type: DataTypes.INTEGER,
