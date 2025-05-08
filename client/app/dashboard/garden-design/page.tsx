@@ -8,7 +8,7 @@ import WithProjectCheck from '@/app/components/WithProjectCheck';
 import { getGardenDesignImages, getGardenDesignList, getDeletedGardenDesigns, getLikedGardenDesigns, updateGardenDesignLikeStatus, deleteGardenDesign, GardenDesignImage } from '@/app/services/gardenDesignService';
 import { useProject } from '@/app/contexts/ProjectContext';
 import { useEventBus } from '@/app/contexts/EventBus';
-import { createCustomStyle } from '@/app/services/customStyleService';
+import { createCustomStyle, getUserCustomStyles, deleteCustomStyle, getCustomStyleById, updateCustomStyle } from '@/app/services/customStyleService';
 
 // 定义图片数据类型
 interface ImageData {
@@ -104,23 +104,18 @@ export default function PhotoGenerator() {
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false);
   const [deletingStyleId, setDeletingStyleId] = useState<number | null>(null);
   
-  // 用户自定义风格列表
-  const [customStyles, setCustomStyles] = useState([
-    { id: 1, name: 'Japanese Garden', preview: 'zen rock garden, moss covered stones, maple trees, minimalist design...' },
-    { id: 2, name: 'English Cottage', preview: 'wildflowers, roses, lavender paths, rustic wooden gates, cottage perennials...' },
-    { id: 3, name: 'Modern Minimalist', preview: 'geometric patterns, concrete planters, succulents, structured design...' },
-    { id: 4, name: 'Tropical Paradise', preview: 'palm trees, exotic flowers, vibrant colors, banana leaves, natural pool...' },
-    { id: 5, name: 'Mediterranean', preview: 'olive trees, terracotta pots, lavender, stone paths, warm sunlight...' },
-    { id: 6, name: 'Woodland Retreat', preview: 'native trees, forest floor, ferns, moss patches, dappled sunlight...' },
-    { id: 7, name: 'Desert Oasis', preview: 'cacti, succulents, rock garden, drought resistant plants, warm tones...' },
-    { id: 8, name: 'French Formal', preview: 'geometric hedges, symmetrical design, gravel paths, classical statues...' },
-    { id: 9, name: 'Cottage Herb', preview: 'herb garden, rustic wooden planters, informal layout, edible flowers...' },
-    { id: 10, name: 'Zen Water', preview: 'koi pond, water lilies, bamboo fountains, meditation area, smooth stones...' },
-    { id: 11, name: 'Rooftop Urban', preview: 'container gardens, city views, vertical gardens, outdoor seating, small trees...' },
-    { id: 12, name: 'Fairy Garden', preview: 'miniature features, whimsical elements, moss paths, tiny flowers, magical...' },
-    { id: 13, name: 'Coastal Garden', preview: 'grasses, driftwood, salt-tolerant plants, beach stones, sandy paths...' },
-    { id: 14, name: 'Night Garden', preview: 'white flowers, silver foliage, moonlight reflection, soft lighting...' },
-  ]);
+  // 用户自定义风格列表类型定义
+  interface CustomStyleItem {
+    id: number;
+    name: string;
+    preview: string;
+    positive_words?: string[];
+    negative_words?: string[];
+  }
+  
+  // 用户自定义风格列表 - 替换mock数据为空数组
+  const [customStyles, setCustomStyles] = useState<CustomStyleItem[]>([]);
+  const [isLoadingStyles, setIsLoadingStyles] = useState(false);
   
   // 分页状态
   const [currentPage, setCurrentPage] = useState(1);
@@ -378,6 +373,8 @@ export default function PhotoGenerator() {
   // 处理打开加载风格对话框
   const handleOpenLoadStyleDialog = () => {
     setShowLoadStyleDialog(true);
+    // 打开对话框时重新获取最新的自定义风格列表
+    fetchUserCustomStyles();
   };
   
   // 处理关闭加载风格对话框
@@ -386,16 +383,40 @@ export default function PhotoGenerator() {
   };
   
   // 处理打开编辑风格对话框
-  const handleOpenEditStyleDialog = (styleId: number) => {
-    const styleToEdit = customStyles.find(style => style.id === styleId);
-    if (styleToEdit) {
-      setEditingStyleId(styleId);
-      setEditStyleNameInput(styleToEdit.name);
-      setShowEditStyleDialog(true);
+  const handleOpenEditStyleDialog = async (styleId: number) => {
+    try {
+      // 根据ID获取自定义风格详情
+      const styleToEdit = await getCustomStyleById(styleId);
       
-      // 在实际应用中，这里会加载风格对应的正负向词汇
-      // setPositiveWords([...]);
-      // setNegativeWords([...]);
+      if (styleToEdit) {
+        setEditingStyleId(styleId);
+        setEditStyleNameInput(styleToEdit.custom_style_name);
+        setShowEditStyleDialog(true);
+        
+        // 加载风格对应的正负向词汇
+        if (styleToEdit.positive_words && styleToEdit.positive_words.length > 0) {
+          const positiveWordTags = styleToEdit.positive_words.map(text => ({
+            id: Date.now() + Math.random(),
+            text
+          }));
+          setPositiveWords(positiveWordTags);
+        } else {
+          setPositiveWords([]);
+        }
+        
+        if (styleToEdit.negative_words && styleToEdit.negative_words.length > 0) {
+          const negativeWordTags = styleToEdit.negative_words.map(text => ({
+            id: Date.now() + Math.random(),
+            text
+          }));
+          setNegativeWords(negativeWordTags);
+        } else {
+          setNegativeWords([]);
+        }
+      }
+    } catch (error) {
+      console.error('获取自定义风格详情失败:', error);
+      alert('获取风格详情失败，请重试');
     }
   };
   
@@ -406,46 +427,111 @@ export default function PhotoGenerator() {
   };
   
   // 处理更新风格
-  const handleUpdateStyle = () => {
+  const handleUpdateStyle = async () => {
     if (editStyleNameInput.trim() && editingStyleId) {
-      // 在实际应用中，这里会调用API更新自定义风格
-      console.log('更新风格ID:', editingStyleId);
-      console.log('新风格名称:', editStyleNameInput);
-      console.log('正向词汇:', positiveWords);
-      console.log('负向词汇:', negativeWords);
-      
-      // 更新本地风格列表
-      setCustomStyles(customStyles.map(style => 
-        style.id === editingStyleId 
-          ? { ...style, name: editStyleNameInput } 
-          : style
-      ));
-      
-      // 关闭对话框
-      setShowEditStyleDialog(false);
-      setEditingStyleId(null);
+      try {
+        // 获取正负向词汇的文本
+        const positiveWordsText = positiveWords.map(word => word.text);
+        const negativeWordsText = negativeWords.map(word => word.text);
+        
+        // 调用API更新自定义风格
+        const updatedStyle = await updateCustomStyle(
+          editingStyleId,
+          editStyleNameInput,
+          positiveWordsText,
+          negativeWordsText
+        );
+        
+        console.log('更新风格成功:', updatedStyle);
+        
+        // 更新本地风格列表
+        setCustomStyles(prevStyles => 
+          prevStyles.map(style => 
+            style.id === editingStyleId 
+              ? { 
+                  ...style, 
+                  name: updatedStyle.custom_style_name,
+                  preview: positiveWordsText.length > 0 
+                    ? positiveWordsText.join(', ')
+                    : negativeWordsText.join(', '),
+                  positive_words: positiveWordsText,
+                  negative_words: negativeWordsText
+                } 
+              : style
+          )
+        );
+        
+        // 关闭对话框
+        setShowEditStyleDialog(false);
+        setEditingStyleId(null);
+      } catch (error) {
+        console.error('更新风格失败:', error);
+        alert('更新风格失败，请重试');
+      }
     }
   };
   
   // 处理加载风格
-  const handleLoadStyle = (styleId: number) => {
-    // 在实际应用中，这里会根据风格ID加载相应的风格数据
-    console.log('加载风格ID:', styleId);
-    
-    // 关闭对话框
-    setShowLoadStyleDialog(false);
+  const handleLoadStyle = async (styleId: number) => {
+    try {
+      // 根据ID获取自定义风格详情
+      const style = await getCustomStyleById(styleId);
+      
+      if (style) {
+        // 切换到Custom styles标签
+        setSelectedTab('custom');
+        
+        // 加载风格对应的正负向词汇
+        if (style.positive_words && style.positive_words.length > 0) {
+          const positiveWordTags = style.positive_words.map(text => ({
+            id: Date.now() + Math.random(),
+            text
+          }));
+          setPositiveWords(positiveWordTags);
+        } else {
+          setPositiveWords([]);
+        }
+        
+        if (style.negative_words && style.negative_words.length > 0) {
+          const negativeWordTags = style.negative_words.map(text => ({
+            id: Date.now() + Math.random(),
+            text
+          }));
+          setNegativeWords(negativeWordTags);
+        } else {
+          setNegativeWords([]);
+        }
+        
+        // 关闭对话框
+        setShowLoadStyleDialog(false);
+      }
+    } catch (error) {
+      console.error('加载风格失败:', error);
+      alert('加载风格失败，请重试');
+    }
   };
   
   // 处理删除自定义风格
-  const handleDeleteCustomStyle = () => {
+  const handleDeleteCustomStyle = async () => {
     if (deletingStyleId) {
-      // 在实际应用中，这里会调用API删除风格
-      console.log('删除风格ID:', deletingStyleId);
-      setCustomStyles(customStyles.filter(style => style.id !== deletingStyleId));
-      
-      // 关闭对话框
-      setShowDeleteConfirmDialog(false);
-      setDeletingStyleId(null);
+      try {
+        // 调用API删除风格
+        const success = await deleteCustomStyle(deletingStyleId);
+        
+        if (success) {
+          // 从本地风格列表中移除
+          setCustomStyles(prevStyles => prevStyles.filter(style => style.id !== deletingStyleId));
+          
+          // 关闭对话框
+          setShowDeleteConfirmDialog(false);
+          setDeletingStyleId(null);
+        } else {
+          throw new Error('删除失败');
+        }
+      } catch (error) {
+        console.error('删除自定义风格失败:', error);
+        alert('删除风格失败，请重试');
+      }
     }
   };
   
@@ -466,13 +552,23 @@ export default function PhotoGenerator() {
         
         console.log('保存自定义风格成功:', savedStyle);
         
+        // 生成预览文本
+        let previewText = '';
+        if (positiveWordsText.length > 0) {
+          previewText = positiveWordsText.join(', ');
+        } else if (negativeWordsText.length > 0) {
+          previewText = negativeWordsText.join(', ');
+        }
+        
         // 添加到自定义风格列表
         const newStyle = {
           id: savedStyle.id,
           name: savedStyle.custom_style_name,
-          preview: positiveWordsText.slice(0, 3).join(', ') + (positiveWordsText.length > 3 ? '...' : '')
+          preview: previewText,
+          positive_words: positiveWordsText,
+          negative_words: negativeWordsText
         };
-        setCustomStyles([...customStyles, newStyle]);
+        setCustomStyles([newStyle, ...customStyles]);
         
         // 关闭对话框
         setShowSaveStyleDialog(false);
@@ -1751,6 +1847,44 @@ export default function PhotoGenerator() {
     // TODO: 实现实际的API调用
   };
   
+  // 获取用户自定义风格列表
+  const fetchUserCustomStyles = useCallback(async () => {
+    try {
+      setIsLoadingStyles(true);
+      const styles = await getUserCustomStyles();
+      
+      // 转换数据结构为组件所需的格式
+      const formattedStyles = styles.map(style => {
+        // 根据要求：如果positive_words不为空就展示positive_words，否则展示negative_words
+        let previewText = '';
+        if (style.positive_words && style.positive_words.length > 0) {
+          previewText = style.positive_words.join(', ');
+        } else if (style.negative_words && style.negative_words.length > 0) {
+          previewText = style.negative_words.join(', ');
+        }
+        
+        return {
+          id: style.id,
+          name: style.custom_style_name,
+          preview: previewText,
+          positive_words: style.positive_words,
+          negative_words: style.negative_words
+        };
+      });
+      
+      setCustomStyles(formattedStyles);
+    } catch (error) {
+      console.error('获取自定义风格列表失败:', error);
+    } finally {
+      setIsLoadingStyles(false);
+    }
+  }, []);
+  
+  // 组件挂载时加载自定义风格列表
+  useEffect(() => {
+    fetchUserCustomStyles();
+  }, [fetchUserCustomStyles]);
+  
   return (
     <WithProjectCheck>
       <div className="w-full h-full">
@@ -2359,7 +2493,12 @@ export default function PhotoGenerator() {
                       <div className="w-1/4 font-medium text-sm text-gray-700">Actions</div>
                     </div>
                     
-                    {customStyles.length > 0 ? (
+                    {isLoadingStyles ? (
+                      <div className="py-12 flex justify-center items-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+                        <span className="ml-3 text-gray-600">Loading styles...</span>
+                      </div>
+                    ) : customStyles.length > 0 ? (
                       <div>
                         <div className="max-h-64 overflow-y-auto">
                           {customStyles
