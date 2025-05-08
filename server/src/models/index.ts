@@ -9,6 +9,7 @@ import GardenAdvisorSpace, { setupGardenAdvisorSpaceAssociations } from './Garde
 import GardenAdvisorSpacePlant, { setupGardenAdvisorSpacePlantAssociations } from './GardenAdvisorSpacePlant';
 import GardenDesign, { setupGardenDesignAssociations } from './GardenDesign';
 import Goods from './Goods';
+import CustomStyle from './CustomStyle';
 
 // 初始化所有模型之间的关联关系
 setupGardenAdvisorAssociations(Project);
@@ -28,5 +29,6 @@ export {
   GardenAdvisorSpace,
   GardenAdvisorSpacePlant,
   GardenDesign,
-  Goods
+  Goods,
+  CustomStyle
 }; 

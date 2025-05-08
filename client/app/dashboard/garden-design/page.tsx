@@ -8,6 +8,7 @@ import WithProjectCheck from '@/app/components/WithProjectCheck';
 import { getGardenDesignImages, getGardenDesignList, getDeletedGardenDesigns, getLikedGardenDesigns, updateGardenDesignLikeStatus, deleteGardenDesign, GardenDesignImage } from '@/app/services/gardenDesignService';
 import { useProject } from '@/app/contexts/ProjectContext';
 import { useEventBus } from '@/app/contexts/EventBus';
+import { createCustomStyle } from '@/app/services/customStyleService';
 
 // 定义图片数据类型
 interface ImageData {
@@ -358,6 +359,13 @@ export default function PhotoGenerator() {
   
   // 处理打开保存风格对话框
   const handleOpenSaveStyleDialog = () => {
+    // 检查正向词汇和负向词汇是否同时为空
+    if (positiveWords.length === 0 && negativeWords.length === 0) {
+      // 如果同时为空，显示提示消息
+      alert("Please fill in or select Your Positive Words and Your Negative Words before clicking Save Style");
+      return;
+    }
+    // 满足要求，打开弹窗
     setShowSaveStyleDialog(true);
     setStyleNameInput('');
   };
@@ -442,23 +450,36 @@ export default function PhotoGenerator() {
   };
   
   // 处理保存风格
-  const handleSaveStyle = () => {
+  const handleSaveStyle = async () => {
     if (styleNameInput.trim()) {
-      // 在实际应用中，这里会调用API保存自定义风格
-      console.log('保存自定义风格:', styleNameInput);
-      console.log('正向词汇:', positiveWords);
-      console.log('负向词汇:', negativeWords);
-      
-      // 添加到自定义风格列表
-      const newStyle = {
-        id: Date.now(),
-        name: styleNameInput,
-        preview: 'mysterious shadows, authentic medieval architecture...' // 在实际应用中，这里会根据词汇生成预览文本
-      };
-      setCustomStyles([...customStyles, newStyle]);
-      
-      // 关闭对话框
-      setShowSaveStyleDialog(false);
+      try {
+        // 获取正负向词汇的文本
+        const positiveWordsText = positiveWords.map(word => word.text);
+        const negativeWordsText = negativeWords.map(word => word.text);
+        
+        // 调用API保存自定义风格
+        const savedStyle = await createCustomStyle(
+          styleNameInput, 
+          positiveWordsText,
+          negativeWordsText
+        );
+        
+        console.log('保存自定义风格成功:', savedStyle);
+        
+        // 添加到自定义风格列表
+        const newStyle = {
+          id: savedStyle.id,
+          name: savedStyle.custom_style_name,
+          preview: positiveWordsText.slice(0, 3).join(', ') + (positiveWordsText.length > 3 ? '...' : '')
+        };
+        setCustomStyles([...customStyles, newStyle]);
+        
+        // 关闭对话框
+        setShowSaveStyleDialog(false);
+      } catch (error) {
+        console.error('保存自定义风格失败:', error);
+        alert('保存失败，请重试');
+      }
     }
   };
   

@@ -39,6 +39,7 @@ import projectRoutes from './routes/projectRoutes';
 import gardenDesignRoutes from './routes/gardenDesignRoutes';
 import passport from './config/passport';
 import checkEnvVariables from './utils/envCheck';
+import customStyleRoutes from './routes/customStyleRoutes';
 
 // 检查环境变量
 checkEnvVariables();
@@ -89,6 +90,7 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/garden-designs', gardenDesignRoutes);
+app.use('/api/custom-styles', customStyleRoutes);
 
 // 启动服务器
 app.listen(PORT, () => {
