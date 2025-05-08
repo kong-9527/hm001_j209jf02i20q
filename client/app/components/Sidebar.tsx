@@ -34,14 +34,14 @@ export default function Sidebar() {
     console.log('Sidebar: Menu item clicked:', href);
     console.log('Sidebar: Current project state:', currentProject);
     
-    // 只处理Garden Design页面的跳转
-    if (href === '/dashboard/garden-design') {
+    // 处理Garden Design和Garden Advisor页面的跳转
+    if (href === '/dashboard/garden-design' || href === '/dashboard/garden-advisor') {
       if (currentProject) {
-        console.log('Sidebar: Handling Garden Design click with project ID:', currentProject.id);
+        console.log(`Sidebar: Handling ${href.includes('garden-design') ? 'Garden Design' : 'Garden Advisor'} click with project ID:`, currentProject.id);
         
         e.preventDefault(); // 阻止默认导航行为
         
-        // 发送项目选择事件，通知garden-design页面刷新数据
+        // 发送项目选择事件，通知相应页面刷新数据
         const eventData = { selectedProjectId: currentProject.id };
         console.log('Sidebar: Emitting project_selected event with data:', eventData);
         
@@ -55,7 +55,7 @@ export default function Sidebar() {
         console.log('Sidebar: No current project available, proceeding with normal navigation');
       }
     } else {
-      console.log('Sidebar: Not Garden Design page, proceeding with normal navigation');
+      console.log('Sidebar: Not Garden Design or Garden Advisor page, proceeding with normal navigation');
     }
   };
   

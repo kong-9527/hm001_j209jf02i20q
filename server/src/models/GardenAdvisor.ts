@@ -22,8 +22,8 @@ interface GardenAdvisorAttributes {
   goals: string | null;
   plant_types: string | null;
   allergies: string | null;
-  ctime: Date | null;
-  utime: Date | null;
+  ctime: number | null;
+  utime: number | null;
 }
 
 // 创建时的可选属性
@@ -47,8 +47,8 @@ class GardenAdvisor extends Model<GardenAdvisorAttributes, GardenAdvisorCreation
   public goals!: string | null;
   public plant_types!: string | null;
   public allergies!: string | null;
-  public ctime!: Date | null;
-  public utime!: Date | null;
+  public ctime!: number | null;
+  public utime!: number | null;
 }
 
 // 初始化模型
@@ -83,23 +83,23 @@ GardenAdvisor.init(
       allowNull: true,
     },
     experience: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     budget: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     time: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     maintenance: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     fertilizer: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     spaces: {
@@ -119,11 +119,11 @@ GardenAdvisor.init(
       allowNull: true,
     },
     ctime: {
-      type: DataTypes.DATE,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     utime: {
-      type: DataTypes.DATE,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
   },
