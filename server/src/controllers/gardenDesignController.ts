@@ -239,11 +239,25 @@ export const generateDesign = async (req: Request, res: Response) => {
       style_id = '1'; // 假设1代表Classic styles
       style_name = positiveWords;
     } else if (styleType === 'Custom styles') {
-      // Custom styles使用用户输入的prompt和negative_prompt
-      prompt = positiveWords;
-      negative_prompt = negativeWords || '';
-      style_id = '99'; // 99代表Custom styles
-      style_name = 'custom style';
+      try {
+        // Custom styles使用用户输入的prompt和negative_prompt
+        // 解析JSON字符串，并提取所有text字段组成新数组
+        const positiveWordsArray = JSON.parse(positiveWords);
+        prompt = JSON.stringify(positiveWordsArray.map((item: any) => item.text));
+        
+        if (negativeWords && negativeWords.trim() !== '') {
+          const negativeWordsArray = JSON.parse(negativeWords);
+          negative_prompt = JSON.stringify(negativeWordsArray.map((item: any) => item.text));
+        } else {
+          negative_prompt = '';
+        }
+        
+        style_id = '99'; // 99代表Custom styles
+        style_name = 'custom style';
+      } catch (error) {
+        console.error('Error parsing JSON words:', error);
+        return res.status(400).json({ error: 'Invalid JSON format for words' });
+      }
     } else {
       console.log('Validation failed: Invalid style type');
       return res.status(400).json({ error: 'Invalid style type' });
@@ -263,8 +277,8 @@ export const generateDesign = async (req: Request, res: Response) => {
       status: 1, // 1代表生成中
       style_id: Number(style_id),
       style_name,
-      positive_words: prompt,
-      negative_words: negative_prompt,
+      positive_words: prompt, // 直接存储JSON格式字符串
+      negative_words: negative_prompt, // 直接存储JSON格式字符串
       structural_similarity: parseInt(structuralSimilarity),
       is_like: 0,
       is_del: 0,
@@ -300,6 +314,8 @@ export const generateDesign = async (req: Request, res: Response) => {
           "prompt_extend": true
         }
       };
+      
+      console.log('API Payload:', JSON.stringify(payload, null, 2));
       
       // 发送POST请求
       const response = await axios.post(apiUrl, payload, { headers });
