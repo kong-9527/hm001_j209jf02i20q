@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, FormEvent, useRef, useEffect } from 'react';
+import React, { useState, FormEvent, useRef, useEffect, useCallback } from 'react';
 import type { DragEvent } from 'react';
 import Image from 'next/image';
 import gardenStylesData from '../../data/gardenStyles';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
 import { getGardenDesignImages, getGardenDesignList, getDeletedGardenDesigns, getLikedGardenDesigns, updateGardenDesignLikeStatus, deleteGardenDesign, GardenDesignImage } from '@/app/services/gardenDesignService';
 import { useProject } from '@/app/contexts/ProjectContext';
+import { useEventBus } from '@/app/contexts/EventBus';
 
 // 定义图片数据类型
 interface ImageData {
@@ -50,6 +51,9 @@ export default function PhotoGenerator() {
   const [isDragOver, setIsDragOver] = useState(false);
   const uploadAreaRef = useRef<HTMLDivElement>(null);
   const { currentProject } = useProject();
+  const { on } = useEventBus();
+  
+  console.log('Garden Design page render. Current project:', currentProject);
   
   // 结构相似度相关状态
   const [resemblancePercent, setResemblancePercent] = useState(75); // 默认75%
@@ -937,7 +941,7 @@ export default function PhotoGenerator() {
   };
   
   // 抽取获取花园设计图片列表的函数，便于复用
-  const fetchGardenDesignList = async (projectId: number) => {
+  const fetchGardenDesignList = useCallback(async (projectId: number) => {
     console.log('Fetching garden design list for project:', projectId);
     
     try {
@@ -948,10 +952,10 @@ export default function PhotoGenerator() {
       console.error('Failed to fetch garden design list:', error);
       setDesignImages([]);
     }
-  };
+  }, []);
   
   // 抽取获取已收藏花园设计图片的函数，便于复用
-  const fetchLikedGardenDesigns = async (projectId: number) => {
+  const fetchLikedGardenDesigns = useCallback(async (projectId: number) => {
     console.log('Fetching liked garden designs for project:', projectId);
     
     try {
@@ -962,10 +966,10 @@ export default function PhotoGenerator() {
       console.error('Failed to fetch liked garden designs:', error);
       setDesignImages([]);
     }
-  };
+  }, []);
   
   // 抽取获取已删除花园设计图片的函数，便于复用
-  const fetchDeletedGardenDesigns = async (projectId: number) => {
+  const fetchDeletedGardenDesigns = useCallback(async (projectId: number) => {
     console.log('Fetching deleted garden designs for project:', projectId);
     
     try {
@@ -976,7 +980,7 @@ export default function PhotoGenerator() {
       console.error('Failed to fetch deleted garden designs:', error);
       setDeletedImages([]);
     }
-  };
+  }, []);
   
   // 获取花园设计图片数据 - 最近图片
   useEffect(() => {
@@ -1028,7 +1032,7 @@ export default function PhotoGenerator() {
     } else if (imageTab === 'deleted') {
       fetchDeletedGardenDesigns(currentProject.id);
     }
-  }, [currentProject, imageTab]);
+  }, [currentProject, imageTab, fetchGardenDesignList, fetchLikedGardenDesigns, fetchDeletedGardenDesigns]);
   
   // 为每种状态定义对应的图片数据 - 使用API获取的真实数据
   const getRecentImagesData = () => {
@@ -1558,6 +1562,103 @@ export default function PhotoGenerator() {
       // 可以添加错误提示
     }
   };
+  
+  // 监听项目切换事件
+  useEffect(() => {
+    console.log('Garden Design: Setting up project_selected event listener. Current project:', currentProject, 'Current tab:', imageTab);
+    
+    // 订阅项目选择事件
+    const unsubscribe = on('project_selected', (data) => {
+      console.log('Garden Design: Project selected event received with data:', data);
+      
+      const selectedProjectId = data?.selectedProjectId;
+      console.log('Garden Design: Extracted project ID:', selectedProjectId, 'Current project ID:', currentProject?.id);
+      
+      if (selectedProjectId) {
+        console.log('Garden Design: Loading data for project ID:', selectedProjectId);
+        
+        // 如果项目ID与当前项目ID相同，也需要强制刷新数据
+        const isCurrentProject = currentProject?.id === selectedProjectId;
+        console.log('Garden Design: Is same as current project?', isCurrentProject);
+        
+        // 获取最近图片数据
+        console.log('Garden Design: Calling getGardenDesignImages with project ID:', selectedProjectId);
+        getGardenDesignImages(selectedProjectId)
+          .then(images => {
+            console.log('Garden Design: Successfully got garden design images, count:', images.length);
+            setRecentImages(images);
+            
+            // 根据图片数量设置状态
+            if (images.length === 0) {
+              setRecentImagesState('empty');
+            } else if (images.length <= 4) {
+              setRecentImagesState('single');
+            } else if (images.length <= 8) {
+              setRecentImagesState('multiple');
+            } else {
+              setRecentImagesState('many');
+            }
+          })
+          .catch(error => {
+            console.error('Garden Design: Failed to fetch garden design images after project change:', error);
+            setRecentImagesState('empty');
+          });
+          
+        // 根据当前标签页加载图片列表数据
+        if (imageTab === 'all') {
+          console.log('Garden Design: Loading all garden designs for project ID:', selectedProjectId);
+          fetchGardenDesignList(selectedProjectId);
+        } else if (imageTab === 'liked') {
+          console.log('Garden Design: Loading liked garden designs for project ID:', selectedProjectId);
+          fetchLikedGardenDesigns(selectedProjectId);
+        } else if (imageTab === 'deleted') {
+          console.log('Garden Design: Loading deleted garden designs for project ID:', selectedProjectId);
+          fetchDeletedGardenDesigns(selectedProjectId);
+        }
+      }
+    });
+    
+    // 每次组件挂载时，使用当前选中的项目ID加载数据
+    if (currentProject) {
+      console.log('Garden Design: Component mounted with current project, loading data for project ID:', currentProject.id);
+      
+      getGardenDesignImages(currentProject.id)
+        .then(images => {
+          console.log('Garden Design: Initial data load got images, count:', images.length);
+          setRecentImages(images);
+          
+          // 根据图片数量设置状态
+          if (images.length === 0) {
+            setRecentImagesState('empty');
+          } else if (images.length <= 4) {
+            setRecentImagesState('single');
+          } else if (images.length <= 8) {
+            setRecentImagesState('multiple');
+          } else {
+            setRecentImagesState('many');
+          }
+        })
+        .catch(error => {
+          console.error('Garden Design: Failed to fetch initial garden design images:', error);
+          setRecentImagesState('empty');
+        });
+        
+      // 根据当前标签页加载图片列表数据
+      if (imageTab === 'all') {
+        fetchGardenDesignList(currentProject.id);
+      } else if (imageTab === 'liked') {
+        fetchLikedGardenDesigns(currentProject.id);
+      } else if (imageTab === 'deleted') {
+        fetchDeletedGardenDesigns(currentProject.id);
+      }
+    }
+    
+    // 清理订阅
+    return () => {
+      console.log('Garden Design: Cleaning up project_selected event listener');
+      unsubscribe();
+    };
+  }, [on, imageTab, currentProject, fetchGardenDesignList, fetchLikedGardenDesigns, fetchDeletedGardenDesigns]);
   
   return (
     <WithProjectCheck>

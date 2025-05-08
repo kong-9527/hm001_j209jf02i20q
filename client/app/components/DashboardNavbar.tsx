@@ -26,6 +26,8 @@ export default function DashboardNavbar() {
   const projectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const profileTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  console.log('DashboardNavbar render, selectedProject:', selectedProject);
+
   // 获取用户项目列表
   const fetchProjects = async () => {
     if (!user) return;
@@ -142,6 +144,11 @@ export default function DashboardNavbar() {
         setSelectedProject(newProject);
         localStorage.setItem('selectedProjectId', newProject.id.toString());
         
+        // 发送项目选择事件，通知其他组件刷新数据
+        emit('project_selected', { 
+          selectedProjectId: newProject.id
+        });
+        
         // 如果这是第一个创建的项目，则重定向到garden-design页面
         if (updatedProjects.length === 1) {
           router.push('/dashboard/garden-design');
@@ -167,11 +174,23 @@ export default function DashboardNavbar() {
   
   // 处理项目选择
   const handleSelectProject = (project: Project) => {
+    console.log('DashboardNavbar: handleSelectProject called with project:', project);
+    
     setSelectedProject(project);
     localStorage.setItem('selectedProjectId', project.id.toString());
+    console.log('DashboardNavbar: Selected project set to:', project);
+    console.log('DashboardNavbar: localStorage updated with project ID:', project.id);
+    
     setIsProjectOpen(false);
     
+    // 发送项目选择事件，通知其他组件刷新数据
+    console.log('DashboardNavbar: Emitting project_selected event with ID:', project.id);
+    emit('project_selected', { 
+      selectedProjectId: project.id
+    });
+    
     // 当选择项目时，跳转到garden-design页面
+    console.log('DashboardNavbar: Navigating to garden-design page');
     router.push('/dashboard/garden-design');
   };
   

@@ -1,8 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useEventBus } from '../contexts/EventBus';
+import { useProject } from '../contexts/ProjectContext';
+import { useEffect } from 'react';
 
 interface MenuSection {
   title: string;
@@ -17,6 +20,44 @@ interface MenuItem {
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { emit } = useEventBus();
+  const { currentProject } = useProject();
+  
+  // 添加日志记录当前项目状态  
+  useEffect(() => {
+    console.log('Sidebar: currentProject changed to:', currentProject);
+  }, [currentProject]);
+  
+  // 处理菜单项点击事件
+  const handleMenuItemClick = (e: React.MouseEvent, href: string) => {
+    console.log('Sidebar: Menu item clicked:', href);
+    console.log('Sidebar: Current project state:', currentProject);
+    
+    // 只处理Garden Design页面的跳转
+    if (href === '/dashboard/garden-design') {
+      if (currentProject) {
+        console.log('Sidebar: Handling Garden Design click with project ID:', currentProject.id);
+        
+        e.preventDefault(); // 阻止默认导航行为
+        
+        // 发送项目选择事件，通知garden-design页面刷新数据
+        const eventData = { selectedProjectId: currentProject.id };
+        console.log('Sidebar: Emitting project_selected event with data:', eventData);
+        
+        emit('project_selected', eventData);
+        console.log('Sidebar: Event emitted successfully');
+        
+        // 使用Router API手动导航
+        console.log('Sidebar: Navigating to:', href);
+        router.push(href);
+      } else {
+        console.log('Sidebar: No current project available, proceeding with normal navigation');
+      }
+    } else {
+      console.log('Sidebar: Not Garden Design page, proceeding with normal navigation');
+    }
+  };
   
   const menuSections: MenuSection[] = [
     {
@@ -138,6 +179,7 @@ export default function Sidebar() {
                   <Link
                     key={itemIdx}
                     href={item.href}
+                    onClick={(e) => handleMenuItemClick(e, item.href)}
                     className={`flex items-center px-6 py-2 text-sm ${
                       isActive 
                         ? 'text-primary bg-primary/5 border-l-2 border-primary' 
