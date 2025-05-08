@@ -5,7 +5,7 @@ import type { DragEvent } from 'react';
 import Image from 'next/image';
 import gardenStylesData from '../../data/gardenStyles';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
-import { getGardenDesignImages, getGardenDesignList, getDeletedGardenDesigns, getLikedGardenDesigns, updateGardenDesignLikeStatus, deleteGardenDesign, GardenDesignImage } from '@/app/services/gardenDesignService';
+import { getGardenDesignImages, getGardenDesignList, getDeletedGardenDesigns, getLikedGardenDesigns, updateGardenDesignLikeStatus, deleteGardenDesign, GardenDesignImage, generateGardenDesign } from '@/app/services/gardenDesignService';
 import { useProject } from '@/app/contexts/ProjectContext';
 import { useEventBus } from '@/app/contexts/EventBus';
 import { createCustomStyle, getUserCustomStyles, deleteCustomStyle, getCustomStyleById, updateCustomStyle } from '@/app/services/customStyleService';
@@ -39,6 +39,21 @@ interface GardenStyle {
   image: string;
   description: string;
 }
+
+// 创建一个获取图片尺寸的辅助函数
+const getImageDimensions = (url: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    img.onload = () => {
+      const dimensions = `${img.naturalWidth}*${img.naturalHeight}`;
+      resolve(dimensions);
+    };
+    img.onerror = () => {
+      reject(new Error('Failed to load image'));
+    };
+    img.src = url;
+  });
+};
 
 export default function PhotoGenerator() {
   const [selectedTab, setSelectedTab] = useState('premade');
@@ -374,7 +389,9 @@ export default function PhotoGenerator() {
   const handleOpenLoadStyleDialog = () => {
     setShowLoadStyleDialog(true);
     // 打开对话框时重新获取最新的自定义风格列表
-    fetchUserCustomStyles();
+    if (fetchUserCustomStyles) {
+      fetchUserCustomStyles(); 
+    }
   };
   
   // 处理关闭加载风格对话框
@@ -1820,33 +1837,94 @@ export default function PhotoGenerator() {
   }, [on, imageTab, currentProject, fetchGardenDesignList, fetchLikedGardenDesigns, fetchDeletedGardenDesigns]);
   
   // 生成按钮
-  const handleGenerate = () => {
-    // 验证是否有上传图片
-    if (!uploadedImageUrl) {
-      alert('请先上传或选择一张图片');
-      return;
+  const handleGenerate = async () => {
+    try {
+      // 验证是否有上传图片
+      if (!uploadedImageUrl) {
+        alert('请先上传或选择一张图片');
+        return;
+      }
+      
+      // 验证是否选择了风格
+      if (selectedTab === 'premade' && !selectedStyleId) {
+        alert('请选择一种风格');
+        return;
+      }
+      
+      // 如果没有当前项目，显示错误
+      if (!currentProject?.id) {
+        alert('请先选择或创建一个项目');
+        return;
+      }
+      
+      console.log('Garden Design: 提交生成请求');
+      console.log('- 图片URL:', uploadedImageUrl);
+      const styleType = selectedTab === 'premade' ? 'Classic styles' : 'Custom styles';
+      console.log('- 风格类型:', styleType);
+      
+      // 准备参数
+      let positiveWordsParam = '';
+      let negativeWordsParam = '';
+      
+      if (selectedTab === 'premade') {
+        console.log('- 预设风格ID:', selectedStyleId);
+        console.log('- 预设风格名称:', getSelectedStyle()?.name);
+        // 对于预设风格，用风格名称作为positiveWords
+        positiveWordsParam = getSelectedStyle()?.name || '';
+      } else {
+        console.log('- 正向词:', positiveWords);
+        console.log('- 负向词:', negativeWords);
+        // 对于自定义风格，将词组数组转换为JSON字符串
+        positiveWordsParam = JSON.stringify(positiveWords);
+        negativeWordsParam = JSON.stringify(negativeWords);
+      }
+      
+      const structuralSimilarity = resemblancePercent.toString();
+      console.log('- 结构相似度:', structuralSimilarity + '%');
+      
+      // 获取图片尺寸
+      const imgElement = new window.Image();
+      
+      // 使用箭头函数保留this上下文
+      imgElement.onload = () => {
+        const width = imgElement.naturalWidth;
+        const height = imgElement.naturalHeight;
+        const sizeParam = `${width}*${height}`;
+        console.log('- 图片尺寸:', sizeParam);
+        
+        // 调用API生成图片
+        generateGardenDesign(
+          uploadedImageUrl,
+          sizeParam,
+          styleType,
+          positiveWordsParam,
+          negativeWordsParam,
+          structuralSimilarity,
+          currentProject.id
+        )
+        .then((response) => {
+          console.log('生成成功，返回数据:', response);
+          // 重新加载图片列表
+          fetchGardenDesignList(currentProject.id);
+        })
+        .catch((error) => {
+          console.error('生成失败:', error);
+          alert('生成图片失败，请重试');
+        });
+      };
+      
+      // 使用箭头函数保留this上下文
+      imgElement.onerror = () => {
+        console.error('无法加载图片以获取尺寸');
+        alert('无法加载图片，请重新上传');
+      };
+      
+      // 设置图片src，触发onload事件
+      imgElement.src = uploadedImageUrl;
+    } catch (error) {
+      console.error('Garden Design: 生成图片失败:', error);
+      alert('生成图片失败，请重试');
     }
-    
-    // 验证是否选择了风格
-    if (selectedTab === 'premade' && !selectedStyleId) {
-      alert('请选择一种风格');
-      return;
-    }
-    
-    console.log('Garden Design: 提交生成请求');
-    console.log('- 图片URL:', uploadedImageUrl);
-    console.log('- 风格类型:', selectedTab);
-    if (selectedTab === 'premade') {
-      console.log('- 预设风格ID:', selectedStyleId);
-      console.log('- 预设风格名称:', getSelectedStyle()?.name);
-    } else {
-      console.log('- 正向词:', positiveWords);
-      console.log('- 负向词:', negativeWords);
-    }
-    console.log('- 结构相似度:', resemblancePercent + '%');
-    
-    // 在实际应用中，这里会调用API生成图片
-    // TODO: 实现实际的API调用
   };
   
   // 获取用户自定义风格列表
@@ -2277,33 +2355,11 @@ export default function PhotoGenerator() {
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                   </svg>
-                  生成您的花园
+                  Generate Your Garden Design
                 </button>
               </div>
               
-              {/* 调试区域 */}
-              <div className="mt-8 border-t border-gray-200 pt-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">调试工具</h3>
-                <form onSubmit={handleDebugSubmit} className="flex flex-col space-y-2">
-                  <input
-                    type="text"
-                    value={debugInput}
-                    onChange={(e) => setDebugInput(e.target.value)}
-                    placeholder="输入'1：空'/'1：有图'/'1：多图'/'1:20图'或'2：有图'/'2：空'"
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700 transition"
-                  >
-                    提交调试命令
-                  </button>
-                </form>
-                <div className="mt-2 text-xs text-gray-500">
-                  <div>最近图片状态: {recentImagesState}</div>
-                  <div>当前上传图片状态: {uploadedImage ? '已上传' : '未上传'}</div>
-                </div>
-              </div>
+
             </div>
             
             {/* 右侧面板 */}

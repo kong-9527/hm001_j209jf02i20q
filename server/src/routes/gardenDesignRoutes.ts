@@ -1,5 +1,5 @@
 import express from 'express';
-import { getGardenDesigns, updateLikeStatus, softDeleteDesign } from '../controllers/gardenDesignController';
+import { getGardenDesigns, updateLikeStatus, softDeleteDesign, generateDesign } from '../controllers/gardenDesignController';
 import { authenticateJWT } from '../middlewares/authMiddleware';
 
 const router = express.Router();
@@ -12,5 +12,8 @@ router.put('/:id/like', authenticateJWT, updateLikeStatus);
 
 // 软删除花园设计图片
 router.put('/:id/delete', authenticateJWT, softDeleteDesign);
+
+// 生成花园设计图片
+router.post('/generate', authenticateJWT, generateDesign);
 
 export default router; 

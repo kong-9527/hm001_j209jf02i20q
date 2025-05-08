@@ -19,6 +19,7 @@ interface GardenDesignAttributes {
   structural_similarity: number | null;
   is_like: number | null;
   is_del: number | null;
+  third_task_id: string | null;
   ctime: number | null;
   utime: number | null;
 }
@@ -42,6 +43,7 @@ class GardenDesign extends Model<GardenDesignAttributes, GardenDesignCreationAtt
   public structural_similarity!: number | null;
   public is_like!: number | null;
   public is_del!: number | null;
+  public third_task_id!: string | null;
   public ctime!: number | null;
   public utime!: number | null;
 }
@@ -101,6 +103,11 @@ GardenDesign.init(
       type: DataTypes.INTEGER,
       allowNull: true,
       comment: '70代表70%',
+    },
+    third_task_id: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      comment: '第三方任务ID',
     },
     is_like: {
       type: DataTypes.STRING(255),

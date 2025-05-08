@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import GardenDesign from '../models/GardenDesign';
 import { getUserIdFromRequest } from '../utils/auth';
+import axios from 'axios';
 
 /**
  * 获取当前用户和项目的花园设计图片
@@ -186,5 +187,149 @@ export const softDeleteDesign = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error deleting garden design:', error);
     return res.status(500).json({ error: 'Failed to delete garden design' });
+  }
+};
+
+/**
+ * 生成花园设计图
+ * @route POST /api/garden-designs/generate
+ */
+export const generateDesign = async (req: Request, res: Response) => {
+  try {
+    console.log('API call received: POST /api/garden-designs/generate');
+    console.log('Request body:', req.body);
+    
+    // 从请求中获取用户ID
+    const user_id = getUserIdFromRequest(req);
+    console.log('Extracted user_id:', user_id);
+    
+    if (!user_id) {
+      console.log('Authentication failed: No user ID found');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    // 获取请求参数
+    const { 
+      imageUrl, 
+      size, 
+      styleType, 
+      positiveWords, 
+      negativeWords, 
+      structuralSimilarity,
+      projectId 
+    } = req.body;
+    
+    // 参数验证
+    if (!imageUrl || !size || !styleType || !projectId) {
+      console.log('Validation failed: Missing required parameters');
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+    
+    // 解析参数
+    let prompt = '';
+    let negative_prompt = '';
+    let style_id = '';
+    let style_name = '';
+    
+    // 根据styleType设置参数
+    if (styleType === 'Classic styles') {
+      // Classic styles使用风格名称作为prompt
+      prompt = positiveWords;
+      negative_prompt = '';
+      style_id = '1'; // 假设1代表Classic styles
+      style_name = positiveWords;
+    } else if (styleType === 'Custom styles') {
+      // Custom styles使用用户输入的prompt和negative_prompt
+      prompt = positiveWords;
+      negative_prompt = negativeWords || '';
+      style_id = '99'; // 99代表Custom styles
+      style_name = 'custom style';
+    } else {
+      console.log('Validation failed: Invalid style type');
+      return res.status(400).json({ error: 'Invalid style type' });
+    }
+    
+    // 解析图片尺寸
+    if (!size.includes('*')) {
+      console.log('Validation failed: Invalid size format');
+      return res.status(400).json({ error: 'Invalid size format, expected format: width*height' });
+    }
+    
+    // 创建新的设计记录
+    const gardenDesign = await GardenDesign.create({
+      user_id,
+      project_id: projectId,
+      pic_orginial: imageUrl,
+      status: 1, // 1代表生成中
+      style_id: Number(style_id),
+      style_name,
+      positive_words: prompt,
+      negative_words: negative_prompt,
+      structural_similarity: parseInt(structuralSimilarity),
+      is_like: 0,
+      is_del: 0,
+      ctime: Math.floor(Date.now() / 1000),
+      utime: Math.floor(Date.now() / 1000)
+    });
+    
+    // 调用第三方接口生成图片
+    try {
+      console.log('Calling third-party API to generate image');
+      
+      // API配置
+      const apiUrl = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis";
+      const apiKey = "sk-93f08f8aec02495ebad527ed5c2a7d8c"; // 应该从环境变量获取
+      
+      // 请求头
+      const headers = {
+        'X-DashScope-Async': 'enable',
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      };
+      
+      // 请求体
+      const payload = {
+        "model": "wanx2.1-t2i-plus",
+        "input": {
+          "prompt": prompt,
+          "negative_prompt": negative_prompt
+        },
+        "parameters": {
+          "size": size,
+          "n": 1,
+          "prompt_extend": true
+        }
+      };
+      
+      // 发送POST请求
+      const response = await axios.post(apiUrl, payload, { headers });
+      
+      // 检查响应
+      if (response.status !== 200) {
+        throw new Error(`API responded with status code ${response.status}`);
+      }
+      
+      const result = response.data;
+      const task_id = result.output.task_id;
+      console.log(`Task created successfully, task_id: ${task_id}`);
+      
+      // 更新设计记录的third_task_id
+      await gardenDesign.update({ third_task_id: task_id });
+      
+      return res.status(200).json(gardenDesign);
+    } catch (apiError: any) {
+      console.error('Error calling third-party API:', apiError);
+      
+      // 更新设计记录状态为失败
+      await gardenDesign.update({ status: 3 }); // 3代表失败
+      
+      return res.status(500).json({ 
+        error: 'Failed to generate garden design', 
+        details: apiError.message 
+      });
+    }
+  } catch (error) {
+    console.error('Error generating garden design:', error);
+    return res.status(500).json({ error: 'Failed to generate garden design' });
   }
 }; 

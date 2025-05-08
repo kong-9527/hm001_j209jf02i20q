@@ -14,6 +14,7 @@ export interface GardenDesignImage {
   ctime: number | null;
   is_like: number | null;
   is_del: number | null;
+  third_task_id: string | null;
 }
 
 /**
@@ -214,6 +215,59 @@ export const deleteGardenDesign = async (imageId: number): Promise<GardenDesignI
     return data;
   } catch (error) {
     console.error('Error deleting garden design:', error);
+    throw error;
+  }
+};
+
+/**
+ * 生成花园设计图
+ */
+export const generateGardenDesign = async (
+  imageUrl: string, 
+  size: string, 
+  styleType: string,
+  positiveWords: string,
+  negativeWords: string,
+  structuralSimilarity: string,
+  projectId: number
+): Promise<GardenDesignImage> => {
+  try {
+    const user = await getCurrentUser();
+    
+    if (!user) {
+      throw new Error('Authentication required');
+    }
+    
+    console.log(`Calling API: ${API_URL}/garden-designs/generate`);
+    
+    const response = await fetch(`${API_URL}/garden-designs/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        imageUrl,
+        size,
+        styleType,
+        positiveWords,
+        negativeWords,
+        structuralSimilarity,
+        projectId
+      }),
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('API error response:', errorData);
+      throw new Error(errorData.error || 'Failed to generate garden design');
+    }
+    
+    const data = await response.json();
+    console.log('API success response for garden design generation:', data);
+    return data;
+  } catch (error) {
+    console.error('Error generating garden design:', error);
     throw error;
   }
 }; 
