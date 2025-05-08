@@ -260,7 +260,7 @@ export const generateGardenDesign = async (
     if (!response.ok) {
       const errorData = await response.json();
       console.error('API error response:', errorData);
-      throw new Error(errorData.error || 'Failed to generate garden design');
+      throw new Error(errorData.message || errorData.error || 'Failed to generate garden design');
     }
     
     const data = await response.json();

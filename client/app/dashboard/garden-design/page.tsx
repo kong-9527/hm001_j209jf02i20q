@@ -1874,59 +1874,71 @@ export default function PhotoGenerator() {
   // 生成按钮
   const handleGenerate = async () => {
     try {
-    // 验证是否有上传图片
-    if (!uploadedImageUrl) {
-      alert('请先上传或选择一张图片');
-      return;
-    }
-    
-    // 验证是否选择了风格
-    if (selectedTab === 'premade' && !selectedStyleId) {
-      alert('请选择一种风格');
-      return;
-    }
+      // 验证是否有上传图片
+      if (!uploadedImageUrl) {
+        addNotification({
+          type: 'warning',
+          message: '请先上传或选择一张图片',
+          duration: 5000
+        });
+        return;
+      }
       
+      // 验证是否选择了风格
+      if (selectedTab === 'premade' && !selectedStyleId) {
+        addNotification({
+          type: 'warning',
+          message: '请选择一种风格',
+          duration: 5000
+        });
+        return;
+      }
+        
       // 如果没有当前项目，显示错误
       if (!currentProject?.id) {
-        alert('请先选择或创建一个项目');
-      return;
-    }
-    
-    console.log('Garden Design: 提交生成请求');
-    console.log('- 图片URL:', uploadedImageUrl);
+        addNotification({
+          type: 'warning',
+          message: '请先选择或创建一个项目',
+          duration: 5000
+        });
+        return;
+      }
+      
+      console.log('Garden Design: 提交生成请求');
+      console.log('- 图片URL:', uploadedImageUrl);
       const styleType = selectedTab === 'premade' ? 'Classic styles' : 'Custom styles';
       console.log('- 风格类型:', styleType);
-      
+        
       // 准备参数
       let positiveWordsParam = '';
       let negativeWordsParam = '';
-      
-    if (selectedTab === 'premade') {
-      console.log('- 预设风格ID:', selectedStyleId);
-      console.log('- 预设风格名称:', getSelectedStyle()?.name);
+        
+      if (selectedTab === 'premade') {
+        console.log('- 预设风格ID:', selectedStyleId);
+        console.log('- 预设风格名称:', getSelectedStyle()?.name);
         // 对于预设风格，用风格名称作为positiveWords
         positiveWordsParam = getSelectedStyle()?.name || '';
-    } else {
-      console.log('- 正向词:', positiveWords);
-      console.log('- 负向词:', negativeWords);
+      } else {
+        console.log('- 正向词:', positiveWords);
+        console.log('- 负向词:', negativeWords);
         // 对于自定义风格，将词组数组转换为JSON字符串
         positiveWordsParam = JSON.stringify(positiveWords);
         negativeWordsParam = JSON.stringify(negativeWords);
       }
-      
+        
       const structuralSimilarity = resemblancePercent.toString();
       console.log('- 结构相似度:', structuralSimilarity + '%');
-      
+        
       // 获取图片尺寸
       const imgElement = new window.Image();
-      
+        
       // 使用箭头函数保留this上下文
       imgElement.onload = () => {
         const width = imgElement.naturalWidth;
         const height = imgElement.naturalHeight;
         const sizeParam = `${width}*${height}`;
         console.log('- 图片尺寸:', sizeParam);
-    
+      
         // 调用API生成图片
         generateGardenDesign(
           uploadedImageUrl,
@@ -1945,27 +1957,50 @@ export default function PhotoGenerator() {
             message: 'Submission successful, your new garden is being generated',
             duration: 5000 // 5秒后自动消失
           });
-          
+            
           // 重新加载图片列表
           fetchGardenDesignList(currentProject.id);
         })
         .catch((error) => {
           console.error('生成失败:', error);
-          alert('生成图片失败，请重试');
+            
+          // 检查是否是订阅相关错误
+          if (error.message && error.message.includes('active subscription')) {
+            addNotification({
+              type: 'warning',
+              message: 'There are no active subscriptions, please check the annual discount subscription information.',
+              duration: 7000 // 延长显示时间
+            });
+          } else {
+            // 其他错误显示通用错误提示或服务器返回的消息
+            addNotification({
+              type: 'error',
+              message: error.message || '生成图片失败，请重试',
+              duration: 5000
+            });
+          }
         });
       };
-      
+        
       // 使用箭头函数保留this上下文
       imgElement.onerror = () => {
         console.error('无法加载图片以获取尺寸');
-        alert('无法加载图片，请重新上传');
+        addNotification({
+          type: 'error',
+          message: '无法加载图片，请重新上传',
+          duration: 5000
+        });
       };
-      
+        
       // 设置图片src，触发onload事件
       imgElement.src = uploadedImageUrl;
     } catch (error) {
       console.error('Garden Design: 生成图片失败:', error);
-      alert('生成图片失败，请重试');
+      addNotification({
+        type: 'error',
+        message: '生成图片失败，请重试',
+        duration: 5000
+      });
     }
   };
   

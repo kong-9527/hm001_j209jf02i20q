@@ -212,6 +212,27 @@ export const generateDesign = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    // 检查用户是否有活跃订阅
+    const activeSubscription = await UserOrder.findOne({
+      where: {
+        user_id,
+        member_start_date: {
+          [Op.lte]: new Date() // 开始日期小于等于当前日期
+        },
+        member_end_date: {
+          [Op.gte]: new Date() // 结束日期大于等于当前日期
+        }
+      }
+    });
+
+    if (!activeSubscription) {
+      console.log('No active subscription for user:', user_id);
+      return res.status(403).json({ 
+        error: 'No active subscription',
+        message: 'There are no active subscriptions, please check the annual discount subscription information.'
+      });
+    }
+
     // 检查用户积分是否足够
     const user = await User.findByPk(user_id);
     if (!user) {
