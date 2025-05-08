@@ -1378,6 +1378,13 @@ export default function PhotoGenerator() {
                 </div>
               )}
               
+              {/* 显示生成失败状态的标记 */}
+              {image.status === 3 && (
+                <div className="absolute top-0 left-0 bg-red-500 text-white text-xs px-2 py-1 rounded-br-md">
+                  Failed
+                </div>
+              )}
+              
               {/* 显示风格名称 */}
               <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
                 {image.style_name}
@@ -1386,28 +1393,32 @@ export default function PhotoGenerator() {
               {/* 只在非处理状态下显示操作按钮 */}
               {image.status !== 1 && (
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
-                  {/* 添加下载按钮 */}
-                  <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(image.pic_result || '', '_blank');
-                          }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                    </svg>
-                  </button>
+                  {/* 只在生成成功状态下显示下载按钮 */}
+                  {image.status === 2 && (
+                    <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(image.pic_result || '', '_blank');
+                            }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                      </svg>
+                    </button>
+                  )}
                   
-                  {/* 添加收藏按钮 */}
-                  <button 
-                    className={`p-1.5 rounded-full bg-white ${image.is_like === 1 ? 'text-red-500' : 'text-gray-500 hover:text-red-500'} hover:bg-red-50 shadow-sm`}
-                    onClick={(e) => handleLikeToggle(e, image)}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill={image.is_like === 1 ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                    </svg>
-                  </button>
+                  {/* 只在生成成功状态下显示收藏按钮 */}
+                  {image.status === 2 && (
+                    <button 
+                      className={`p-1.5 rounded-full bg-white ${image.is_like === 1 ? 'text-red-500' : 'text-gray-500 hover:text-red-500'} hover:bg-red-50 shadow-sm`}
+                      onClick={(e) => handleLikeToggle(e, image)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill={image.is_like === 1 ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                      </svg>
+                    </button>
+                  )}
                   
-                  {/* 添加删除按钮 */}
+                  {/* 添加删除按钮 - 所有非生成中状态都显示 */}
                   <button 
                     className="p-1.5 rounded-full bg-white text-gray-500 hover:text-red-500 hover:bg-red-50 shadow-sm"
                     onClick={(e) => handleDelete(e, image)}
@@ -1548,6 +1559,13 @@ export default function PhotoGenerator() {
                 onClick={() => handleImageClick(image)}
               />
               
+              {/* 显示生成失败状态的标记 */}
+              {image.status === 3 && (
+                <div className="absolute top-0 left-0 bg-red-500 text-white text-xs px-2 py-1 rounded-br-md">
+                  Failed
+                </div>
+              )}
+              
               {/* 显示风格名称 */}
               <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
                 {image.style_name} (Deleted)
@@ -1611,7 +1629,7 @@ export default function PhotoGenerator() {
               <div className="font-medium">
                 {selectedImage.status === 1 ? 'Processing' : 
                  selectedImage.status === 2 ? 'Success' : 
-                 selectedImage.status === 3 ? 'Failed' : 'Unknown'}
+                 selectedImage.status === 3 ? <span className="text-red-500">Failed</span> : 'Unknown'}
               </div>
               
               <div className="text-gray-500">Created At</div>
