@@ -42,11 +42,11 @@ interface GardenStyle {
 
 export default function PhotoGenerator() {
   const [selectedTab, setSelectedTab] = useState('premade');
-  const [uploadedImage, setUploadedImage] = useState(true); // 默认已上传图片状态，实际应用中默认为false
+  const [uploadedImage, setUploadedImage] = useState(false); // 修改为默认没有上传图片
   // 增加图片URL状态
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
-  // 增加本地预览图片URL状态
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>('/uploads/garden-sample.png');
+  // 增加本地预览图片URL状态，初始为null
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [recentImagesState, setRecentImagesState] = useState<'empty' | 'single' | 'multiple' | 'many'>('empty'); // 默认显示为空状态
   const [recentImages, setRecentImages] = useState<GardenDesignImage[]>([]);
   const [designImages, setDesignImages] = useState<GardenDesignImage[]>([]);
@@ -1070,6 +1070,8 @@ export default function PhotoGenerator() {
     
     // 清空输入框
     setDebugInput('');
+    
+    // 不再通过调试工具修改上传状态，仅保留其他调试功能
   };
   
   // 处理标签切换并加载相应数据
