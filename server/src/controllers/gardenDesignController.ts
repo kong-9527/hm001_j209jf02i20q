@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import GardenDesign from '../models/GardenDesign';
+import User from '../models/User';
+import UserOrder from '../models/UserOrder';
+import PointsLog from '../models/PointsLog';
 import { getUserIdFromRequest } from '../utils/auth';
 import axios from 'axios';
+import { Op } from 'sequelize';
 
 /**
  * 获取当前用户和项目的花园设计图片
@@ -207,6 +211,20 @@ export const generateDesign = async (req: Request, res: Response) => {
       console.log('Authentication failed: No user ID found');
       return res.status(401).json({ error: 'Unauthorized' });
     }
+
+    // 检查用户积分是否足够
+    const user = await User.findByPk(user_id);
+    if (!user) {
+      console.log('User not found:', user_id);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // 检查用户积分是否足够
+    const userPoints = parseInt(user.points || '0', 10);
+    if (userPoints < 1) {
+      console.log('Insufficient points for user:', user_id);
+      return res.status(400).json({ error: 'Insufficient points' });
+    }
     
     // 获取请求参数
     const { 
@@ -282,9 +300,56 @@ export const generateDesign = async (req: Request, res: Response) => {
       structural_similarity: parseInt(structuralSimilarity),
       is_like: 0,
       is_del: 0,
+      points_cost: 1, // 记录消耗的点数
       ctime: Math.floor(Date.now() / 1000),
       utime: Math.floor(Date.now() / 1000)
     });
+
+    // 处理积分扣除
+    try {
+      // 1. 更新用户积分
+      await user.update({
+        points: (userPoints - 1).toString(),
+        utime: Math.floor(Date.now() / 1000)
+      });
+
+      // 2. 更新用户订单表中的积分余额
+      const userOrder = await UserOrder.findOne({
+        where: {
+          user_id,
+          points_remain: {
+            [Op.gt]: 0
+          }
+        },
+        order: [['member_start_date', 'ASC']]
+      });
+
+      if (userOrder) {
+        await userOrder.update({
+          points_remain: (userOrder.points_remain || 0) - 1,
+          utime: Math.floor(Date.now() / 1000)
+        });
+      } else {
+        console.log('No valid user order found for user:', user_id);
+      }
+
+      // 3. 添加积分日志
+      await PointsLog.create({
+        user_id,
+        points_type: '2', // 2代表减少
+        points_num: 1,    // 本次扣除数量
+        log_type: 11,     // 11代表生成设计图
+        log_content: '生成garden_design',
+        related_id: gardenDesign.id.toString(),
+        ctime: Math.floor(Date.now() / 1000),
+        utime: Math.floor(Date.now() / 1000)
+      });
+
+      console.log('Points deducted successfully for user:', user_id);
+    } catch (pointsError) {
+      console.error('Error processing points deduction:', pointsError);
+      // 记录错误但不中断流程
+    }
     
     // 调用第三方接口生成图片
     try {

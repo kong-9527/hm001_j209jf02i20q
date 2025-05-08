@@ -390,7 +390,7 @@ export default function PhotoGenerator() {
     setShowLoadStyleDialog(true);
     // 打开对话框时重新获取最新的自定义风格列表
     if (fetchUserCustomStyles) {
-      fetchUserCustomStyles(); 
+    fetchUserCustomStyles();
     }
   };
   
@@ -1346,15 +1346,15 @@ export default function PhotoGenerator() {
             >
               {/* 所有状态都显示背景图片 */}
               {image.pic_result ? (
-                <Image 
+              <Image 
                   src={image.pic_result}
-                  alt={image.style_name || 'Garden design'}
-                  fill
-                  sizes="100%"
-                  style={{objectFit: 'cover'}}
-                  className={`${image.status !== 1 ? "hover:opacity-80 transition-opacity cursor-pointer" : "opacity-50"}`}
-                  onClick={() => image.status !== 1 && handleImageClick(image)}
-                />
+                alt={image.style_name || 'Garden design'}
+                fill
+                sizes="100%"
+                style={{objectFit: 'cover'}}
+                className={`${image.status !== 1 ? "hover:opacity-80 transition-opacity cursor-pointer" : "opacity-50"}`}
+                onClick={() => image.status !== 1 && handleImageClick(image)}
+              />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-200">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-400">
@@ -1395,27 +1395,27 @@ export default function PhotoGenerator() {
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
                   {/* 只在生成成功状态下显示下载按钮 */}
                   {image.status === 2 && (
-                    <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              window.open(image.pic_result || '', '_blank');
-                            }}>
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                      </svg>
-                    </button>
+                  <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(image.pic_result || '', '_blank');
+                          }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                  </button>
                   )}
                   
                   {/* 只在生成成功状态下显示收藏按钮 */}
                   {image.status === 2 && (
-                    <button 
-                      className={`p-1.5 rounded-full bg-white ${image.is_like === 1 ? 'text-red-500' : 'text-gray-500 hover:text-red-500'} hover:bg-red-50 shadow-sm`}
-                      onClick={(e) => handleLikeToggle(e, image)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill={image.is_like === 1 ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                      </svg>
-                    </button>
+                  <button 
+                    className={`p-1.5 rounded-full bg-white ${image.is_like === 1 ? 'text-red-500' : 'text-gray-500 hover:text-red-500'} hover:bg-red-50 shadow-sm`}
+                    onClick={(e) => handleLikeToggle(e, image)}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill={image.is_like === 1 ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                  </button>
                   )}
                   
                   {/* 添加删除按钮 - 所有非生成中状态都显示 */}
@@ -1467,15 +1467,15 @@ export default function PhotoGenerator() {
               className="relative aspect-square bg-gray-100 rounded-md overflow-hidden group"
             >
               {image.pic_result ? (
-                <Image 
+              <Image 
                   src={image.pic_result}
-                  alt={image.style_name || 'Garden design'}
-                  fill
-                  sizes="100%"
-                  style={{objectFit: 'cover'}}
-                  className="hover:opacity-80 transition-opacity cursor-pointer"
-                  onClick={() => handleImageClick(image)}
-                />
+                alt={image.style_name || 'Garden design'}
+                fill
+                sizes="100%"
+                style={{objectFit: 'cover'}}
+                className="hover:opacity-80 transition-opacity cursor-pointer"
+                onClick={() => handleImageClick(image)}
+              />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-200">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-400">
@@ -1602,13 +1602,13 @@ export default function PhotoGenerator() {
           <div className="relative w-full pt-6 px-6">
             <div className="relative w-full h-80 rounded-lg overflow-hidden">
               {selectedImage.pic_result ? (
-                <Image 
+              <Image 
                   src={selectedImage.pic_result}
-                  alt={selectedImage.style_name || 'Garden design'}
-                  fill
-                  style={{objectFit: 'cover'}}
-                  className="w-full h-full"
-                />
+                alt={selectedImage.style_name || 'Garden design'}
+                fill
+                style={{objectFit: 'cover'}}
+                className="w-full h-full"
+              />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-200">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-400">
@@ -1872,26 +1872,26 @@ export default function PhotoGenerator() {
   // 生成按钮
   const handleGenerate = async () => {
     try {
-      // 验证是否有上传图片
-      if (!uploadedImageUrl) {
-        alert('请先上传或选择一张图片');
-        return;
-      }
-      
-      // 验证是否选择了风格
-      if (selectedTab === 'premade' && !selectedStyleId) {
-        alert('请选择一种风格');
-        return;
-      }
+    // 验证是否有上传图片
+    if (!uploadedImageUrl) {
+      alert('请先上传或选择一张图片');
+      return;
+    }
+    
+    // 验证是否选择了风格
+    if (selectedTab === 'premade' && !selectedStyleId) {
+      alert('请选择一种风格');
+      return;
+    }
       
       // 如果没有当前项目，显示错误
       if (!currentProject?.id) {
         alert('请先选择或创建一个项目');
         return;
       }
-      
-      console.log('Garden Design: 提交生成请求');
-      console.log('- 图片URL:', uploadedImageUrl);
+    
+    console.log('Garden Design: 提交生成请求');
+    console.log('- 图片URL:', uploadedImageUrl);
       const styleType = selectedTab === 'premade' ? 'Classic styles' : 'Custom styles';
       console.log('- 风格类型:', styleType);
       
@@ -1899,14 +1899,14 @@ export default function PhotoGenerator() {
       let positiveWordsParam = '';
       let negativeWordsParam = '';
       
-      if (selectedTab === 'premade') {
-        console.log('- 预设风格ID:', selectedStyleId);
-        console.log('- 预设风格名称:', getSelectedStyle()?.name);
+    if (selectedTab === 'premade') {
+      console.log('- 预设风格ID:', selectedStyleId);
+      console.log('- 预设风格名称:', getSelectedStyle()?.name);
         // 对于预设风格，用风格名称作为positiveWords
         positiveWordsParam = getSelectedStyle()?.name || '';
-      } else {
-        console.log('- 正向词:', positiveWords);
-        console.log('- 负向词:', negativeWords);
+    } else {
+      console.log('- 正向词:', positiveWords);
+      console.log('- 负向词:', negativeWords);
         // 对于自定义风格，将词组数组转换为JSON字符串
         positiveWordsParam = JSON.stringify(positiveWords);
         negativeWordsParam = JSON.stringify(negativeWords);
