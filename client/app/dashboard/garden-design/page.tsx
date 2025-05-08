@@ -1050,7 +1050,7 @@ export default function PhotoGenerator() {
       
       // 调用上传API - 这里需要替换为实际的上传API
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${API_URL}/upload-image`, {
+      const response = await fetch(`${API_URL}/upload/image`, {
         method: 'POST',
         credentials: 'include',
         body: formData,
@@ -1066,7 +1066,7 @@ export default function PhotoGenerator() {
       
       // 设置为已上传状态并保存URL
       setUploadedImage(true);
-      setUploadedImageUrl(data.imageUrl);
+      setUploadedImageUrl(data.url);
       
     } catch (error) {
       console.error('Garden Design: 文件上传失败:', error);
@@ -1345,15 +1345,23 @@ export default function PhotoGenerator() {
               className={`relative aspect-square bg-gray-100 rounded-md overflow-hidden ${image.status !== 1 ? "group" : ""}`}
             >
               {/* 所有状态都显示背景图片 */}
-              <Image 
-                src={image.pic_result || ''}
-                alt={image.style_name || 'Garden design'}
-                fill
-                sizes="100%"
-                style={{objectFit: 'cover'}}
-                className={`${image.status !== 1 ? "hover:opacity-80 transition-opacity cursor-pointer" : "opacity-50"}`}
-                onClick={() => image.status !== 1 && handleImageClick(image)}
-              />
+              {image.pic_result ? (
+                <Image 
+                  src={image.pic_result}
+                  alt={image.style_name || 'Garden design'}
+                  fill
+                  sizes="100%"
+                  style={{objectFit: 'cover'}}
+                  className={`${image.status !== 1 ? "hover:opacity-80 transition-opacity cursor-pointer" : "opacity-50"}`}
+                  onClick={() => image.status !== 1 && handleImageClick(image)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-400">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                </div>
+              )}
               
               {image.status === 1 && (
                 // 生成中的状态显示 - 保留背景图片
@@ -1447,24 +1455,27 @@ export default function PhotoGenerator() {
               key={image.id} 
               className="relative aspect-square bg-gray-100 rounded-md overflow-hidden group"
             >
-              <Image 
-                src={image.pic_result || ''}
-                alt={image.style_name || 'Garden design'}
-                fill
-                sizes="100%"
-                style={{objectFit: 'cover'}}
-                className="hover:opacity-80 transition-opacity cursor-pointer"
-                onClick={() => handleImageClick(image)}
-              />
-              
-              {/* 显示风格名称 */}
+              {image.pic_result ? (
+                <Image 
+                  src={image.pic_result}
+                  alt={image.style_name || 'Garden design'}
+                  fill
+                  sizes="100%"
+                  style={{objectFit: 'cover'}}
+                  className="hover:opacity-80 transition-opacity cursor-pointer"
+                  onClick={() => handleImageClick(image)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-400">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                </div>
+              )}
               <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
                 {image.style_name}
               </div>
-              
-              {/* 操作按钮 */}
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
-                {/* 添加下载按钮 */}
                 <button className="p-1.5 rounded-full bg-white text-blue-600 hover:bg-blue-100 shadow-sm"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1474,8 +1485,6 @@ export default function PhotoGenerator() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                   </svg>
                 </button>
-                
-                {/* 添加收藏按钮，这里应该始终是红色高亮状态 */}
                 <button 
                   className="p-1.5 rounded-full bg-white text-red-500 hover:bg-red-50 shadow-sm"
                   onClick={(e) => handleLikeToggle(e, image)}
@@ -1484,8 +1493,6 @@ export default function PhotoGenerator() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                   </svg>
                 </button>
-                
-                {/* 添加删除按钮 */}
                 <button 
                   className="p-1.5 rounded-full bg-white text-gray-500 hover:text-red-500 hover:bg-red-50 shadow-sm"
                   onClick={(e) => handleDelete(e, image)}
@@ -1576,13 +1583,21 @@ export default function PhotoGenerator() {
           {/* 图片展示 */}
           <div className="relative w-full pt-6 px-6">
             <div className="relative w-full h-80 rounded-lg overflow-hidden">
-              <Image 
-                src={selectedImage.pic_result || ''}
-                alt={selectedImage.style_name || 'Garden design'}
-                fill
-                style={{objectFit: 'cover'}}
-                className="w-full h-full"
-              />
+              {selectedImage.pic_result ? (
+                <Image 
+                  src={selectedImage.pic_result}
+                  alt={selectedImage.style_name || 'Garden design'}
+                  fill
+                  style={{objectFit: 'cover'}}
+                  className="w-full h-full"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-400">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                </div>
+              )}
             </div>
           </div>
           
