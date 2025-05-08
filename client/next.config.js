@@ -18,6 +18,12 @@ const nextConfig = {
       },
       {
         protocol: 'http',
+        hostname: 'img.zgsta.zhuge.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
         hostname: 'localhost',
         port: '5000',
         pathname: '/**',
