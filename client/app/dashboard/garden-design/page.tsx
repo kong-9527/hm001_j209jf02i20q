@@ -42,6 +42,10 @@ interface GardenStyle {
 export default function PhotoGenerator() {
   const [selectedTab, setSelectedTab] = useState('premade');
   const [uploadedImage, setUploadedImage] = useState(true); // 默认已上传图片状态，实际应用中默认为false
+  // 增加图片URL状态
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  // 增加本地预览图片URL状态
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>('/uploads/garden-sample.png');
   const [recentImagesState, setRecentImagesState] = useState<'empty' | 'single' | 'multiple' | 'many'>('empty'); // 默认显示为空状态
   const [recentImages, setRecentImages] = useState<GardenDesignImage[]>([]);
   const [designImages, setDesignImages] = useState<GardenDesignImage[]>([]);
@@ -863,8 +867,10 @@ export default function PhotoGenerator() {
     // 处理从最近图片拖拽的情况
     const imageSrc = e.dataTransfer.getData('text/plain');
     if (imageSrc) {
+      console.log(`Garden Design: 从最近图片拖放图片 ${imageSrc} 到上传区域`);
       setUploadedImage(true);
-      console.log(`将图片 ${imageSrc} 拖放到上传区域`);
+      setUploadedImageUrl(imageSrc);
+      setPreviewImageUrl(imageSrc);
       return;
     }
     
@@ -877,27 +883,61 @@ export default function PhotoGenerator() {
       if (file.type.startsWith('image/')) {
         handleFileUpload(file);
       } else {
-        console.log('只支持图片文件');
-        // 可以在这里添加错误提示
+        console.log('Garden Design: 只支持图片文件');
+        // 添加错误提示
+        alert('只支持图片文件 (JPG, PNG, WEBP)');
       }
     }
   };
   
   // 处理文件上传
-  const handleFileUpload = (file: File) => {
-    // 创建文件的预览URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target && e.target.result) {
-        // 设置为已上传状态
-        setUploadedImage(true);
-        console.log('文件上传成功:', file.name);
-        
-        // 实际项目中这里会调用API将文件发送到服务器
-        // 在这个示例中我们只是设置上传状态
+  const handleFileUpload = async (file: File) => {
+    try {
+      console.log('Garden Design: 开始上传文件:', file.name);
+      
+      // 创建文件的预览URL用于显示
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target && e.target.result) {
+          // 设置本地预览
+          setPreviewImageUrl(e.target.result.toString());
+        }
+      };
+      reader.readAsDataURL(file);
+      
+      // 创建FormData用于上传
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      // 如果有当前项目ID，添加到表单数据
+      if (currentProject?.id) {
+        formData.append('project_id', currentProject.id.toString());
       }
-    };
-    reader.readAsDataURL(file);
+      
+      // 调用上传API - 这里需要替换为实际的上传API
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_URL}/upload-image`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '文件上传失败');
+      }
+      
+      const data = await response.json();
+      console.log('Garden Design: 文件上传成功，返回数据:', data);
+      
+      // 设置为已上传状态并保存URL
+      setUploadedImage(true);
+      setUploadedImageUrl(data.imageUrl);
+      
+    } catch (error) {
+      console.error('Garden Design: 文件上传失败:', error);
+      alert('文件上传失败，请重试');
+    }
   };
   
   // 处理文件输入变化
@@ -1660,6 +1700,36 @@ export default function PhotoGenerator() {
     };
   }, [on, imageTab, currentProject, fetchGardenDesignList, fetchLikedGardenDesigns, fetchDeletedGardenDesigns]);
   
+  // 生成按钮
+  const handleGenerate = () => {
+    // 验证是否有上传图片
+    if (!uploadedImageUrl) {
+      alert('请先上传或选择一张图片');
+      return;
+    }
+    
+    // 验证是否选择了风格
+    if (selectedTab === 'premade' && !selectedStyleId) {
+      alert('请选择一种风格');
+      return;
+    }
+    
+    console.log('Garden Design: 提交生成请求');
+    console.log('- 图片URL:', uploadedImageUrl);
+    console.log('- 风格类型:', selectedTab);
+    if (selectedTab === 'premade') {
+      console.log('- 预设风格ID:', selectedStyleId);
+      console.log('- 预设风格名称:', getSelectedStyle()?.name);
+    } else {
+      console.log('- 正向词:', positiveWords);
+      console.log('- 负向词:', negativeWords);
+    }
+    console.log('- 结构相似度:', resemblancePercent + '%');
+    
+    // 在实际应用中，这里会调用API生成图片
+    // TODO: 实现实际的API调用
+  };
+  
   return (
     <WithProjectCheck>
       <div className="w-full h-full">
@@ -1780,13 +1850,14 @@ export default function PhotoGenerator() {
                       </svg>
                     </div>
                     <p className="text-sm font-medium text-center mb-1">
-                      {isDragOver ? 'Release to upload image' : 'Drop your image here or click to upload'}
+                      {isDragOver ? '松开鼠标上传图片' : '拖放图片到此处或点击上传'}
                     </p>
-                    <p className="text-xs text-gray-500 text-center">Supports JPG, PNG, WEBP</p>
+                    <p className="text-xs text-gray-500 text-center">支持JPG、PNG、WEBP格式</p>
+                    <p className="text-xs text-gray-500 text-center mt-1">或从最近图片中拖拽一张图片到此处</p>
                     <label className="mt-4">
                       <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={handleFileInputChange} />
                       <span className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition cursor-pointer">
-                        Select File
+                        选择文件
                       </span>
                     </label>
                   </div>
@@ -1808,7 +1879,7 @@ export default function PhotoGenerator() {
                   >
                     <div className="relative aspect-video overflow-hidden rounded-md">
                       <Image 
-                        src="/uploads/garden-sample.png" 
+                        src={previewImageUrl || '/uploads/garden-sample.png'} 
                         alt="Uploaded Garden" 
                         fill
                         sizes="100%"
@@ -1817,7 +1888,7 @@ export default function PhotoGenerator() {
                       />
                       <div className={`absolute inset-0 flex items-center justify-center ${isDragOver ? 'bg-black bg-opacity-40' : 'bg-black bg-opacity-0 group-hover:bg-opacity-40'} transition-all`}>
                         <p className={`text-white font-medium ${isDragOver ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
-                          {isDragOver ? 'Release to replace image' : 'Click to change image'}
+                          {isDragOver ? '松开鼠标替换图片' : '点击更换图片'}
                         </p>
                       </div>
                     </div>
@@ -1827,6 +1898,12 @@ export default function PhotoGenerator() {
                       accept="image/jpeg,image/png,image/webp" 
                       onChange={handleFileInputChange} 
                     />
+                    {uploadedImageUrl && (
+                      <div className="mt-2 text-xs text-gray-500 truncate px-1">
+                        <span className="font-medium">图片URL: </span>
+                        <span className="opacity-70">{uploadedImageUrl}</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -2038,20 +2115,12 @@ export default function PhotoGenerator() {
                     (!uploadedImage || (!selectedStyleId && selectedTab === 'premade')) ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                   disabled={!uploadedImage || (!selectedStyleId && selectedTab === 'premade')}
-                  onClick={() => {
-                    // 在实际应用中，这里会调用API生成图片
-                    if (selectedTab === 'premade') {
-                      console.log('生成图片，使用预设风格:', getSelectedStyle()?.name);
-                    } else {
-                      console.log('生成图片，使用自定义风格。正向词:', positiveWords, '负向词:', negativeWords);
-                    }
-                    console.log('结构相似度:', resemblancePercent + '%');
-                  }}
+                  onClick={handleGenerate}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                   </svg>
-                  Generate Your Garden
+                  生成您的花园
                 </button>
               </div>
               
