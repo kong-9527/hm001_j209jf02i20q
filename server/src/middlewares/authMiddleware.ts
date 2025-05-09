@@ -12,8 +12,10 @@ if (JWT_SECRET === 'your-secret-key') {
 // 定义JWT解析后的用户类型
 interface JwtPayload {
   id: number;
-  email?: string;
-  name?: string;
+  email: string;
+  nickName?: string | null;
+  registerType?: number | null;
+  googleId?: string | null;
   [key: string]: any;
 }
 

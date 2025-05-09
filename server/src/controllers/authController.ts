@@ -9,15 +9,6 @@ import { User as UserModel } from '../models';
 import { generateAvatarFromNickName } from '../utils/avatarGenerator';
 import User from '../models/User';
 
-// 扩展Request类型以包含user属性
-declare global {
-  namespace Express {
-    interface Request {
-      user?: any;
-    }
-  }
-}
-
 /**
  * JWT 配置
  * 密钥应从环境变量中获取

@@ -4,12 +4,20 @@ import GardenAdvisor from '../models/GardenAdvisor';
 import GardenAdvisorSpace from '../models/GardenAdvisorSpace';
 import sequelize from '../config/database';
 
+// 定义用户类型
+interface UserInfo {
+  id: number;
+  email: string;
+  [key: string]: any;
+}
+
 /**
  * 获取用户在指定项目下的花园顾问列表
  */
 export const getGardenAdvisorListByProject = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const user = req.user as UserInfo;
+    const userId = user?.id;
     const projectId = req.query.project_id ? Number(req.query.project_id) : undefined;
 
     // 参数校验
@@ -46,7 +54,8 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
   const transaction = await sequelize.transaction();
 
   try {
-    const userId = req.user?.id;
+    const user = req.user as UserInfo;
+    const userId = user?.id;
     const projectId = Number(req.body.projectId);
     const {
       gardenLocation, 
