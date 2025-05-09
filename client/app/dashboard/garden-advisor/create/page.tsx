@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
 import PlantingPlaceModal from '@/app/components/PlantingPlaceModal';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { useNotification } from '@/app/components/NotificationCenter';
 import { useProject } from '@/app/contexts/ProjectContext';
 import { createGardenAdvisor } from '@/app/services/gardenAdvisorService';
 
@@ -43,6 +43,7 @@ const FERTILIZER_DICT = {
 export default function CreateGardenAdvisorPage() {
   const router = useRouter();
   const { currentProject } = useProject();
+  const { addNotification } = useNotification();
   
   // 添加步骤状态
   const [currentStep, setCurrentStep] = useState(1);
@@ -873,13 +874,13 @@ export default function CreateGardenAdvisorPage() {
     
     // 检查是否有项目
     if (!currentProject?.id) {
-      toast.error('No active project found. Please select a project first.');
+      addNotification({ type: 'error', message: '未找到活动项目。请先选择一个项目。' });
       return;
     }
     
     // 检查是否有至少一个种植空间
     if (gardenSpaces.length === 0) {
-      toast.error('Please add at least one planting place');
+      addNotification({ type: 'error', message: '请至少添加一个种植位置' });
       return;
     }
     
@@ -920,13 +921,13 @@ export default function CreateGardenAdvisorPage() {
       await createGardenAdvisor(submitData);
       
       // 处理成功响应
-      toast.success('Garden plan created successfully!');
+      addNotification({ type: 'success', message: '花园计划创建成功！' });
       
       // 重定向到花园顾问列表页
       router.push(`/dashboard/garden-advisor?project_id=${currentProject.id}`);
     } catch (error) {
       console.error('Failed to create garden plan:', error);
-      toast.error('Failed to create garden plan. Please try again.');
+      addNotification({ type: 'error', message: '创建花园计划失败。请重试。' });
     } finally {
       setIsSubmitting(false);
     }

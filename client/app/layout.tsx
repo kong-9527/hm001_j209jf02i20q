@@ -5,6 +5,7 @@ import { UserProvider } from './contexts/UserContext'
 import { SessionProvider } from './contexts/SessionContext'
 import { EventBusProvider } from './contexts/EventBus'
 import { ProjectProvider } from './contexts/ProjectContext'
+import { NotificationProvider } from './components/NotificationCenter'
 
 export const metadata: Metadata = {
   title: 'AI Garden Design',
@@ -31,7 +32,9 @@ export default function RootLayout({
           <SessionProvider>
             <EventBusProvider>
               <ProjectProvider>
-                <main>{children}</main>
+                <NotificationProvider>
+                  <main>{children}</main>
+                </NotificationProvider>
               </ProjectProvider>
             </EventBusProvider>
           </SessionProvider>
