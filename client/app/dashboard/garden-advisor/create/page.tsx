@@ -5,6 +5,36 @@ import Link from 'next/link';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
 import PlantingPlaceModal from '@/app/components/PlantingPlaceModal';
 
+// 添加字典表常量
+const EXPERIENCE_DICT = {
+  1: { id: 1, label: 'Novice', value: 'Beginner' },
+  2: { id: 2, label: 'Proficient', value: 'Intermediate' },
+  3: { id: 3, label: 'Expert', value: 'Advanced' }
+};
+
+const BUDGET_DICT = {
+  1: { id: 1, label: 'Low', value: 'Low' },
+  2: { id: 2, label: 'Medium', value: 'Medium' },
+  3: { id: 3, label: 'High', value: 'High' }
+};
+
+const TIME_DICT = {
+  1: { id: 1, label: 'Low', value: 'Low' },
+  2: { id: 2, label: 'Medium', value: 'Medium' },
+  3: { id: 3, label: 'High', value: 'High' }
+};
+
+const MAINTENANCE_DICT = {
+  1: { id: 1, label: 'Low', value: 'Low' },
+  2: { id: 2, label: 'Medium', value: 'Medium' },
+  3: { id: 3, label: 'High', value: 'High' }
+};
+
+const FERTILIZER_DICT = {
+  1: { id: 1, label: 'Organic', value: 'Organic' },
+  2: { id: 2, label: 'Conventional', value: 'Conventional' }
+};
+
 export default function CreateGardenAdvisorPage() {
   // 添加步骤状态
   const [currentStep, setCurrentStep] = useState(1);
@@ -18,6 +48,7 @@ export default function CreateGardenAdvisorPage() {
   // General Information state - 将所有默认值设为空
   const [gardenLocation, setGardenLocation] = useState('');
   const [hardinessZone, setHardinessZone] = useState('');
+  // 使用字典表中的值
   const [experience, setExperience] = useState('');
   const [budget, setBudget] = useState('');
   const [time, setTime] = useState('');
@@ -26,6 +57,7 @@ export default function CreateGardenAdvisorPage() {
 
   // Custom Planting Plan state - 将所有默认值设为空
   const [plantTypes, setPlantTypes] = useState<string[]>([]);
+  // 使用字典表中的值
   const [fertilizerType, setFertilizerType] = useState('');
   const [allergies, setAllergies] = useState<string[]>([]);
 
@@ -231,41 +263,19 @@ export default function CreateGardenAdvisorPage() {
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">Your gardening experience (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${experience === 'Beginner' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="experience"
-                      checked={experience === 'Beginner'}
-                      onChange={() => setExperience('Beginner')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Beginner' ? 'border-primary bg-primary' : 'border-gray-300'}`}>  </div>
-                    <span className={experience === 'Beginner' ? 'text-primary font-medium' : ''}>Novice</span>
-                  </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${experience === 'Intermediate' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="experience"
-                      checked={experience === 'Intermediate'}
-                      onChange={() => setExperience('Intermediate')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Intermediate' ? 'border-primary bg-primary' : 'border-gray-300'}`}>
-                    </div>
-                    <span className={experience === 'Intermediate' ? 'text-primary font-medium' : ''}>Proficient</span>
-                  </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${experience === 'Advanced' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="experience"
-                      checked={experience === 'Advanced'}
-                      onChange={() => setExperience('Advanced')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${experience === 'Advanced' ? 'border-primary bg-primary' : 'border-gray-300'}`}>
-                    </div>
-                    <span className={experience === 'Advanced' ? 'text-primary font-medium' : ''}>Expert</span>
-                  </label>
+                  {Object.values(EXPERIENCE_DICT).map((item) => (
+                    <label key={item.id} className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${experience === item.value ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                      <input
+                        type="radio"
+                        name="experience"
+                        checked={experience === item.value}
+                        onChange={() => setExperience(item.value)}
+                        className="hidden"
+                      />
+                      <div className={`w-4 h-4 rounded-full mr-2 border ${experience === item.value ? 'border-primary bg-primary' : 'border-gray-300'}`}>  </div>
+                      <span className={experience === item.value ? 'text-primary font-medium' : ''}>{item.label}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
@@ -279,40 +289,20 @@ export default function CreateGardenAdvisorPage() {
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">Your funds range for gardening (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${budget === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="budget"
-                      checked={budget === 'Low'}
-                      onChange={() => setBudget('Low')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${budget === 'Low' ? 'border-primary bg-primary' : 'border-gray-300'}`}>
-                    </div>
-                    <span className={budget === 'Low' ? 'text-primary font-medium' : ''}>Low</span>
-                  </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${budget === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="budget"
-                      checked={budget === 'Medium'}
-                      onChange={() => setBudget('Medium')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${budget === 'Medium' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
-                    <span className={budget === 'Medium' ? 'text-primary font-medium' : ''}>Medium</span>
-                  </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${budget === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="budget"
-                      checked={budget === 'High'}
-                      onChange={() => setBudget('High')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${budget === 'High' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
-                    <span className={budget === 'High' ? 'text-primary font-medium' : ''}>High</span>
-                  </label>
+                  {Object.values(BUDGET_DICT).map((item) => (
+                    <label key={item.id} className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${budget === item.value ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                      <input
+                        type="radio"
+                        name="budget"
+                        checked={budget === item.value}
+                        onChange={() => setBudget(item.value)}
+                        className="hidden"
+                      />
+                      <div className={`w-4 h-4 rounded-full mr-2 border ${budget === item.value ? 'border-primary bg-primary' : 'border-gray-300'}`}>
+                      </div>
+                      <span className={budget === item.value ? 'text-primary font-medium' : ''}>{item.label}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
@@ -326,39 +316,19 @@ export default function CreateGardenAdvisorPage() {
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">How much time you spending on gardening (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer  hover:bg-green-50 ${time === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="time"
-                      checked={time === 'Low'}
-                      onChange={() => setTime('Low')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${time === 'Low' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
-                    <span className={time === 'Low' ? 'text-primary font-medium' : ''}>Low</span>
-                  </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${time === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="time"
-                      checked={time === 'Medium'}
-                      onChange={() => setTime('Medium')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${time === 'Medium' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
-                    <span className={time === 'Medium' ? 'text-primary font-medium' : ''}>Medium</span>
-                  </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${time === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="time"
-                      checked={time === 'High'}
-                      onChange={() => setTime('High')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${time === 'High' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
-                    <span className={time === 'High' ? 'text-primary font-medium' : ''}>High</span>
-                  </label>
+                  {Object.values(TIME_DICT).map((item) => (
+                    <label key={item.id} className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer  hover:bg-green-50 ${time === item.value ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                      <input
+                        type="radio"
+                        name="time"
+                        checked={time === item.value}
+                        onChange={() => setTime(item.value)}
+                        className="hidden"
+                      />
+                      <div className={`w-4 h-4 rounded-full mr-2 border ${time === item.value ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
+                      <span className={time === item.value ? 'text-primary font-medium' : ''}>{item.label}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
@@ -372,39 +342,19 @@ export default function CreateGardenAdvisorPage() {
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">Select the level of difficulty you want to maintain (optional):</p>
                 <div className="flex flex-wrap gap-4">
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${maintenance === 'Low' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="maintenance"
-                      checked={maintenance === 'Low'}
-                      onChange={() => setMaintenance('Low')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${maintenance === 'Low' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
-                    <span className={maintenance === 'Low' ? 'text-primary font-medium' : ''}>Low</span>
-                  </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${maintenance === 'Medium' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="maintenance"
-                      checked={maintenance === 'Medium'}
-                      onChange={() => setMaintenance('Medium')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${maintenance === 'Medium' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
-                    <span className={maintenance === 'Medium' ? 'text-primary font-medium' : ''}>Medium</span>
-                  </label>
-                  <label className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${maintenance === 'High' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
-                    <input
-                      type="radio"
-                      name="maintenance"
-                      checked={maintenance === 'High'}
-                      onChange={() => setMaintenance('High')}
-                      className="hidden"
-                    />
-                    <div className={`w-4 h-4 rounded-full mr-2 border ${maintenance === 'High' ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
-                    <span className={maintenance === 'High' ? 'text-primary font-medium' : ''}>High</span>
-                  </label>
+                  {Object.values(MAINTENANCE_DICT).map((item) => (
+                    <label key={item.id} className={`flex items-center bg-white border rounded-md px-4 py-2 cursor-pointer transition-colors hover:bg-green-50 ${maintenance === item.value ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+                      <input
+                        type="radio"
+                        name="maintenance"
+                        checked={maintenance === item.value}
+                        onChange={() => setMaintenance(item.value)}
+                        className="hidden"
+                      />
+                      <div className={`w-4 h-4 rounded-full mr-2 border ${maintenance === item.value ? 'border-primary bg-primary' : 'border-gray-300'}`}></div>
+                      <span className={maintenance === item.value ? 'text-primary font-medium' : ''}>{item.label}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
@@ -506,42 +456,30 @@ export default function CreateGardenAdvisorPage() {
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">What kind of fertilizer do you prefer to use to maintain plants (optional):</p>
                 <div className="space-y-3">
-                  <label className="flex items-start p-3 border rounded-md cursor-pointer hover:bg-green-50 transition-colors">
-                    <input
-                      type="radio"
-                      name="fertilizer"
-                      checked={fertilizerType === 'Organic'}
-                      onChange={() => setFertilizerType('Organic')}
-                      className="hidden"
-                    />
-                    <div className="flex h-5 items-center mr-3">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${fertilizerType === 'Organic' ? 'border-primary' : 'border-gray-300'}`}>
-                        {fertilizerType === 'Organic' && <div className="w-3 h-3 rounded-full bg-primary"></div>}
+                  {Object.values(FERTILIZER_DICT).map((item) => (
+                    <label key={item.id} className="flex items-start p-3 border rounded-md cursor-pointer hover:bg-green-50 transition-colors">
+                      <input
+                        type="radio"
+                        name="fertilizer"
+                        checked={fertilizerType === item.value}
+                        onChange={() => setFertilizerType(item.value)}
+                        className="hidden"
+                      />
+                      <div className="flex h-5 items-center mr-3">
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${fertilizerType === item.value ? 'border-primary' : 'border-gray-300'}`}>
+                          {fertilizerType === item.value && <div className="w-3 h-3 rounded-full bg-primary"></div>}
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <span className={`font-medium ${fertilizerType === 'Organic' ? 'text-primary' : ''}`}>Organic</span>
-                      <p className="text-xs text-gray-500 mt-1">Organic gardening emphasizes the utilization of natural techniques and substances for plant cultivation. It strictly avoids the application of synthetic chemicals and pesticides, instead relying on nature - friendly approaches to ensure healthy plant growth.</p>
-                    </div>
-                  </label>
-                  <label className="flex items-start p-3 border rounded-md cursor-pointer hover:bg-green-50 transition-colors">
-                    <input
-                      type="radio"
-                      name="fertilizer"
-                      checked={fertilizerType === 'Conventional'}
-                      onChange={() => setFertilizerType('Conventional')}
-                      className="hidden"
-                    />
-                    <div className="flex h-5 items-center mr-3">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${fertilizerType === 'Conventional' ? 'border-primary' : 'border-gray-300'}`}>
-                        {fertilizerType === 'Conventional' && <div className="w-3 h-3 rounded-full bg-primary"></div>}
+                      <div>
+                        <span className={`font-medium ${fertilizerType === item.value ? 'text-primary' : ''}`}>{item.label}</span>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {item.value === 'Organic' ? 
+                            'Organic gardening emphasizes the utilization of natural techniques and substances for plant cultivation. It strictly avoids the application of synthetic chemicals and pesticides, instead relying on nature - friendly approaches to ensure healthy plant growth.' : 
+                            'In contrast, conventional gardening typically makes use of synthetic fertilizers and pesticides. The main goal of this method is to boost plant growth to the maximum extent and effectively control pests, often through the use of artificial chemical substances.'}
+                        </p>
                       </div>
-                    </div>
-                    <div>
-                      <span className={`font-medium ${fertilizerType === 'Conventional' ? 'text-primary' : ''}`}>Conventional</span>
-                      <p className="text-xs text-gray-500 mt-1">In contrast, conventional gardening typically makes use of synthetic fertilizers and pesticides. The main goal of this method is to boost plant growth to the maximum extent and effectively control pests, often through the use of artificial chemical substances.</p>
-                    </div>
-                  </label>
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
@@ -907,22 +845,44 @@ export default function CreateGardenAdvisorPage() {
   };
 
   const createGardenPlan = () => {
-    // Implement the creation logic here
+    // 将字典值转换为ID
+    const getIdFromDictValue = (dict: any, value: string): number | null => {
+      const entry = Object.values(dict).find(item => (item as any).value === value);
+      return entry ? (entry as any).id : null;
+    };
+    
+    // 实现创建逻辑
     console.log('Creating garden plan with the following data:');
-    console.log({
+    
+    // 转换值为ID
+    const experienceId = getIdFromDictValue(EXPERIENCE_DICT, experience);
+    const budgetId = getIdFromDictValue(BUDGET_DICT, budget);
+    const timeId = getIdFromDictValue(TIME_DICT, time);
+    const maintenanceId = getIdFromDictValue(MAINTENANCE_DICT, maintenance);
+    const fertilizerId = getIdFromDictValue(FERTILIZER_DICT, fertilizerType);
+    
+    // 整合数据，包含原始值和ID值
+    const formattedData = {
       gardenLocation,
       hardinessZone,
       experience,
+      experienceId,
       budget,
+      budgetId,
       time,
+      timeId,
       maintenance,
+      maintenanceId,
       goals,
       plantTypes,
       fertilizerType,
+      fertilizerId,
       allergies,
       gardenSpaces
-    });
-    // Navigate or show success message
+    };
+    
+    console.log(formattedData);
+    // 导航或显示成功消息
   };
 
   return (

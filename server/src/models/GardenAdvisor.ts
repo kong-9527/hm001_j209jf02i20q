@@ -11,8 +11,9 @@ interface GardenAdvisorAttributes {
   project_id: number | null;
   status: number | null;
   points_cost: number | null;
-  loaction: number | null; // 保持原始SQL中的字段名
-  hardiness_zone: number | null;
+  location: string | null; // 修正拼写错误
+  plan_name: string | null; // 新增plan_name字段
+  hardiness_zone: string | null;
   experience: number | null;
   budget: number | null;
   time: number | null;
@@ -36,8 +37,9 @@ class GardenAdvisor extends Model<GardenAdvisorAttributes, GardenAdvisorCreation
   public project_id!: number | null;
   public status!: number | null;
   public points_cost!: number | null;
-  public loaction!: number | null;
-  public hardiness_zone!: number | null;
+  public location!: string | null;
+  public plan_name!: string | null;
+  public hardiness_zone!: string | null;
   public experience!: number | null;
   public budget!: number | null;
   public time!: number | null;
@@ -57,6 +59,7 @@ GardenAdvisor.init(
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      autoIncrement: true,
     },
     user_id: {
       type: DataTypes.INTEGER,
@@ -67,14 +70,19 @@ GardenAdvisor.init(
       allowNull: true,
     },
     status: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
+      defaultValue: 0,
     },
     points_cost: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,
     },
-    loaction: {
+    location: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    plan_name: {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
@@ -121,16 +129,19 @@ GardenAdvisor.init(
     ctime: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      defaultValue: () => Math.floor(Date.now() / 1000),
     },
     utime: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      defaultValue: () => Math.floor(Date.now() / 1000),
     },
   },
   {
     sequelize,
     tableName: 'garden_advisor',
     modelName: 'GardenAdvisor',
+    timestamps: false,
   }
 );
 
