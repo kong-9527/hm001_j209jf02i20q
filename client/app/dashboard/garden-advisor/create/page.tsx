@@ -1,9 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
 import PlantingPlaceModal from '@/app/components/PlantingPlaceModal';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useProject } from '@/app/contexts/ProjectContext';
+import { createGardenAdvisor } from '@/app/services/gardenAdvisorService';
 
 // 添加字典表常量
 const EXPERIENCE_DICT = {
@@ -36,6 +41,9 @@ const FERTILIZER_DICT = {
 };
 
 export default function CreateGardenAdvisorPage() {
+  const router = useRouter();
+  const { currentProject } = useProject();
+  
   // 添加步骤状态
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3;
@@ -75,6 +83,9 @@ export default function CreateGardenAdvisorPage() {
     waterAccess: string;
     measurement: string;
   }>>([]);
+
+  // 添加发送API请求状态
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 打开添加种植位置弹窗
   const openAddPlantingPlaceModal = () => {
@@ -786,12 +797,25 @@ export default function CreateGardenAdvisorPage() {
             <div>
               <button 
                 onClick={createGardenPlan}
-                className="bg-primary hover:bg-green-700 text-white py-3.5 px-8 rounded-md font-medium transition-colors flex items-center justify-center ml-4"
+                disabled={isSubmitting}
+                className={`bg-primary hover:bg-green-700 text-white py-3.5 px-8 rounded-md font-medium transition-colors flex items-center justify-center ml-4 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Create My Personalized Garden Plan Now!
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Create My Personalized Garden Plan Now!
+                  </>
+                )}
               </button>
             </div>
             <div className="w-[130px] px-6 py-2 rounded-md font-medium transition-colors flex items-center">
@@ -844,15 +868,26 @@ export default function CreateGardenAdvisorPage() {
     }
   };
 
-  const createGardenPlan = () => {
+  const createGardenPlan = async () => {
+    if (isSubmitting) return; // 防止重复提交
+    
+    // 检查是否有项目
+    if (!currentProject?.id) {
+      toast.error('No active project found. Please select a project first.');
+      return;
+    }
+    
+    // 检查是否有至少一个种植空间
+    if (gardenSpaces.length === 0) {
+      toast.error('Please add at least one planting place');
+      return;
+    }
+    
     // 将字典值转换为ID
     const getIdFromDictValue = (dict: any, value: string): number | null => {
       const entry = Object.values(dict).find(item => (item as any).value === value);
       return entry ? (entry as any).id : null;
     };
-    
-    // 实现创建逻辑
-    console.log('Creating garden plan with the following data:');
     
     // 转换值为ID
     const experienceId = getIdFromDictValue(EXPERIENCE_DICT, experience);
@@ -861,28 +896,40 @@ export default function CreateGardenAdvisorPage() {
     const maintenanceId = getIdFromDictValue(MAINTENANCE_DICT, maintenance);
     const fertilizerId = getIdFromDictValue(FERTILIZER_DICT, fertilizerType);
     
-    // 整合数据，包含原始值和ID值
-    const formattedData = {
+    // 准备提交的数据
+    const submitData = {
+      projectId: currentProject.id,
       gardenLocation,
       hardinessZone,
-      experience,
       experienceId,
-      budget,
       budgetId,
-      time,
       timeId,
-      maintenance,
       maintenanceId,
       goals,
       plantTypes,
-      fertilizerType,
       fertilizerId,
       allergies,
       gardenSpaces
     };
     
-    console.log(formattedData);
-    // 导航或显示成功消息
+    // 设置提交状态
+    setIsSubmitting(true);
+    
+    try {
+      // 使用服务方法调用API
+      await createGardenAdvisor(submitData);
+      
+      // 处理成功响应
+      toast.success('Garden plan created successfully!');
+      
+      // 重定向到花园顾问列表页
+      router.push(`/dashboard/garden-advisor?project_id=${currentProject.id}`);
+    } catch (error) {
+      console.error('Failed to create garden plan:', error);
+      toast.error('Failed to create garden plan. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
