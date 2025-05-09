@@ -6,15 +6,16 @@ import type { ModelStatic } from 'sequelize';
 interface GardenAdvisorSpaceAttributes {
   id: number;
   advisor_id: number | null;
-  in_out: string | null;
-  cultivation: string | null;
+  in_out: number | null;
+  cultivation: number | null;
   length: number | null;
   width: number | null;
   height: number | null;
-  diameter: string | null;
-  sunlight: string | null;
-  soil: string | null;
-  water_access: string | null;
+  Measurement: number | null;
+  diameter: number | null;
+  sunlight: number | null;
+  soil: number | null;
+  water_access: number | null;
 }
 
 // 创建时的可选属性
@@ -24,15 +25,16 @@ interface GardenAdvisorSpaceCreationAttributes extends Optional<GardenAdvisorSpa
 class GardenAdvisorSpace extends Model<GardenAdvisorSpaceAttributes, GardenAdvisorSpaceCreationAttributes> implements GardenAdvisorSpaceAttributes {
   public id!: number;
   public advisor_id!: number | null;
-  public in_out!: string | null;
-  public cultivation!: string | null;
+  public in_out!: number | null;
+  public cultivation!: number | null;
   public length!: number | null;
   public width!: number | null;
   public height!: number | null;
-  public diameter!: string | null;
-  public sunlight!: string | null;
-  public soil!: string | null;
-  public water_access!: string | null;
+  public Measurement!: number | null;
+  public diameter!: number | null;
+  public sunlight!: number | null;
+  public soil!: number | null;
+  public water_access!: number | null;
 }
 
 // 初始化模型
@@ -48,39 +50,43 @@ GardenAdvisorSpace.init(
       allowNull: true,
     },
     in_out: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     cultivation: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     length: {
-      type: DataTypes.DOUBLE,
+      type: DataTypes.FLOAT,
       allowNull: true,
     },
     width: {
-      type: DataTypes.DOUBLE,
+      type: DataTypes.FLOAT,
       allowNull: true,
     },
     height: {
-      type: DataTypes.DOUBLE,
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    Measurement: {
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     diameter: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.FLOAT,
       allowNull: true,
     },
     sunlight: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     soil: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     water_access: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
   },
