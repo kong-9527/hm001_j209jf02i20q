@@ -300,8 +300,8 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
           
           {/* Size Dimensions */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Length - 方盆、高床、地上种植需要 */}
-            {(formData.type === 'square-pot' || formData.type === 'raised-bed' || formData.type === 'ground' || formData.type === '') && (
+            {/* Length - square-pot, raised-bed, ground需要 */}
+            {(formData.type === 'square-pot' || formData.type === 'raised-bed' || formData.type === 'ground') && (
               <div>
                 <label className="block text-sm text-gray-600 mb-1">Length</label>
                 <input
@@ -314,8 +314,8 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
               </div>
             )}
             
-            {/* Width - 方盆、高床、地上种植需要 */}
-            {(formData.type === 'square-pot' || formData.type === 'raised-bed' || formData.type === 'ground' || formData.type === '') && (
+            {/* Width - square-pot, raised-bed, ground需要 */}
+            {(formData.type === 'square-pot' || formData.type === 'raised-bed' || formData.type === 'ground') && (
               <div>
                 <label className="block text-sm text-gray-600 mb-1">Width</label>
                 <input
@@ -328,8 +328,8 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
               </div>
             )}
             
-            {/* Height - 方盆、圆盆、高床需要 */}
-            {(formData.type === 'square-pot' || formData.type === 'round-pot' || formData.type === 'raised-bed' || formData.type === '') && (
+            {/* Height - square-pot, round-pot, raised-bed需要 */}
+            {(formData.type === 'square-pot' || formData.type === 'round-pot' || formData.type === 'raised-bed') && (
               <div>
                 <label className="block text-sm text-gray-600 mb-1">Height</label>
                 <input
@@ -342,8 +342,8 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
               </div>
             )}
             
-            {/* Diameter - 只有圆盆需要 */}
-            {(formData.type === 'round-pot' || formData.type === '') && (
+            {/* Diameter - 只有round-pot需要 */}
+            {formData.type === 'round-pot' && (
               <div>
                 <label className="block text-sm text-gray-600 mb-1">Diameter</label>
                 <input
@@ -354,6 +354,52 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
                   placeholder="Diameter"
                 />
               </div>
+            )}
+            
+            {/* 当没有选择cultivation类型时，显示所有字段 */}
+            {formData.type === '' && (
+              <>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Length</label>
+                  <input
+                    type="text"
+                    value={formData.length}
+                    onChange={(e) => handleChange('length', e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="Length"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Width</label>
+                  <input
+                    type="text"
+                    value={formData.width}
+                    onChange={(e) => handleChange('width', e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="Width"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Height</label>
+                  <input
+                    type="text"
+                    value={formData.height}
+                    onChange={(e) => handleChange('height', e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="Height"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Diameter</label>
+                  <input
+                    type="text"
+                    value={formData.diameter}
+                    onChange={(e) => handleChange('diameter', e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                    placeholder="Diameter"
+                  />
+                </div>
+              </>
             )}
           </div>
         </div>
