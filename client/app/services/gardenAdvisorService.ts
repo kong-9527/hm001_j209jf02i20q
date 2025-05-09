@@ -6,7 +6,7 @@ export interface GardenAdvisor {
   user_id: number;
   project_id: number;
   plan_name: string;
-  loaction: string;
+  location: string;
   hardiness_zone: string;
   experience: number;
   fertilizer: number;
