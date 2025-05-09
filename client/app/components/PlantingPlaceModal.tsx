@@ -64,15 +64,57 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
 
   // 处理表单字段更改
   const handleChange = (field: keyof PlantingPlace, value: string) => {
-    setFormData(prev => ({
-      ...prev,
+    // 创建新的表单数据对象
+    const updatedFormData = {
+      ...formData,
       [field]: value
-    }));
+    };
+
+    // 如果更改的是"type"字段，清空与新类型无关的尺寸字段
+    if (field === 'type') {
+      if (value === 'square-pot') {
+        // 方盆：清空diameter
+        updatedFormData.diameter = '';
+      } else if (value === 'round-pot') {
+        // 圆盆：清空length和width
+        updatedFormData.length = '';
+        updatedFormData.width = '';
+      } else if (value === 'raised-bed') {
+        // 高床：清空diameter
+        updatedFormData.diameter = '';
+      } else if (value === 'ground') {
+        // 地上种植：清空height和diameter
+        updatedFormData.height = '';
+        updatedFormData.diameter = '';
+      }
+    }
+
+    setFormData(updatedFormData);
   };
 
   // 处理保存操作
   const handleSave = () => {
-    onSave(formData);
+    // 创建一个新对象以避免直接修改state
+    const dataToSave = { ...formData };
+    
+    // 根据cultivation类型清空不需要的字段
+    if (dataToSave.type === 'square-pot') {
+      // 方盆：保留length, width, height，清空diameter
+      dataToSave.diameter = '';
+    } else if (dataToSave.type === 'round-pot') {
+      // 圆盆：保留diameter和height，清空length和width
+      dataToSave.length = '';
+      dataToSave.width = '';
+    } else if (dataToSave.type === 'raised-bed') {
+      // 高床：保留length, width, height，清空diameter
+      dataToSave.diameter = '';
+    } else if (dataToSave.type === 'ground') {
+      // 地上种植：保留length和width，清空height和diameter
+      dataToSave.height = '';
+      dataToSave.diameter = '';
+    }
+
+    onSave(dataToSave);
     onClose();
   };
 
@@ -258,49 +300,61 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
           
           {/* Size Dimensions */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Length</label>
-              <input
-                type="text"
-                value={formData.length}
-                onChange={(e) => handleChange('length', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder="Length"
-              />
-            </div>
+            {/* Length - 方盆、高床、地上种植需要 */}
+            {(formData.type === 'square-pot' || formData.type === 'raised-bed' || formData.type === 'ground' || formData.type === '') && (
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Length</label>
+                <input
+                  type="text"
+                  value={formData.length}
+                  onChange={(e) => handleChange('length', e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Length"
+                />
+              </div>
+            )}
             
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Width</label>
-              <input
-                type="text"
-                value={formData.width}
-                onChange={(e) => handleChange('width', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder="Width"
-              />
-            </div>
+            {/* Width - 方盆、高床、地上种植需要 */}
+            {(formData.type === 'square-pot' || formData.type === 'raised-bed' || formData.type === 'ground' || formData.type === '') && (
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Width</label>
+                <input
+                  type="text"
+                  value={formData.width}
+                  onChange={(e) => handleChange('width', e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Width"
+                />
+              </div>
+            )}
             
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Height</label>
-              <input
-                type="text"
-                value={formData.height}
-                onChange={(e) => handleChange('height', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder="Height"
-              />
-            </div>
+            {/* Height - 方盆、圆盆、高床需要 */}
+            {(formData.type === 'square-pot' || formData.type === 'round-pot' || formData.type === 'raised-bed' || formData.type === '') && (
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Height</label>
+                <input
+                  type="text"
+                  value={formData.height}
+                  onChange={(e) => handleChange('height', e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Height"
+                />
+              </div>
+            )}
             
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Diameter</label>
-              <input
-                type="text"
-                value={formData.diameter}
-                onChange={(e) => handleChange('diameter', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder="Diameter"
-              />
-            </div>
+            {/* Diameter - 只有圆盆需要 */}
+            {(formData.type === 'round-pot' || formData.type === '') && (
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Diameter</label>
+                <input
+                  type="text"
+                  value={formData.diameter}
+                  onChange={(e) => handleChange('diameter', e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Diameter"
+                />
+              </div>
+            )}
           </div>
         </div>
         
