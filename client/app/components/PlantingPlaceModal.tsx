@@ -39,6 +39,19 @@ const defaultData: PlantingPlace = {
   measurement: 'inches' // 保留默认值为inches
 };
 
+// 定义错误信息接口
+interface FormErrors {
+  inOut?: string;
+  type?: string;
+  length?: string;
+  width?: string;
+  height?: string;
+  diameter?: string;
+  sunlight?: string;
+  soil?: string;
+  waterAccess?: string;
+}
+
 const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({ 
   isOpen, 
   onClose, 
@@ -48,6 +61,10 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
 }) => {
   // 使用state管理表单数据
   const [formData, setFormData] = useState<PlantingPlace>(defaultData);
+  // 添加错误状态
+  const [errors, setErrors] = useState<FormErrors>({});
+  // 添加表单提交状态
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 监听isOpen和editData变化，重新初始化表单数据
   useEffect(() => {
@@ -59,6 +76,9 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
         // 如果是新增模式，重置为默认状态
         setFormData({...defaultData, id: Date.now()});
       }
+      // 重置错误状态
+      setErrors({});
+      setIsSubmitting(false);
     }
   }, [isOpen, editData]);
 
@@ -89,11 +109,89 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
       }
     }
 
+    // 清除相关字段的错误
+    if (errors[field as keyof FormErrors]) {
+      setErrors(prev => {
+        const newErrors = {...prev};
+        delete newErrors[field as keyof FormErrors];
+        return newErrors;
+      });
+    }
+
     setFormData(updatedFormData);
+  };
+
+  // 验证表单数据
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    let isValid = true;
+
+    // 检查必填字段
+    if (!formData.inOut) {
+      newErrors.inOut = "Please select indoor or outdoor";
+      isValid = false;
+    }
+
+    if (!formData.type) {
+      newErrors.type = "Please select a cultivation type";
+      isValid = false;
+    }
+
+    // 根据cultivation类型验证尺寸字段
+    if (formData.type === 'square-pot' || formData.type === 'raised-bed' || formData.type === 'ground') {
+      if (!formData.length) {
+        newErrors.length = "Length is required";
+        isValid = false;
+      }
+      if (!formData.width) {
+        newErrors.width = "Width is required";
+        isValid = false;
+      }
+    }
+
+    if (formData.type === 'square-pot' || formData.type === 'round-pot' || formData.type === 'raised-bed') {
+      if (!formData.height) {
+        newErrors.height = "Height is required";
+        isValid = false;
+      }
+    }
+
+    if (formData.type === 'round-pot') {
+      if (!formData.diameter) {
+        newErrors.diameter = "Diameter is required";
+        isValid = false;
+      }
+    }
+
+    if (!formData.sunlight) {
+      newErrors.sunlight = "Please select sunlight condition";
+      isValid = false;
+    }
+
+    if (!formData.soil) {
+      newErrors.soil = "Please select soil type";
+      isValid = false;
+    }
+
+    if (!formData.waterAccess) {
+      newErrors.waterAccess = "Please select water access";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   // 处理保存操作
   const handleSave = () => {
+    setIsSubmitting(true);
+    
+    // 验证表单
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
+    }
+
     // 创建一个新对象以避免直接修改state
     const dataToSave = { ...formData };
     
@@ -131,9 +229,11 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
         
         {/* In/Out Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">In/Out</label>
+          <label className="block text-sm font-medium mb-2">
+            In/Out
+          </label>
           <div className="flex space-x-4">
-            <label className={`flex items-center border rounded-md px-4 py-2 cursor-pointer ${formData.inOut === 'indoor' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+            <label className={`flex items-center border rounded-md px-4 py-2 cursor-pointer ${formData.inOut === 'indoor' ? 'border-primary bg-green-50' : errors.inOut ? 'border-red-500' : 'border-gray-300 hover:bg-green-50'}`}>
               <input
                 type="radio"
                 name="inOut"
@@ -147,7 +247,7 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
               <span>Indoor</span>
             </label>
             
-            <label className={`flex items-center border rounded-md px-4 py-2 cursor-pointer ${formData.inOut === 'outdoor' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
+            <label className={`flex items-center border rounded-md px-4 py-2 cursor-pointer ${formData.inOut === 'outdoor' ? 'border-primary bg-green-50' : errors.inOut ? 'border-red-500' : 'border-gray-300 hover:bg-green-50'}`}>
               <input
                 type="radio"
                 name="inOut"
@@ -161,12 +261,15 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
               <span>Outdoor</span>
             </label>
           </div>
+          {errors.inOut && <p className="text-red-500 text-xs mt-1">{errors.inOut}</p>}
         </div>
         
         {/* Cultivation Type */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Cultivation</label>
-          <div className="flex flex-wrap gap-3">
+          <label className="block text-sm font-medium mb-2">
+            Cultivation
+          </label>
+          <div className={`flex flex-wrap gap-3 ${errors.type ? 'border border-red-500 p-2 rounded-md' : ''}`}>
             <label className={`flex items-center border rounded-md px-3 py-2 cursor-pointer ${formData.type === 'square-pot' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
               <input
                 type="radio"
@@ -261,11 +364,14 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
               </div>
             </label>
           </div>
+          {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type}</p>}
         </div>
         
         {/* Size Section */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Size</label>
+          <label className="block text-sm font-medium mb-2">
+            Size
+          </label>
           
           {/* Measurement Unit Selection */}
           <div className="flex space-x-4 mb-4">
@@ -303,56 +409,72 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
             {/* Length - square-pot, raised-bed, ground需要 */}
             {(formData.type === 'square-pot' || formData.type === 'raised-bed' || formData.type === 'ground') && (
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Length</label>
+                <label className="block text-sm text-gray-600 mb-1">
+                  Length
+                </label>
                 <input
                   type="text"
                   value={formData.length}
                   onChange={(e) => handleChange('length', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                  className={`w-full border ${errors.length ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary`}
                   placeholder="Length"
+                  required
                 />
+                {errors.length && <p className="text-red-500 text-xs mt-1">{errors.length}</p>}
               </div>
             )}
             
             {/* Width - square-pot, raised-bed, ground需要 */}
             {(formData.type === 'square-pot' || formData.type === 'raised-bed' || formData.type === 'ground') && (
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Width</label>
+                <label className="block text-sm text-gray-600 mb-1">
+                  Width
+                </label>
                 <input
                   type="text"
                   value={formData.width}
                   onChange={(e) => handleChange('width', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                  className={`w-full border ${errors.width ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary`}
                   placeholder="Width"
+                  required
                 />
+                {errors.width && <p className="text-red-500 text-xs mt-1">{errors.width}</p>}
               </div>
             )}
             
             {/* Height - square-pot, round-pot, raised-bed需要 */}
             {(formData.type === 'square-pot' || formData.type === 'round-pot' || formData.type === 'raised-bed') && (
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Height</label>
+                <label className="block text-sm text-gray-600 mb-1">
+                  Height
+                </label>
                 <input
                   type="text"
                   value={formData.height}
                   onChange={(e) => handleChange('height', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                  className={`w-full border ${errors.height ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary`}
                   placeholder="Height"
+                  required
                 />
+                {errors.height && <p className="text-red-500 text-xs mt-1">{errors.height}</p>}
               </div>
             )}
             
             {/* Diameter - 只有round-pot需要 */}
             {formData.type === 'round-pot' && (
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Diameter</label>
+                <label className="block text-sm text-gray-600 mb-1">
+                  Diameter
+                </label>
                 <input
                   type="text"
                   value={formData.diameter}
                   onChange={(e) => handleChange('diameter', e.target.value)}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+                  className={`w-full border ${errors.diameter ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary`}
                   placeholder="Diameter"
+                  required
                 />
+                {errors.diameter && <p className="text-red-500 text-xs mt-1">{errors.diameter}</p>}
               </div>
             )}
             
@@ -406,8 +528,10 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
         
         {/* Sunlight */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Sunlight</label>
-          <div className="flex flex-wrap gap-3">
+          <label className="block text-sm font-medium mb-2">
+            Sunlight
+          </label>
+          <div className={`flex flex-wrap gap-3 ${errors.sunlight ? 'border border-red-500 p-2 rounded-md' : ''}`}>
             <label className={`flex items-center border rounded-md px-3 py-2 cursor-pointer ${formData.sunlight === 'full-sun' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
               <input
                 type="radio"
@@ -464,12 +588,15 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
               <span>Full Shade</span>
             </label>
           </div>
+          {errors.sunlight && <p className="text-red-500 text-xs mt-1">{errors.sunlight}</p>}
         </div>
         
         {/* Soil */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Soil</label>
-          <div className="flex flex-wrap gap-3">
+          <label className="block text-sm font-medium mb-2">
+            Soil
+          </label>
+          <div className={`flex flex-wrap gap-3 ${errors.soil ? 'border border-red-500 p-2 rounded-md' : ''}`}>
             <label className={`flex items-center border rounded-md px-3 py-2 cursor-pointer ${formData.soil === 'clay' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
               <input
                 type="radio"
@@ -526,12 +653,15 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
               <span>Silthy (Smooth)</span>
             </label>
           </div>
+          {errors.soil && <p className="text-red-500 text-xs mt-1">{errors.soil}</p>}
         </div>
         
         {/* Water Access */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Water Access</label>
-          <div className="flex flex-wrap gap-3">
+          <label className="block text-sm font-medium mb-2">
+            Water Access
+          </label>
+          <div className={`flex flex-wrap gap-3 ${errors.waterAccess ? 'border border-red-500 p-2 rounded-md' : ''}`}>
             <label className={`flex items-center border rounded-md px-3 py-2 cursor-pointer ${formData.waterAccess === 'easy' ? 'border-primary bg-green-50' : 'border-gray-300 hover:bg-green-50'}`}>
               <input
                 type="radio"
@@ -574,6 +704,7 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
               <span>Rainfall</span>
             </label>
           </div>
+          {errors.waterAccess && <p className="text-red-500 text-xs mt-1">{errors.waterAccess}</p>}
         </div>
         
         {/* Action Buttons */}
@@ -581,14 +712,16 @@ const PlantingPlaceModal: React.FC<PlantingPlaceModalProps> = ({
           <button 
             onClick={onClose}
             className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md mr-3 hover:bg-gray-50"
+            disabled={isSubmitting}
           >
             Cancel
           </button>
           <button 
             onClick={handleSave}
             className="bg-primary hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+            disabled={isSubmitting}
           >
-            {saveButtonText}
+            {isSubmitting ? 'Saving...' : saveButtonText}
           </button>
         </div>
       </div>
