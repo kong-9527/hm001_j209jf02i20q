@@ -30,60 +30,19 @@ export default function CreateGardenAdvisorPage() {
   const [allergies, setAllergies] = useState<string[]>([]);
 
   // Garden Space state
-  const [gardenSpaces, setGardenSpaces] = useState([
-    { 
-      id: 1, 
-      inOut: 'indoor', 
-      type: 'raised-bed', 
-      length: '50cm', 
-      width: '50cm', 
-      height: '50cm', 
-      diameter: '', 
-      sunlight: 'full-sun', 
-      soil: 'clay', 
-      waterAccess: 'easy',
-      measurement: 'cm'
-    },
-    { 
-      id: 2, 
-      inOut: 'outdoor', 
-      type: 'ground', 
-      length: '50cm', 
-      width: '50cm', 
-      height: '', 
-      diameter: '', 
-      sunlight: 'partial-sun', 
-      soil: 'loam', 
-      waterAccess: 'limited',
-      measurement: 'cm'
-    },
-    { 
-      id: 3, 
-      inOut: 'indoor', 
-      type: 'square-pot', 
-      length: '50cm', 
-      width: '50cm', 
-      height: '50cm', 
-      diameter: '', 
-      sunlight: 'partial-shade', 
-      soil: 'sandy', 
-      waterAccess: 'rainfall',
-      measurement: 'cm'
-    },
-    {
-      id: 4,
-      inOut: 'indoor',
-      type: 'round-pot',
-      length: '',
-      width: '',
-      height: '50cm',
-      diameter: '50cm',
-      sunlight: 'full-shade',
-      soil: 'silty',
-      waterAccess: 'rainfall',
-      measurement: 'cm'
-    }
-  ]);
+  const [gardenSpaces, setGardenSpaces] = useState<Array<{
+    id: number;
+    inOut: string;
+    type: string;
+    length: string;
+    width: string;
+    height: string;
+    diameter: string;
+    sunlight: string;
+    soil: string;
+    waterAccess: string;
+    measurement: string;
+  }>>([]);
 
   // 打开添加种植位置弹窗
   const openAddPlantingPlaceModal = () => {
@@ -659,107 +618,115 @@ export default function CreateGardenAdvisorPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {gardenSpaces.map((space) => (
-                        <tr key={space.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">{space.inOut}</td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">
-                            <div className="flex items-center">
-                              {space.type === 'raised-bed' && (
-                                <div className="bg-[#EDFAEF] h-6 w-10 rounded-sm mr-2 flex items-center justify-center">
-                                  <svg width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="1" y="5" width="20" height="10" rx="1" fill="#B7E4C7" stroke="#2D6A4F" strokeWidth="1.5"/>
-                                    <line x1="1" y1="8.25" x2="21" y2="8.25" stroke="#2D6A4F" strokeWidth="1.5"/>
-                                    <line x1="4" y1="1" x2="4" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
-                                    <line x1="18" y1="1" x2="18" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
-                                    <line x1="11" y1="1" x2="11" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
+                      {gardenSpaces.length > 0 ? (
+                        gardenSpaces.map((space) => (
+                          <tr key={space.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">{space.inOut}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                              <div className="flex items-center">
+                                {space.type === 'raised-bed' && (
+                                  <div className="bg-[#EDFAEF] h-6 w-10 rounded-sm mr-2 flex items-center justify-center">
+                                    <svg width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <rect x="1" y="5" width="20" height="10" rx="1" fill="#B7E4C7" stroke="#2D6A4F" strokeWidth="1.5"/>
+                                      <line x1="1" y1="8.25" x2="21" y2="8.25" stroke="#2D6A4F" strokeWidth="1.5"/>
+                                      <line x1="4" y1="1" x2="4" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
+                                      <line x1="18" y1="1" x2="18" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
+                                      <line x1="11" y1="1" x2="11" y2="5" stroke="#2D6A4F" strokeWidth="1.5"/>
+                                    </svg>
+                                  </div>
+                                )}
+                                {space.type === 'ground' && (
+                                  <div className="bg-[#FFF3E0] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
+                                    <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <path d="M1 15C1 12 5 1 10 1C15 1 19 12 19 15" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
+                                      <path d="M1 15H19" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
+                                      <path d="M5 10C6.5 8.5 8.5 8 10 8C11.5 8 13.5 8.5 15 10" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
+                                    </svg>
+                                  </div>
+                                )}
+                                {space.type === 'square-pot' && (
+                                  <div className="bg-[#E6F7FF] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <rect x="1" y="5" width="14" height="10" rx="1" fill="#BAE7FF" stroke="#0D6EFD" strokeWidth="1.5"/>
+                                      <path d="M3 5V3C3 1.89543 3.89543 1 5 1H11C12.1046 1 13 1.89543 13 3V5" stroke="#0D6EFD" strokeWidth="1.5"/>
+                                      <line x1="3" y1="8.25" x2="13" y2="8.25" stroke="#0D6EFD" strokeWidth="1.5"/>
+                                    </svg>
+                                  </div>
+                                )}
+                                {space.type === 'round-pot' && (
+                                  <div className="bg-[#F9E9FB] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <ellipse cx="8" cy="10.5" rx="7" ry="4.5" fill="#E9C7F9" stroke="#9C27B0" strokeWidth="1.5"/>
+                                      <path d="M3 10.5V7C3 4.79086 5.23858 3 8 3C10.7614 3 13 4.79086 13 7V10.5" stroke="#9C27B0" strokeWidth="1.5"/>
+                                      <line x1="5" y1="7.25" x2="11" y2="7.25" stroke="#9C27B0" strokeWidth="1.5"/>
+                                    </svg>
+                                  </div>
+                                )}
+                                <span>{space.type}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">{space.length}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">{space.width}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">{space.height}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">{space.diameter}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                space.sunlight === 'full-sun' ? 'bg-yellow-100 text-yellow-800' :
+                                space.sunlight === 'partial-sun' ? 'bg-yellow-50 text-yellow-600' :
+                                space.sunlight === 'partial-shade' ? 'bg-gray-100 text-gray-800' :
+                                'bg-gray-200 text-gray-800'
+                              }`}>
+                                {space.sunlight}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                space.soil === 'clay' ? 'bg-orange-100 text-orange-800' :
+                                space.soil === 'loam' ? 'bg-amber-100 text-amber-800' :
+                                space.soil === 'sandy' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {space.soil}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                space.waterAccess === 'easy' ? 'bg-blue-100 text-blue-800' :
+                                space.waterAccess === 'limited' ? 'bg-blue-50 text-blue-600' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {space.waterAccess}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                              <div className="flex space-x-2">
+                                <button 
+                                  className="p-1 rounded-full text-gray-500 hover:text-primary hover:bg-green-50"
+                                  onClick={() => openEditPlantingPlaceModal(space)}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                   </svg>
-                                </div>
-                              )}
-                              {space.type === 'ground' && (
-                                <div className="bg-[#FFF3E0] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
-                                  <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 15C1 12 5 1 10 1C15 1 19 12 19 15" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
-                                    <path d="M1 15H19" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
-                                    <path d="M5 10C6.5 8.5 8.5 8 10 8C11.5 8 13.5 8.5 15 10" stroke="#774D2B" strokeWidth="1.5" strokeLinecap="round"/>
+                                </button>
+                                <button 
+                                  className="p-1 rounded-full text-gray-500 hover:text-red-600 hover:bg-red-50"
+                                  onClick={() => handleDeletePlantingPlace(space.id)}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                   </svg>
-                                </div>
-                              )}
-                              {space.type === 'square-pot' && (
-                                <div className="bg-[#E6F7FF] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
-                                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="1" y="5" width="14" height="10" rx="1" fill="#BAE7FF" stroke="#0D6EFD" strokeWidth="1.5"/>
-                                    <path d="M3 5V3C3 1.89543 3.89543 1 5 1H11C12.1046 1 13 1.89543 13 3V5" stroke="#0D6EFD" strokeWidth="1.5"/>
-                                    <line x1="3" y1="8.25" x2="13" y2="8.25" stroke="#0D6EFD" strokeWidth="1.5"/>
-                                  </svg>
-                                </div>
-                              )}
-                              {space.type === 'round-pot' && (
-                                <div className="bg-[#F9E9FB] h-6 w-6 rounded-sm mr-2 flex items-center justify-center">
-                                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <ellipse cx="8" cy="10.5" rx="7" ry="4.5" fill="#E9C7F9" stroke="#9C27B0" strokeWidth="1.5"/>
-                                    <path d="M3 10.5V7C3 4.79086 5.23858 3 8 3C10.7614 3 13 4.79086 13 7V10.5" stroke="#9C27B0" strokeWidth="1.5"/>
-                                    <line x1="5" y1="7.25" x2="11" y2="7.25" stroke="#9C27B0" strokeWidth="1.5"/>
-                                  </svg>
-                                </div>
-                              )}
-                              <span>{space.type}</span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">{space.length}</td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">{space.width}</td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">{space.height}</td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">{space.diameter}</td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              space.sunlight === 'full-sun' ? 'bg-yellow-100 text-yellow-800' :
-                              space.sunlight === 'partial-sun' ? 'bg-yellow-50 text-yellow-600' :
-                              space.sunlight === 'partial-shade' ? 'bg-gray-100 text-gray-800' :
-                              'bg-gray-200 text-gray-800'
-                            }`}>
-                              {space.sunlight}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              space.soil === 'clay' ? 'bg-orange-100 text-orange-800' :
-                              space.soil === 'loam' ? 'bg-amber-100 text-amber-800' :
-                              space.soil === 'sandy' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {space.soil}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              space.waterAccess === 'easy' ? 'bg-blue-100 text-blue-800' :
-                              space.waterAccess === 'limited' ? 'bg-blue-50 text-blue-600' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {space.waterAccess}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-sm">
-                            <div className="flex space-x-2">
-                              <button 
-                                className="p-1 rounded-full text-gray-500 hover:text-primary hover:bg-green-50"
-                                onClick={() => openEditPlantingPlaceModal(space)}
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                              </button>
-                              <button 
-                                className="p-1 rounded-full text-gray-500 hover:text-red-600 hover:bg-red-50"
-                                onClick={() => handleDeletePlantingPlace(space.id)}
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            </div>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={10} className="px-4 py-8 text-center text-sm text-gray-500">
+                            Please add your planting places.
                           </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -880,7 +847,7 @@ export default function CreateGardenAdvisorPage() {
   return (
     <WithProjectCheck>
       <div className="p-6">
-        {/* Page header */}
+        {/* Page header with Progress bar in same row */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center">
             <Link href="/dashboard/garden-advisor" className="mr-4 text-gray-500 hover:text-gray-700">
@@ -890,49 +857,21 @@ export default function CreateGardenAdvisorPage() {
             </Link>
             <h1 className="text-2xl font-semibold">Create Garden Plan</h1>
           </div>
-        </div>
-        
-        {/* Progress bar */}
-        <div className="mb-8">
-          <div className="flex justify-between mb-2">
-            <span className="text-sm font-medium">Step {currentStep} of {totalSteps}</span>
-            <span className="text-sm text-gray-500">{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div className="bg-primary h-2.5 rounded-full" style={{ width: `${(currentStep / totalSteps) * 100}%` }}></div>
+          
+          {/* Progress bar */}
+          <div className="flex flex-col w-1/3">
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">Step {currentStep} of {totalSteps}</span>
+              <span className="text-sm text-gray-500">{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="bg-primary h-2.5 rounded-full" style={{ width: `${(currentStep / totalSteps) * 100}%` }}></div>
+            </div>
           </div>
         </div>
         
         {/* Steps content */}
         {showContentByStep(currentStep)}
-        
-        {/* Navigation buttons */}
-        <div className="mt-10 flex justify-between">
-          <button 
-            onClick={goToPrevStep}
-            className={`px-6 py-2 rounded-md border border-gray-300 
-              ${currentStep === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-            disabled={currentStep === 1}
-          >
-            Previous
-          </button>
-          
-          {currentStep < totalSteps ? (
-            <button 
-              onClick={goToNextStep}
-              className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-            >
-              Next
-            </button>
-          ) : (
-            <button 
-              onClick={createGardenPlan}
-              className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
-            >
-              Create Plan
-            </button>
-          )}
-        </div>
       </div>
     </WithProjectCheck>
   );
