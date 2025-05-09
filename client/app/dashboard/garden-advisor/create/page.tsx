@@ -58,6 +58,75 @@ export default function CreateGardenAdvisorPage() {
     setIsPlantingPlaceModalOpen(true);
   };
 
+  // 添加4个常用种植位置的函数
+  const addSmallIndoorSquarePot = () => {
+    const newPlace = {
+      id: Date.now(),
+      inOut: 'indoor',
+      type: 'square-pot',
+      length: '25',
+      width: '25',
+      height: '25',
+      diameter: '',
+      measurement: 'cm',
+      sunlight: 'full-sun',
+      soil: 'clay',
+      waterAccess: 'easy'
+    };
+    setGardenSpaces([...gardenSpaces, newPlace]);
+  };
+
+  const addBigIndoorRoundPot = () => {
+    const newPlace = {
+      id: Date.now(),
+      inOut: 'indoor',
+      type: 'round-pot',
+      length: '',
+      width: '',
+      height: '25',
+      diameter: '25',
+      measurement: 'cm',
+      sunlight: 'full-sun',
+      soil: 'clay',
+      waterAccess: 'easy'
+    };
+    setGardenSpaces([...gardenSpaces, newPlace]);
+  };
+
+  const addRaisedBedOutside = () => {
+    const newPlace = {
+      id: Date.now(),
+      inOut: 'outdoor',
+      type: 'raised-bed',
+      length: '50',
+      width: '50',
+      height: '25',
+      diameter: '',
+      measurement: 'cm',
+      sunlight: 'full-sun',
+      soil: 'clay',
+      waterAccess: 'easy'
+    };
+    setGardenSpaces([...gardenSpaces, newPlace]);
+  };
+
+  const addPieceOfLandOutside = () => {
+    const newPlace = {
+      id: Date.now(),
+      inOut: 'outdoor',
+      type: 'ground',
+      length: '50',
+      width: '50',
+      height: '',
+      diameter: '',
+      measurement: 'cm',
+      sunlight: 'full-sun',
+      soil: 'clay',
+      waterAccess: 'easy'
+    };
+    setGardenSpaces([...gardenSpaces, newPlace]);
+  };
+
   // 处理保存种植位置
   const handleSavePlantingPlace = (place: any) => {
     if (editingPlantingPlace) {
@@ -560,19 +629,31 @@ export default function CreateGardenAdvisorPage() {
               </div>
               <div className="md:col-span-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <div className="border rounded-md p-3 flex items-center hover:bg-green-50 hover:border-primary cursor-pointer transition-colors">
+                  <div 
+                    className="border rounded-md p-3 flex items-center hover:bg-green-50 hover:border-primary cursor-pointer transition-colors"
+                    onClick={addSmallIndoorSquarePot}
+                  >
                     <div className="w-6 h-6 rounded-full bg-green-100 text-primary flex items-center justify-center mr-3">+</div>
                     <span>Small Indoor Square Pot</span>
                   </div>
-                  <div className="border rounded-md p-3 flex items-center hover:bg-green-50 hover:border-primary cursor-pointer transition-colors">
+                  <div 
+                    className="border rounded-md p-3 flex items-center hover:bg-green-50 hover:border-primary cursor-pointer transition-colors"
+                    onClick={addBigIndoorRoundPot}
+                  >
                     <div className="w-6 h-6 rounded-full bg-green-100 text-primary flex items-center justify-center mr-3">+</div>
                     <span>Big Indoor Round Pot</span>
                   </div>
-                  <div className="border rounded-md p-3 flex items-center hover:bg-green-50 hover:border-primary cursor-pointer transition-colors">
+                  <div 
+                    className="border rounded-md p-3 flex items-center hover:bg-green-50 hover:border-primary cursor-pointer transition-colors"
+                    onClick={addRaisedBedOutside}
+                  >
                     <div className="w-6 h-6 rounded-full bg-green-100 text-primary flex items-center justify-center mr-3">+</div>
                     <span>Raised Bed Outside</span>
                   </div>
-                  <div className="border rounded-md p-3 flex items-center hover:bg-green-50 hover:border-primary cursor-pointer transition-colors">
+                  <div 
+                    className="border rounded-md p-3 flex items-center hover:bg-green-50 hover:border-primary cursor-pointer transition-colors"
+                    onClick={addPieceOfLandOutside}
+                  >
                     <div className="w-6 h-6 rounded-full bg-green-100 text-primary flex items-center justify-center mr-3">+</div>
                     <span>Piece of Land Outside</span>
                   </div>
