@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useEventBus } from '../contexts/EventBus';
 import { useProject } from '../contexts/ProjectContext';
 import { useEffect } from 'react';
+import { useUser } from '../contexts/UserContext';
 
 interface MenuSection {
   title: string;
@@ -23,6 +24,7 @@ export default function Sidebar() {
   const router = useRouter();
   const { emit } = useEventBus();
   const { currentProject } = useProject();
+  const { user } = useUser();
   
   // 添加日志记录当前项目状态  
   useEffect(() => {
@@ -30,9 +32,30 @@ export default function Sidebar() {
   }, [currentProject]);
   
   // 处理菜单项点击事件
-  const handleMenuItemClick = (e: React.MouseEvent, href: string) => {
+  const handleMenuItemClick = async (e: React.MouseEvent, href: string) => {
     console.log('Sidebar: Menu item clicked:', href);
     console.log('Sidebar: Current project state:', currentProject);
+    
+    // 更新用户点数
+    try {
+      const response = await fetch('/api/user/points');
+      if (!response.ok) {
+        throw new Error('Failed to fetch points');
+      }
+      const data = await response.json();
+      if (data.points !== undefined) {
+        // 更新用户上下文中的点数
+        if (user) {
+          user.points = data.points.toString();
+        }
+        // 发送更新事件
+        emit('user_points_updated', { 
+          points: data.points
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user points:', error);
+    }
     
     // 处理Garden Design和Garden Advisor页面的跳转
     if (href === '/dashboard/garden-design' || href === '/dashboard/garden-advisor') {
@@ -150,6 +173,16 @@ export default function Sidebar() {
     //   ]
     // }
   ];
+  
+  // 处理导航点击
+  const handleNavigation = (path: string) => {
+    // 更新用户点数
+    emit('user_points_updated', { 
+      points: user?.points || '0'
+    });
+    // 导航到目标页面
+    router.push(path);
+  };
   
   return (
     <div className="w-64 h-screen bg-white border-r border-gray-200 overflow-y-auto">

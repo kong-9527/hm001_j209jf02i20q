@@ -8,6 +8,7 @@ import { CreateProjectModal } from './CreateProjectModal';
 import { useUser } from '../contexts/UserContext';
 import { getUserProjects, createProject, Project } from '../services/projectService';
 import { useEventBus } from '../contexts/EventBus';
+import { getCurrentUser } from '../services/authService';
 
 export default function DashboardNavbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -257,6 +258,27 @@ export default function DashboardNavbar() {
     }
   };
   
+  // 处理导航链接点击
+  const handleNavigation = async (path: string) => {
+    try {
+      // 获取最新的用户信息
+      const userData = await getCurrentUser();
+      if (userData) {
+        // 更新用户上下文中的点数
+        if (user) {
+          user.points = userData.points;
+        }
+        // 发送更新事件
+        emit('user_points_updated', { 
+          points: userData.points
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+    router.push(path);
+  };
+  
   useEffect(() => {
     // 组件卸载时清除所有定时器
     return () => {
@@ -320,15 +342,15 @@ export default function DashboardNavbar() {
                         Create New Project
                       </button>
                       
-                      <Link 
-                        href="/dashboard/projects" 
+                      <button 
+                        onClick={() => handleNavigation('/dashboard/projects')} 
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
                         </svg>
                         My Projects
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -366,12 +388,18 @@ export default function DashboardNavbar() {
                       {loading ? 'Loading...' : (user?.email || 'user@example.com')}
                     </p>
                   </div>
-                  <Link href="/dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <button 
+                    onClick={() => handleNavigation('/dashboard/settings')} 
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
                     Settings
-                  </Link>
-                  <Link href="/dashboard/billing" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  </button>
+                  <button 
+                    onClick={() => handleNavigation('/dashboard/billing')} 
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
                     Billing
-                  </Link>
+                  </button>
                   <div className="border-t border-gray-100 mt-1"></div>
                   <button 
                     onClick={handleLogout} 
