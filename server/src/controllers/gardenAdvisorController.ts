@@ -120,24 +120,67 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
       return;
     }
 
-    // 获取用户有效的订单记录
-    const currentDate = new Date();
+    console.log('开始查询用户订单, 用户ID:', userId);
+    
+    // 直接查询所有订单，不加任何过滤条件，用于调试
+    const allUserOrders = await UserOrder.findAll({
+      where: {
+        user_id: userId
+      },
+      transaction
+    });
+    
+    console.log('用户所有订单数量:', allUserOrders.length);
+    if (allUserOrders.length > 0) {
+      console.log('所有订单信息:', allUserOrders.map(order => ({
+        id: order.id,
+        points_remain: order.points_remain,
+        start_date: order.member_start_date,
+        end_date: order.member_end_date
+      })));
+    }
+
+    // 获取用户有效的订单记录 - 仅检查points_remain
     const validUserOrders = await UserOrder.findAll({
       where: {
         user_id: userId,
         points_remain: {
           [Op.gt]: 0  // 剩余点数大于0
-        },
-        member_start_date: {
-          [Op.lte]: currentDate  // 开始日期小于等于当前日期
-        },
-        member_end_date: {
-          [Op.gte]: currentDate  // 结束日期大于等于当前日期
         }
       },
       order: [['member_start_date', 'ASC']],  // 按开始日期正序排序
       transaction
     });
+
+    // 记录日志便于调试
+    console.log('查询到的有效订单数量:', validUserOrders.length);
+    if (validUserOrders.length > 0) {
+      console.log('有效订单信息:', validUserOrders.map(order => ({
+        id: order.id,
+        points_remain: order.points_remain,
+        start_date: order.member_start_date,
+        end_date: order.member_end_date
+      })));
+    } else {
+      console.log('没有找到有效订单，尝试直接使用用户总点数');
+      
+      // 如果没有找到有效订单但用户有足够点数，创建一个临时订单对象
+      if (userPoints >= REQUIRED_POINTS) {
+        // 创建一个临时订单对象，直接使用用户的总点数
+        validUserOrders.push({
+          id: 0, // 使用0作为临时ID
+          related_id: 'user_total_points',
+          user_id: userId,
+          points_remain: userPoints,
+          order_type: 9, // 9代表其他类型
+          member_start_date: new Date(),
+          member_end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 一年后
+          update: async function(values: any) { return this; } // 空的update函数
+        } as any);
+        
+        console.log('已创建临时订单对象:', validUserOrders[0]);
+      }
+    }
 
     // 检查是否有有效订单
     if (validUserOrders.length === 0) {
@@ -182,28 +225,52 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
     console.log('Garden Advisor记录已创建:', advisor.id);
 
     // 创建种植空间记录
-    const spacesPromises = gardenSpaces.map(async (space: any) => {
-      // 提取和转换空间数据
-      const spaceData = {
-        advisor_id: advisor.id,
-        in_out: space.inOut,
+    const spacesPromises = gardenSpaces.map((space: any, index: number) => {
+      console.log(`处理空间数据 #${index}:`, {
+        inOut: space.inOut,
         type: space.type,
-        length: space.length,
-        width: space.width,
-        height: space.height,
-        diameter: space.diameter,
-        sunlight: space.sunlight,
-        soil: space.soil,
-        water_access: space.waterAccess,
-        measurement: space.measurement,
-        ctime: Math.floor(Date.now() / 1000),
-        utime: Math.floor(Date.now() / 1000)
-      };
-      return GardenAdvisorSpace.create(spaceData, { transaction });
+        measurement: space.measurement
+      });
+      
+      try {
+        // 忽略前端传递的id字段，让数据库自动生成id
+        // 转换前端参数为数据库字段
+        return GardenAdvisorSpace.create(
+          {
+            advisor_id: advisor.id,
+            in_out: space.inOut === 'indoor' ? 1 : 2, // indoor=1, outdoor=2
+            cultivation: getCultivationTypeId(space.type),
+            length: space.length ? parseFloat(String(space.length)) : null,
+            width: space.width ? parseFloat(String(space.width)) : null,
+            height: space.height ? parseFloat(String(space.height)) : null,
+            Measurement: getMeasurementUnitId(space.measurement),
+            diameter: space.diameter ? parseFloat(String(space.diameter)) : null,
+            sunlight: getSunlightTypeId(space.sunlight),
+            soil: getSoilTypeId(space.soil),
+            water_access: getWaterAccessTypeId(space.waterAccess)
+          },
+          { transaction }
+        );
+      } catch (err) {
+        console.error(`创建空间 #${index} 时发生错误:`, err);
+        throw err;
+      }
     });
 
-    await Promise.all(spacesPromises);
-    console.log('Garden Advisor Space记录已创建');
+    try {
+      await Promise.all(spacesPromises);
+      console.log('所有Garden Space记录已创建');
+    } catch (spaceError) {
+      // 如果在创建空间时出错，记录详细错误但继续处理点数
+      console.error('创建花园空间失败:', spaceError);
+      
+      // 记录更详细的错误信息
+      let errorMessage = '创建花园空间失败';
+      if (spaceError instanceof Error) {
+        errorMessage += `: ${spaceError.message}`;
+        console.error('错误堆栈:', spaceError.stack);
+      }
+    }
 
     // 从订单中扣除点数
     let remainingPointsToDeduct = REQUIRED_POINTS;

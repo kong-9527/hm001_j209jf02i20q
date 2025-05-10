@@ -106,4 +106,8 @@ UserOrder.belongsTo(Goods, {
   as: 'goods',
 });
 
+const currentDate = new Date();
+console.log('服务器当前时间:', currentDate.toISOString());
+console.log('本地格式时间:', currentDate.toLocaleString());
+
 export default UserOrder; 
