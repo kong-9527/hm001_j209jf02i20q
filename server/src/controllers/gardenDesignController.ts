@@ -307,6 +307,61 @@ export const generateDesign = async (req: Request, res: Response) => {
       console.log('Validation failed: Invalid size format');
       return res.status(400).json({ error: 'Invalid size format, expected format: width*height' });
     }
+
+    // 先调用第三方接口生成图片
+    let task_id = null;
+    try {
+      console.log('Calling third-party API to generate image');
+      
+      // API配置
+      const apiUrl = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis";
+      const apiKey = "sk-93f08f8aec02495ebad527ed5c2a7d8c"; // 应该从环境变量获取
+      
+      // 请求头
+      const headers = {
+        'X-DashScope-Async': 'enable',
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      };
+      
+      // 请求体
+      const payload = {
+        "model": "wanx2.1-t2i-plus",
+        "input": {
+          "prompt": prompt,
+          "negative_prompt": negative_prompt
+        },
+        "parameters": {
+          "size": size,
+          "n": 1,
+          "prompt_extend": true
+        }
+      };
+      
+      console.log('API Payload:', JSON.stringify(payload, null, 2));
+      
+      // 发送POST请求
+      const response = await axios.post(apiUrl, payload, { headers });
+      
+      // 检查响应
+      if (response.status !== 200) {
+        throw new Error(`API responded with status code ${response.status}`);
+      }
+      
+      const result = response.data;
+      task_id = result.output.task_id;
+      console.log(`Task created successfully, task_id: ${task_id}`);
+
+      if (!task_id) {
+        throw new Error('Failed to get task_id from third-party API');
+      }
+    } catch (apiError: any) {
+      console.error('Error calling third-party API:', apiError);
+      return res.status(500).json({ 
+        error: 'Failed to generate garden design', 
+        details: apiError.message 
+      });
+    }
     
     // 创建新的设计记录
     const gardenDesign = await GardenDesign.create({
@@ -322,6 +377,7 @@ export const generateDesign = async (req: Request, res: Response) => {
       is_like: 0,
       is_del: 0,
       points_cost: 1, // 记录消耗的点数
+      third_task_id: task_id,
       ctime: Math.floor(Date.now() / 1000),
       utime: Math.floor(Date.now() / 1000)
     });
@@ -372,64 +428,7 @@ export const generateDesign = async (req: Request, res: Response) => {
       // 记录错误但不中断流程
     }
     
-    // 调用第三方接口生成图片
-    try {
-      console.log('Calling third-party API to generate image');
-      
-      // API配置
-      const apiUrl = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis";
-      const apiKey = "sk-93f08f8aec02495ebad527ed5c2a7d8c"; // 应该从环境变量获取
-      
-      // 请求头
-      const headers = {
-        'X-DashScope-Async': 'enable',
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      };
-      
-      // 请求体
-      const payload = {
-        "model": "wanx2.1-t2i-plus",
-        "input": {
-          "prompt": prompt,
-          "negative_prompt": negative_prompt
-        },
-        "parameters": {
-          "size": size,
-          "n": 1,
-          "prompt_extend": true
-        }
-      };
-      
-      console.log('API Payload:', JSON.stringify(payload, null, 2));
-      
-      // 发送POST请求
-      const response = await axios.post(apiUrl, payload, { headers });
-      
-      // 检查响应
-      if (response.status !== 200) {
-        throw new Error(`API responded with status code ${response.status}`);
-      }
-      
-      const result = response.data;
-      const task_id = result.output.task_id;
-      console.log(`Task created successfully, task_id: ${task_id}`);
-      
-      // 更新设计记录的third_task_id
-      await gardenDesign.update({ third_task_id: task_id });
-      
-      return res.status(200).json(gardenDesign);
-    } catch (apiError: any) {
-      console.error('Error calling third-party API:', apiError);
-      
-      // 更新设计记录状态为失败
-      await gardenDesign.update({ status: 3 }); // 3代表失败
-      
-      return res.status(500).json({ 
-        error: 'Failed to generate garden design', 
-        details: apiError.message 
-      });
-    }
+    return res.status(200).json(gardenDesign);
   } catch (error) {
     console.error('Error generating garden design:', error);
     return res.status(500).json({ error: 'Failed to generate garden design' });
