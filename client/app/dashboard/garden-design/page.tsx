@@ -1893,9 +1893,21 @@ export default function PhotoGenerator() {
         });
         return;
       }
+      
+      // 获取项目ID - 首先尝试从当前项目获取
+      let projectId = currentProject?.id;
+      
+      // 如果没有当前项目，尝试从localStorage获取
+      if (!projectId) {
+        const savedProjectId = localStorage.getItem('selectedProjectId');
+        if (savedProjectId) {
+          projectId = parseInt(savedProjectId, 10);
+          console.log('Garden Design: Using project ID from localStorage:', projectId);
+        }
+      }
         
-      // 如果没有当前项目，显示错误
-      if (!currentProject?.id) {
+      // 如果仍然没有找到项目ID，显示错误
+      if (!projectId) {
         addNotification({
           type: 'warning',
           message: '请先选择或创建一个项目',
@@ -1947,7 +1959,7 @@ export default function PhotoGenerator() {
           positiveWordsParam,
           negativeWordsParam,
           structuralSimilarity,
-          currentProject.id
+          projectId
         )
         .then((response) => {
           console.log('生成成功，返回数据:', response);
@@ -1959,7 +1971,7 @@ export default function PhotoGenerator() {
           });
             
           // 重新加载图片列表
-          fetchGardenDesignList(currentProject.id);
+          fetchGardenDesignList(projectId);
         })
         .catch((error) => {
           console.error('生成失败:', error);

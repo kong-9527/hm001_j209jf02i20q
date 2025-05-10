@@ -74,6 +74,7 @@ export default function Sidebar() {
     
     // 处理Garden Design和Garden Advisor页面的跳转
     if (href === '/dashboard/garden-design' || href === '/dashboard/garden-advisor') {
+      // 如果有当前项目，正常处理
       if (currentProject) {
         console.log(`Sidebar: Handling ${href.includes('garden-design') ? 'Garden Design' : 'Garden Advisor'} click with project ID:`, currentProject.id);
         
@@ -89,8 +90,29 @@ export default function Sidebar() {
         // 使用Router API手动导航
         console.log('Sidebar: Navigating to:', href);
         router.push(href);
-      } else {
-        console.log('Sidebar: No current project available, proceeding with normal navigation');
+      } 
+      // 如果没有当前项目，尝试从localStorage获取
+      else {
+        console.log('Sidebar: No current project, trying to get from localStorage');
+        const savedProjectId = localStorage.getItem('selectedProjectId');
+        
+        if (savedProjectId) {
+          console.log('Sidebar: Found project ID in localStorage:', savedProjectId);
+          e.preventDefault(); // 阻止默认导航行为
+          
+          // 发送项目选择事件，通知相应页面刷新数据
+          const eventData = { selectedProjectId: parseInt(savedProjectId, 10) };
+          console.log('Sidebar: Emitting project_selected event with data from localStorage:', eventData);
+          
+          emit('project_selected', eventData);
+          console.log('Sidebar: Event emitted successfully');
+          
+          // 使用Router API手动导航
+          console.log('Sidebar: Navigating to:', href);
+          router.push(href);
+        } else {
+          console.log('Sidebar: No project ID available, proceeding with normal navigation');
+        }
       }
     } else {
       console.log('Sidebar: Not Garden Design or Garden Advisor page, proceeding with normal navigation');

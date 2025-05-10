@@ -98,6 +98,9 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       
       const selectedProjectId = data?.selectedProjectId;
       if (selectedProjectId) {
+        // 确保项目ID保存到localStorage
+        localStorage.setItem('selectedProjectId', selectedProjectId.toString());
+        
         const project = projects.find(p => p.id === selectedProjectId);
         if (project) {
           console.log('ProjectContext: Found project for ID, setting current project to:', project);
