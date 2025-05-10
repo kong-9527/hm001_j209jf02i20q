@@ -303,7 +303,7 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
         points_type: '2', // 2表示减少
         points_num: pointsToDeduct,
         log_type: 12, // 12消耗:生成建议
-        log_content: `Create Garden Advisor ID: ${advisor.id}`,
+        log_content: `Create Garden Advisor`,
         related_id: order.related_id, // 订单的related_id
         content_id: advisor.id.toString(), // 本次生成的garden_advisor的id
         ctime: Math.floor(Date.now() / 1000),
