@@ -2,7 +2,12 @@ import { Request, Response } from 'express';
 import { Op } from 'sequelize';
 import GardenAdvisor from '../models/GardenAdvisor';
 import GardenAdvisorSpace from '../models/GardenAdvisorSpace';
+import User from '../models/User';
+import PointsLog from '../models/PointsLog';
 import sequelize from '../config/database';
+
+// Points required to create a garden advisor
+const REQUIRED_POINTS = 5;
 
 // 定义用户类型
 interface UserInfo {
@@ -94,6 +99,26 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
       return;
     }
 
+    // 检查用户是否有足够的点数
+    const userRecord = await User.findByPk(userId);
+    if (!userRecord) {
+      await transaction.rollback();
+      res.status(404).json({ message: '用户不存在' });
+      return;
+    }
+
+    const userPoints = userRecord.points ? parseFloat(userRecord.points) : 0;
+    if (userPoints < REQUIRED_POINTS) {
+      await transaction.rollback();
+      res.status(400).json({ 
+        message: '点数不足',
+        msg: 'Insufficient points',
+        required: REQUIRED_POINTS,
+        current: userPoints 
+      });
+      return;
+    }
+
     // 构建计划名称：location + spaces数量 + "places plan"
     // 如果location为空，则使用默认值"My"
     const locationPrefix = gardenLocation || "My";
@@ -105,7 +130,7 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
         user_id: userId,
         project_id: projectId,
         status: 0, // 初始状态为0
-        points_cost: 5, // 每次生成消耗5点
+        points_cost: REQUIRED_POINTS, // 每次生成消耗5点
         location: gardenLocation,
         plan_name: planName,
         hardiness_zone: hardinessZone,
@@ -126,66 +151,54 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
 
     console.log('Garden Advisor记录已创建:', advisor.id);
 
-    // 创建花园空间记录
-    const spacesPromises = gardenSpaces.map((space: any, index: number) => {
-      console.log(`处理空间数据 #${index}:`, {
-        inOut: space.inOut,
+    // 创建种植空间记录
+    const spacesPromises = gardenSpaces.map(async (space: any) => {
+      // 提取和转换空间数据
+      const spaceData = {
+        advisor_id: advisor.id,
+        in_out: space.inOut,
         type: space.type,
-        measurement: space.measurement
-      });
-      
-      try {
-        // 忽略前端传递的id字段，让数据库自动生成id
-        // 转换前端参数为数据库字段
-        return GardenAdvisorSpace.create(
-          {
-            advisor_id: advisor.id,
-            in_out: space.inOut === 'indoor' ? 1 : 2, // indoor=1, outdoor=2
-            cultivation: getCultivationTypeId(space.type),
-            length: space.length ? parseFloat(String(space.length)) : null,
-            width: space.width ? parseFloat(String(space.width)) : null,
-            height: space.height ? parseFloat(String(space.height)) : null,
-            Measurement: getMeasurementUnitId(space.measurement),
-            diameter: space.diameter ? parseFloat(String(space.diameter)) : null,
-            sunlight: getSunlightTypeId(space.sunlight),
-            soil: getSoilTypeId(space.soil),
-            water_access: getWaterAccessTypeId(space.waterAccess)
-          },
-          { transaction }
-        );
-      } catch (err) {
-        console.error(`创建空间 #${index} 时发生错误:`, err);
-        throw err;
-      }
+        length: space.length,
+        width: space.width,
+        height: space.height,
+        diameter: space.diameter,
+        sunlight: space.sunlight,
+        soil: space.soil,
+        water_access: space.waterAccess,
+        measurement: space.measurement,
+        ctime: Math.floor(Date.now() / 1000),
+        utime: Math.floor(Date.now() / 1000)
+      };
+      return GardenAdvisorSpace.create(spaceData, { transaction });
     });
 
-    try {
-      await Promise.all(spacesPromises);
-      console.log('所有Garden Space记录已创建');
-      await transaction.commit();
-      console.log('事务已提交');
+    await Promise.all(spacesPromises);
+    console.log('Garden Advisor Space记录已创建');
 
-      // 返回成功响应
-      res.status(201).json({
-        message: '花园顾问创建成功',
-        advisorId: advisor.id
-      });
-    } catch (spaceError) {
-      // 如果在创建空间时出错，回滚事务
-      await transaction.rollback();
-      console.error('创建花园空间失败:', spaceError);
-      
-      // 记录更详细的错误信息
-      let errorMessage = '创建花园空间失败';
-      if (spaceError instanceof Error) {
-        errorMessage += `: ${spaceError.message}`;
-        console.error('错误堆栈:', spaceError.stack);
-      }
-      
-      res.status(500).json({ message: errorMessage, error: spaceError });
-    }
+    // 更新用户点数
+    const newPoints = (userPoints - REQUIRED_POINTS).toString();
+    await userRecord.update({ points: newPoints }, { transaction });
+
+    // 记录点数消耗日志
+    await PointsLog.create({
+      user_id: userId,
+      points_type: '2', // 2表示减少
+      points_num: REQUIRED_POINTS,
+      log_type: 12, // 12消耗:生成建议
+      log_content: `Create Garden Advisor ID: ${advisor.id}`,
+      related_id: advisor.id.toString(),
+      ctime: Math.floor(Date.now() / 1000),
+      utime: Math.floor(Date.now() / 1000)
+    }, { transaction });
+
+    await transaction.commit();
+    res.status(201).json({ 
+      id: advisor.id,
+      message: '花园顾问创建成功',
+      pointsDeducted: REQUIRED_POINTS,
+      remainingPoints: newPoints
+    });
   } catch (error) {
-    // 发生错误时回滚事务
     await transaction.rollback();
     console.error('创建花园顾问失败:', error);
     res.status(500).json({ message: '创建花园顾问失败', error });

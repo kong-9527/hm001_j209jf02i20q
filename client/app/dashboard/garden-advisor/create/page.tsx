@@ -8,6 +8,7 @@ import PlantingPlaceModal from '@/app/components/PlantingPlaceModal';
 import axios from 'axios';
 import { useNotification } from '@/app/components/NotificationCenter';
 import { useProject } from '@/app/contexts/ProjectContext';
+import { useUser } from '@/app/contexts/UserContext';
 import { createGardenAdvisor } from '@/app/services/gardenAdvisorService';
 
 // 添加字典表常量
@@ -40,9 +41,13 @@ const FERTILIZER_DICT = {
   2: { id: 2, label: 'Conventional', value: 'Conventional' }
 };
 
+// Points required to create a garden advisor
+const REQUIRED_POINTS = 5;
+
 export default function CreateGardenAdvisorPage() {
   const router = useRouter();
   const { currentProject } = useProject();
+  const { user } = useUser();
   const { addNotification } = useNotification();
   
   // 添加步骤状态
@@ -87,6 +92,12 @@ export default function CreateGardenAdvisorPage() {
 
   // 添加发送API请求状态
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 当前用户点数
+  const userPoints = user?.points ? parseInt(user.points) : 0;
+  
+  // 检查用户是否有足够的点数
+  const hasEnoughPoints = userPoints >= REQUIRED_POINTS;
 
   // 打开添加种植位置弹窗
   const openAddPlantingPlaceModal = () => {
@@ -540,7 +551,7 @@ export default function CreateGardenAdvisorPage() {
             </button>
             <button
               onClick={goToNextStep}
-              className="w-[130px] bg-primary hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors flex items-center"
+              className="bg-primary hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors flex items-center"
             >
               Next Step
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -783,6 +794,27 @@ export default function CreateGardenAdvisorPage() {
             <p className="text-sm mb-6 text-gray-700">To ensure you're completely satisfied with the end result, we strongly advise carefully reviewing all your inputs before finalizing the plan.</p>
           </div>
 
+          {/* Points requirement notice */}
+          <div className={`text-center max-w-2xl mx-auto mb-6 p-4 rounded-md ${hasEnoughPoints ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
+            <div className="flex items-center justify-center mb-2">
+              {hasEnoughPoints ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+              <span className="font-medium">Points Required: {REQUIRED_POINTS}</span>
+            </div>
+            <p className="text-sm">
+              {hasEnoughPoints 
+                ? `You have ${userPoints} points, which is sufficient to create a garden plan.` 
+                : `You have ${userPoints} points. You need at least ${REQUIRED_POINTS} points to create a garden plan.`}
+            </p>
+          </div>
+
           <div className="mt-8 flex justify-between">
             <div>
               <button
@@ -798,8 +830,8 @@ export default function CreateGardenAdvisorPage() {
             <div>
               <button 
                 onClick={createGardenPlan}
-                disabled={isSubmitting}
-                className={`bg-primary hover:bg-green-700 text-white py-3.5 px-8 rounded-md font-medium transition-colors flex items-center justify-center ml-4 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                disabled={isSubmitting || !hasEnoughPoints}
+                className={`bg-primary hover:bg-green-700 text-white py-3.5 px-8 rounded-md font-medium transition-colors flex items-center justify-center ml-4 ${(isSubmitting || !hasEnoughPoints) ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
                 {isSubmitting ? (
                   <>
@@ -874,13 +906,22 @@ export default function CreateGardenAdvisorPage() {
     
     // 检查是否有项目
     if (!currentProject?.id) {
-      addNotification({ type: 'error', message: '未找到活动项目。请先选择一个项目。' });
+      addNotification({ type: 'error', message: 'No active project found. Please select a project first.' });
       return;
     }
     
     // 检查是否有至少一个种植空间
     if (gardenSpaces.length === 0) {
-      addNotification({ type: 'error', message: '请至少添加一个种植位置' });
+      addNotification({ type: 'error', message: 'Please add at least one planting place' });
+      return;
+    }
+    
+    // 检查用户是否有足够的点数
+    if (!hasEnoughPoints) {
+      addNotification({ 
+        type: 'error', 
+        message: `Insufficient points. You need at least ${REQUIRED_POINTS} points to create a garden plan.` 
+      });
       return;
     }
     
@@ -921,13 +962,22 @@ export default function CreateGardenAdvisorPage() {
       await createGardenAdvisor(submitData);
       
       // 处理成功响应
-      addNotification({ type: 'success', message: '花园计划创建成功！' });
+      addNotification({ type: 'success', message: 'Garden plan created successfully!' });
       
       // 重定向到花园顾问列表页
       router.push(`/dashboard/garden-advisor?project_id=${currentProject.id}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create garden plan:', error);
-      addNotification({ type: 'error', message: '创建花园计划失败。请重试。' });
+      
+      // 检查是否是点数不足的错误
+      if (error.response && error.response.data && error.response.data.msg === 'Insufficient points') {
+        addNotification({ 
+          type: 'error', 
+          message: `Insufficient points. You need at least ${REQUIRED_POINTS} points to create a garden plan.` 
+        });
+      } else {
+        addNotification({ type: 'error', message: 'Failed to create garden plan. Please try again.' });
+      }
     } finally {
       setIsSubmitting(false);
     }
