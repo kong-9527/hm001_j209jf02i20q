@@ -7,6 +7,7 @@ import { useEventBus } from '../contexts/EventBus';
 import { useProject } from '../contexts/ProjectContext';
 import { useEffect } from 'react';
 import { useUser } from '../contexts/UserContext';
+import { getCurrentUser } from '../services/authService';
 
 interface MenuSection {
   title: string;
@@ -26,6 +27,20 @@ export default function Sidebar() {
   const { currentProject } = useProject();
   const { user } = useUser();
   
+  // 更新DashboardNavbar中的用户信息
+  const updateNavbarUserInfo = async () => {
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        emit('user_points_updated', { 
+          points: user.points || '0'
+        });
+      }
+    } catch (error) {
+      console.error('Error updating navbar user info:', error);
+    }
+  };
+
   // 添加日志记录当前项目状态  
   useEffect(() => {
     console.log('Sidebar: currentProject changed to:', currentProject);
@@ -212,7 +227,10 @@ export default function Sidebar() {
                   <Link
                     key={itemIdx}
                     href={item.href}
-                    onClick={(e) => handleMenuItemClick(e, item.href)}
+                    onClick={(e) => {
+                      handleMenuItemClick(e, item.href);
+                      updateNavbarUserInfo();
+                    }}
                     className={`flex items-center px-6 py-2 text-sm ${
                       isActive 
                         ? 'text-primary bg-primary/5 border-l-2 border-primary' 
