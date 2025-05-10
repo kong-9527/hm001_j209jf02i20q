@@ -140,10 +140,10 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
       })));
     }
 
-    // 获取用户有效的订单记录 - 仅检查points_remain
+    // 获取用户有效的订单记录 - 检查points_remain和user_id
     const validUserOrders = await UserOrder.findAll({
       where: {
-        user_id: userId,
+        user_id: userId,  // 确保只查询当前用户的订单
         points_remain: {
           [Op.gt]: 0  // 剩余点数大于0
         }
@@ -164,22 +164,16 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
     } else {
       console.log('没有找到有效订单，尝试直接使用用户总点数');
       
-      // 如果没有找到有效订单但用户有足够点数，创建一个临时订单对象
-      if (userPoints >= REQUIRED_POINTS) {
-        // 创建一个临时订单对象，直接使用用户的总点数
-        validUserOrders.push({
-          id: 0, // 使用0作为临时ID
-          related_id: 'user_total_points',
-          user_id: userId,
-          points_remain: userPoints,
-          order_type: 9, // 9代表其他类型
-          member_start_date: new Date(),
-          member_end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 一年后
-          update: async function(values: any) { return this; } // 空的update函数
-        } as any);
-        
-        console.log('已创建临时订单对象:', validUserOrders[0]);
-      }
+      // 如果没有找到有效订单，直接返回错误信息
+      await transaction.rollback();
+      res.status(400).json({ 
+        message: '点数不足',
+        msg: 'Insufficient points',
+        required: REQUIRED_POINTS,
+        current: userPoints,
+        error: 'No valid orders found'
+      });
+      return;
     }
 
     // 检查是否有有效订单
@@ -288,10 +282,20 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
       
       // 更新订单剩余点数
       const newOrderPointsRemain = orderPoints - pointsToDeduct;
-      await order.update({
-        points_remain: newOrderPointsRemain,
-        utime: Math.floor(Date.now() / 1000)
-      }, { transaction });
+      
+      // 使用原始查询更新订单
+      await UserOrder.update(
+        {
+          points_remain: newOrderPointsRemain,
+          utime: Math.floor(Date.now() / 1000)
+        },
+        {
+          where: {
+            id: order.id
+          },
+          transaction
+        }
+      );
 
       // 创建点数日志条目
       pointsLogEntries.push({
