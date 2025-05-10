@@ -3,7 +3,10 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
 // 定义事件类型
-export type EventType = 'projects_updated' | 'project_selected';
+export type EventType = 
+  | 'project_selected'
+  | 'projects_updated'
+  | 'user_points_updated';
 
 // 事件监听器类型
 type EventListener = (data?: any) => void;

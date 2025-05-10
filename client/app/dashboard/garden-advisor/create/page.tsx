@@ -10,6 +10,7 @@ import { useNotification } from '@/app/components/NotificationCenter';
 import { useProject } from '@/app/contexts/ProjectContext';
 import { useUser } from '@/app/contexts/UserContext';
 import { createGardenAdvisor } from '@/app/services/gardenAdvisorService';
+import { useEventBus } from '@/app/contexts/EventBus';
 
 // 添加字典表常量
 const EXPERIENCE_DICT = {
@@ -49,6 +50,7 @@ export default function CreateGardenAdvisorPage() {
   const { currentProject } = useProject();
   const { user } = useUser();
   const { addNotification } = useNotification();
+  const { emit } = useEventBus();
   
   // 添加步骤状态
   const [currentStep, setCurrentStep] = useState(1);
@@ -963,6 +965,11 @@ export default function CreateGardenAdvisorPage() {
       
       // 处理成功响应
       addNotification({ type: 'success', message: 'Garden plan created successfully!' });
+      
+      // 发送更新用户点数的事件
+      emit('user_points_updated', { 
+        points: userPoints - REQUIRED_POINTS 
+      });
       
       // 重定向到花园顾问列表页
       router.push(`/dashboard/garden-advisor?project_id=${currentProject.id}`);

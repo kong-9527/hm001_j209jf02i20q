@@ -88,11 +88,21 @@ export default function DashboardNavbar() {
       fetchProjects();
     });
     
+    // 订阅用户点数更新事件
+    const unsubscribePoints = on('user_points_updated', ({ points }) => {
+      console.log('User points updated event received:', points);
+      if (user) {
+        // 更新用户上下文中的点数
+        user.points = points.toString();
+      }
+    });
+    
     // 清理订阅
     return () => {
       unsubscribe();
+      unsubscribePoints();
     };
-  }, [on]);
+  }, [on, user]);
   
   const handleProjectMouseEnter = () => {
     if (projectTimerRef.current) {
