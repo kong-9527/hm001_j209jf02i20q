@@ -4,6 +4,7 @@ import GardenAdvisor from '../models/GardenAdvisor';
 import GardenAdvisorSpace from '../models/GardenAdvisorSpace';
 import User from '../models/User';
 import PointsLog from '../models/PointsLog';
+import UserOrder from '../models/UserOrder';
 import sequelize from '../config/database';
 
 // Points required to create a garden advisor
@@ -119,6 +120,35 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
       return;
     }
 
+    // 获取用户有效的订单记录
+    const currentDate = new Date();
+    const validUserOrders = await UserOrder.findAll({
+      where: {
+        user_id: userId,
+        points_remain: {
+          [Op.gt]: 0  // 剩余点数大于0
+        },
+        member_start_date: {
+          [Op.lte]: currentDate  // 开始日期小于等于当前日期
+        },
+        member_end_date: {
+          [Op.gte]: currentDate  // 结束日期大于等于当前日期
+        }
+      },
+      order: [['member_start_date', 'ASC']],  // 按开始日期正序排序
+      transaction
+    });
+
+    // 检查是否有有效订单
+    if (validUserOrders.length === 0) {
+      await transaction.rollback();
+      res.status(400).json({ 
+        message: '没有有效的订单点数',
+        msg: 'No valid order points',
+      });
+      return;
+    }
+
     // 构建计划名称：location + spaces数量 + "places plan"
     // 如果location为空，则使用默认值"My"
     const locationPrefix = gardenLocation || "My";
@@ -175,21 +205,50 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
     await Promise.all(spacesPromises);
     console.log('Garden Advisor Space记录已创建');
 
-    // 更新用户点数
+    // 从订单中扣除点数
+    let remainingPointsToDeduct = REQUIRED_POINTS;
+    const pointsLogEntries = [];
+
+    // 遍历有效订单，扣除点数
+    for (const order of validUserOrders) {
+      // 如果没有剩余点数需要扣除，跳出循环
+      if (remainingPointsToDeduct <= 0) break;
+
+      // 当前订单可以扣除的点数
+      const orderPoints = order.points_remain || 0;
+      // 实际从该订单扣除的点数
+      const pointsToDeduct = Math.min(orderPoints, remainingPointsToDeduct);
+      
+      // 更新订单剩余点数
+      const newOrderPointsRemain = orderPoints - pointsToDeduct;
+      await order.update({
+        points_remain: newOrderPointsRemain,
+        utime: Math.floor(Date.now() / 1000)
+      }, { transaction });
+
+      // 创建点数日志条目
+      pointsLogEntries.push({
+        user_id: userId,
+        points_type: '2', // 2表示减少
+        points_num: pointsToDeduct,
+        log_type: 12, // 12消耗:生成建议
+        log_content: `Create Garden Advisor ID: ${advisor.id}`,
+        related_id: order.related_id, // 订单的related_id
+        content_id: advisor.id.toString(), // 本次生成的garden_advisor的id
+        ctime: Math.floor(Date.now() / 1000),
+        utime: Math.floor(Date.now() / 1000)
+      });
+
+      // 减少剩余待扣点数
+      remainingPointsToDeduct -= pointsToDeduct;
+    }
+
+    // 插入点数日志
+    await PointsLog.bulkCreate(pointsLogEntries, { transaction });
+
+    // 更新用户总点数
     const newPoints = (userPoints - REQUIRED_POINTS).toString();
     await userRecord.update({ points: newPoints }, { transaction });
-
-    // 记录点数消耗日志
-    await PointsLog.create({
-      user_id: userId,
-      points_type: '2', // 2表示减少
-      points_num: REQUIRED_POINTS,
-      log_type: 12, // 12消耗:生成建议
-      log_content: `Create Garden Advisor ID: ${advisor.id}`,
-      related_id: advisor.id.toString(),
-      ctime: Math.floor(Date.now() / 1000),
-      utime: Math.floor(Date.now() / 1000)
-    }, { transaction });
 
     await transaction.commit();
     res.status(201).json({ 

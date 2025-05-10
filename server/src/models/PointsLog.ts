@@ -11,6 +11,7 @@ interface PointsLogAttributes {
   log_type: number | null;
   log_content: string | null;
   related_id: string | null;
+  content_id: string | null;
   ctime: number | null;
   utime: number | null;
 }
@@ -27,6 +28,7 @@ class PointsLog extends Model<PointsLogAttributes, PointsLogCreationAttributes> 
   public log_type!: number | null;
   public log_content!: string | null;
   public related_id!: string | null;
+  public content_id!: string | null;
   public ctime!: number | null;
   public utime!: number | null;
 }
@@ -65,6 +67,11 @@ PointsLog.init(
       type: DataTypes.STRING,
       allowNull: true,
       comment: '订单id 生成的id 退回的时候关联本表id',
+    },
+    content_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      comment: '',
     },
     ctime: {
       type: DataTypes.INTEGER,
