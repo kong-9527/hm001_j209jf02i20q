@@ -134,23 +134,29 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
         measurement: space.measurement
       });
       
-      // 转换前端参数为数据库字段
-      return GardenAdvisorSpace.create(
-        {
-          advisor_id: advisor.id,
-          in_out: space.inOut === 'indoor' ? 1 : 2, // indoor=1, outdoor=2
-          cultivation: getCultivationTypeId(space.type),
-          length: space.length ? parseFloat(String(space.length)) : null,
-          width: space.width ? parseFloat(String(space.width)) : null,
-          height: space.height ? parseFloat(String(space.height)) : null,
-          Measurement: getMeasurementUnitId(space.measurement),
-          diameter: space.diameter ? parseFloat(String(space.diameter)) : null,
-          sunlight: getSunlightTypeId(space.sunlight),
-          soil: getSoilTypeId(space.soil),
-          water_access: getWaterAccessTypeId(space.waterAccess)
-        },
-        { transaction }
-      );
+      try {
+        // 忽略前端传递的id字段，让数据库自动生成id
+        // 转换前端参数为数据库字段
+        return GardenAdvisorSpace.create(
+          {
+            advisor_id: advisor.id,
+            in_out: space.inOut === 'indoor' ? 1 : 2, // indoor=1, outdoor=2
+            cultivation: getCultivationTypeId(space.type),
+            length: space.length ? parseFloat(String(space.length)) : null,
+            width: space.width ? parseFloat(String(space.width)) : null,
+            height: space.height ? parseFloat(String(space.height)) : null,
+            Measurement: getMeasurementUnitId(space.measurement),
+            diameter: space.diameter ? parseFloat(String(space.diameter)) : null,
+            sunlight: getSunlightTypeId(space.sunlight),
+            soil: getSoilTypeId(space.soil),
+            water_access: getWaterAccessTypeId(space.waterAccess)
+          },
+          { transaction }
+        );
+      } catch (err) {
+        console.error(`创建空间 #${index} 时发生错误:`, err);
+        throw err;
+      }
     });
 
     try {
@@ -168,7 +174,15 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
       // 如果在创建空间时出错，回滚事务
       await transaction.rollback();
       console.error('创建花园空间失败:', spaceError);
-      res.status(500).json({ message: '创建花园空间失败', error: spaceError });
+      
+      // 记录更详细的错误信息
+      let errorMessage = '创建花园空间失败';
+      if (spaceError instanceof Error) {
+        errorMessage += `: ${spaceError.message}`;
+        console.error('错误堆栈:', spaceError.stack);
+      }
+      
+      res.status(500).json({ message: errorMessage, error: spaceError });
     }
   } catch (error) {
     // 发生错误时回滚事务
