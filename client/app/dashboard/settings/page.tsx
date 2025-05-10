@@ -10,10 +10,6 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [nickname, setNickname] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -40,38 +36,16 @@ const Settings = () => {
       setSaveError('');
       setSaveSuccess(false);
 
-      // 检查密码是否一致
-      if (newPassword && newPassword !== confirmPassword) {
-        setPasswordError('两次输入的密码不一致');
-        return;
-      }
-      
-      // 密码一致，清除错误信息
-      setPasswordError('');
-      
-      // 准备更新数据
-      const updateData: any = {
+      const updateData = {
         nick_name: nickname
       };
 
-      // 如果输入了新密码，则添加密码更新
-      if (newPassword) {
-        updateData.currentPassword = currentPassword;
-        updateData.newPassword = newPassword;
-      }
-
-      // 发送更新请求
       const response = await axios.put(`${API_URL}/users/profile`, updateData, {
         withCredentials: true
       });
 
       if (response.status === 200) {
         setSaveSuccess(true);
-        // 清空密码字段
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-        // 重新获取用户数据
         await fetchUserData();
       }
     } catch (error: any) {
@@ -119,47 +93,6 @@ const Settings = () => {
                 className="w-[300px] p-2 border rounded"
               />
               <span className="text-gray-400 text-sm ml-3">最多30个字符</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
-          <h2 className="text-bold font-medium mb-4">修改密码</h2>
-          
-          <div className="grid grid-cols-[180px_1fr] gap-4 items-center mb-4">
-            <label className="text-sm">当前密码</label>
-            <div>
-              <input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-[300px] p-2 border rounded"
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-[180px_1fr] gap-4 items-center mb-4">
-            <label className="text-sm">新密码</label>
-            <div>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-[300px] p-2 border rounded"
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-[180px_1fr] gap-4 items-center">
-            <label className="text-sm">确认新密码</label>
-            <div>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`w-[300px] p-2 border rounded ${passwordError ? 'border-red-500' : ''}`}
-              />
-              {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
             </div>
           </div>
         </div>
