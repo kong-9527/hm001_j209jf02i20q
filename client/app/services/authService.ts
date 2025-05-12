@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Configure axios instance
 const api = axios.create({
@@ -102,7 +102,7 @@ export const loginWithGooglePopup = () => {
     // 设置消息监听器，用于接收授权弹窗的消息
     const messageHandler = async (event: MessageEvent) => {
       // 确保消息来源是安全的
-      if (event.origin !== new URL(API_URL).origin) {
+      if (event.origin !== new URL(API_URL as string).origin) {
         return;
       }
       

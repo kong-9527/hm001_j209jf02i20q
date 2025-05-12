@@ -16,11 +16,11 @@ import { Op } from 'sequelize';
  * 
  * GOOGLE_CLIENT_ID=从Google Cloud Console获取的客户端ID
  * GOOGLE_CLIENT_SECRET=从Google Cloud Console获取的客户端密钥
- * GOOGLE_CALLBACK_URL=认证回调URL，例如 http://localhost:5000/api/auth/google/callback
+ * GOOGLE_CALLBACK_URL=认证回调URL
  */
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
-const CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL;
 
 // 如果未设置客户端ID或密钥，在控制台显示警告
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {

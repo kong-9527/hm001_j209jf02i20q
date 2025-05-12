@@ -77,7 +77,7 @@ export const googleCallback = async (req: Request, res: Response) => {
     // 创建令牌并设置Cookie
     createTokenAndSetCookie(user, res);
 
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    const clientUrl = process.env.CLIENT_URL;
     
     // 检查是否为弹窗模式
     const isPopup = req.query.popup === 'true';
@@ -155,7 +155,7 @@ export const googleCallback = async (req: Request, res: Response) => {
     
     // 检查是否为弹窗模式
     const isPopup = req.query.popup === 'true';
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    const clientUrl = process.env.CLIENT_URL;
     
     if (isPopup) {
       // 弹窗模式：返回错误消息，但使用更可靠的自关闭机制

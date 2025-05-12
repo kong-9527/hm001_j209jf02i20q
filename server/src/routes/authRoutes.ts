@@ -74,7 +74,7 @@ if (GOOGLE_CLIENT_ID) {
   router.get('/google', (req: Request, res: Response) => {
     // 判断是否为弹窗模式
     const isPopup = req.query.popup === 'true';
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    const clientUrl = process.env.CLIENT_URL;
     
     if (isPopup) {
       // 弹窗模式：返回错误消息
@@ -120,7 +120,7 @@ if (GOOGLE_CLIENT_ID) {
   
   router.get('/google/callback', (req: Request, res: Response) => {
     const isPopup = req.query.popup === 'true';
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    const clientUrl = process.env.CLIENT_URL;
     
     if (isPopup) {
       // 弹窗模式：返回错误消息

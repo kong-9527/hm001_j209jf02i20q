@@ -1,17 +1,17 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize, Dialect } from 'sequelize';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 // 数据库连接配置
 const sequelize = new Sequelize(
-  process.env.DB_NAME || 'garden',
-  process.env.DB_USER || 'root',
-  process.env.DB_PASSWORD || '123456',
+  process.env.DB_NAME as string,
+  process.env.DB_USER as string,
+  process.env.DB_PASSWORD as string,
   {
-    host: process.env.DB_HOST || 'localhost',
-    dialect: 'mysql',
-    port: parseInt(process.env.DB_PORT || '3306'),
+    host: process.env.DB_HOST as string,
+    dialect: process.env.DB_DIALECT as Dialect,
+    port: parseInt(process.env.DB_PORT as string),
     timezone: '+08:00', // 中国时区
     define: {
       timestamps: false, // 禁用默认时间戳

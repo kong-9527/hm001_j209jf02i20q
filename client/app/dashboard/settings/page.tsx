@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { getCurrentUser } from '@/app/services/authService';
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const Settings = () => {
   const [loading, setLoading] = useState(true);

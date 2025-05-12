@@ -1051,7 +1051,7 @@ export default function PhotoGenerator() {
       }
       
       // 调用上传API - 这里需要替换为实际的上传API
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
       const response = await fetch(`${API_URL}/upload/image`, {
         method: 'POST',
         credentials: 'include',
