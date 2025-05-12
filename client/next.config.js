@@ -48,6 +48,14 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://apiaigardendesign.vercel.app/api/:path*',
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig 
