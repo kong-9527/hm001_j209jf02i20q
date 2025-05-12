@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
-    "build": "npm install typescript && ./node_modules/.bin/tsc",
+    "build": "npm install typescript && npx tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -23,6 +23,7 @@
     "axios": "^1.9.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "helmet": "^7.1.0",
@@ -34,8 +35,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "sequelize": "^6.37.7",
-    "uuid": "^9.0.1",
-    "date-fns": "^2.30.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.8",
@@ -53,6 +53,6 @@
     "typescript": "^5.8.3"
   },
   "engines": {
-    "node": "v22.14.0"
+    "node": ">=22.0.0"
   }
 }
