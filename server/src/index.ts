@@ -103,3 +103,5 @@ app.listen(PORT, () => {
   startTaskChecker();
   console.log('Garden设计任务状态检查服务已启动');
 }); 
+
+module.exports = app;
