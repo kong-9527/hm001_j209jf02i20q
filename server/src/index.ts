@@ -59,7 +59,21 @@ app.use(cors({
 
 // 配置Helmet，但允许内联脚本执行（使弹窗中的脚本能够执行）
 app.use(helmet({
-  contentSecurityPolicy: false
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", process.env.FRONTEND_URL as string],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
 
 app.use(express.json());
@@ -103,5 +117,31 @@ app.listen(PORT, () => {
   startTaskChecker();
   console.log('Garden设计任务状态检查服务已启动');
 }); 
+
+// CORS配置
+const allowedOrigins = [
+  'https://aigardendesign.vercel.app',  // 生产环境前端域名
+  // 'http://localhost:3000',             // 开发环境前端地址
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    // 允许没有origin的请求（比如移动端APP）
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,  // 允许携带凭证
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Set-Cookie'],
+  maxAge: 86400  // 预检请求结果缓存24小时
+}));
+
+
 
 module.exports = app;
