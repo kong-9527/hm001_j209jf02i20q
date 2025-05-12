@@ -6,6 +6,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'vercel.blob.core.windows.net', // 如果使用Vercel Blob
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'ui-avatars.com',
         port: '',
         pathname: '/**',
