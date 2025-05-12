@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
-    "build": "tsc",
+    "build": "npm install typescript && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -19,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/axios": "^0.14.4",
+    "all": "^0.0.0",
     "axios": "^1.9.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -48,9 +49,9 @@
     "@types/uuid": "^9.0.8",
     "nodemon": "^3.0.2",
     "ts-node": "^10.9.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.8.3"
   },
   "engines": {
-  "node": "20.x"
+    "node": "v22.2.0"
   }
 }
