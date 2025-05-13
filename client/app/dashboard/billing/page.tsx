@@ -7,10 +7,6 @@ import { getUserOrders } from '@/app/services/paymentService';
 import { createCheckout } from '@/app/services/paymentService';
 import { getCurrentUser } from '@/app/services/authService';
 import { format } from 'date-fns';
-import { Metadata } from 'next';
-
-// 强制动态渲染
-export const dynamic = 'force-dynamic';
 
 // 定义订单数据类型
 interface OrderData {
@@ -37,21 +33,26 @@ export default function BillingPage() {
       try {
         setLoading(true);
         const response = await getUserOrders();
-        if (response.success) {
-          setSubscriptionData(response.data || []);
+        if (response && response.success) {
+          // 确保数据是数组
+          const ordersData = Array.isArray(response.data) ? response.data : [];
+          setSubscriptionData(ordersData);
           
           // 计算当前积分总数
           let totalCredits = 0;
-          response.data.forEach((order: OrderData) => {
-            if (order.points_num) {
+          ordersData.forEach((order: OrderData) => {
+            if (order && order.points_num) {
               totalCredits += order.points_num;
             }
           });
           setCurrentCredits(totalCredits);
+        } else {
+          console.error('获取订单数据失败:', response);
+          setError('加载订单数据失败');
         }
       } catch (err) {
         setError('加载订单数据失败');
-        console.error('Failed to fetch orders:', err);
+        console.error('获取订单数据出错:', err);
       } finally {
         setLoading(false);
       }
@@ -103,7 +104,13 @@ export default function BillingPage() {
       }
     } catch (err) {
       console.error('购买处理失败:', err);
-      setError('购买请求失败，请稍后再试');
+      
+      // 更详细的错误处理
+      if (err instanceof Error) {
+        setError(`购买请求失败: ${err.message}`);
+      } else {
+        setError('购买请求失败，请稍后再试');
+      }
     } finally {
       setIsSubmitting(null);
     }
