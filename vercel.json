@@ -11,7 +11,7 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "server/dist/index.js" },
+    { "src": "/api/(.*)", "dest": "server/src/index.ts" },
     { "src": "/(.*)", "dest": "client/$1" }
   ],
   "regions": ["sfo1"]
