@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/api/auth/:path*",
-      "destination": "http://apiaigardendesign.vercel.app/api/auth/:path*"
+      "destination": "/api/auth/:path*"
     }
   ]
 } 

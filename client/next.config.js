@@ -51,10 +51,16 @@ const nextConfig = {
   },
   async rewrites() {
     return [
+      // 首先处理Google Auth路由
+      {
+        source: '/api/auth/:path*',
+        destination: '/api/auth/:path*',
+      },
+      // 其他API路由
       {
         source: '/api/:path*',
-        destination: 'http://apiaigardendesign.vercel.app/api/:path*',
-      },
+        destination: '/api/:path*',
+      }
     ]
   },
 }
