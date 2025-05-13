@@ -1,9 +1,7 @@
 .git
 node_modules
-dist
-uploads
-.env
+.next
 .env.local
 .env.development.local
 .env.test.local
-.env.production.local
+.env.production.local 

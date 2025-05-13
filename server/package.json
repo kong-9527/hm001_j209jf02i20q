@@ -4,7 +4,7 @@
   "description": "花园网站后端服务",
   "main": "dist/index.js",
   "scripts": {
-    "vercel-install": "node install.js && npm install",
+    "vercel-install": "npm install",
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
     "build": "npx tsc",
@@ -20,7 +20,6 @@
   "license": "ISC",
   "dependencies": {
     "@types/axios": "^0.14.4",
-    "all": "^0.0.0",
     "axios": "^1.9.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -37,7 +36,6 @@
     "passport-google-oauth20": "^2.0.0",
     "sequelize": "^6.37.7",
     "uuid": "^9.0.1",
-    "typescript": "^5.8.3",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4"
   },

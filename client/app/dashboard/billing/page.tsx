@@ -3,10 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getUserOrders } from '../../services/paymentService';
-import { createCheckout } from '../../services/paymentService';
-import { getCurrentUser } from '../../services/authService';
+import { getUserOrders } from '@/app/services/paymentService';
+import { createCheckout } from '@/app/services/paymentService';
+import { getCurrentUser } from '@/app/services/authService';
 import { format } from 'date-fns';
+import { Metadata } from 'next';
+
+// 强制动态渲染
+export const dynamic = 'force-dynamic';
 
 // 定义订单数据类型
 interface OrderData {
