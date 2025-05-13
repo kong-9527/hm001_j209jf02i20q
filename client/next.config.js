@@ -59,7 +59,7 @@ const nextConfig = {
       // 其他API路由
       {
         source: '/api/:path*',
-        destination: '/api/:path*',
+        destination: 'http://aagardendesign.vercel.app/api/:path*',
       }
     ]
   },
