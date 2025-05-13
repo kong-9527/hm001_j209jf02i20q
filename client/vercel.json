@@ -1,4 +1,10 @@
 {
   "version": 2,
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "rewrites": [
+    {
+      "source": "/api/auth/:path*",
+      "destination": "http://apiaigardendesign.vercel.app/api/auth/:path*"
+    }
+  ]
 } 
