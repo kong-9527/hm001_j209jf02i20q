@@ -42,6 +42,7 @@ import passport from './config/passport';
 import checkEnvVariables from './utils/envCheck';
 import customStyleRoutes from './routes/customStyleRoutes';
 import startTaskChecker from './services/taskStatusChecker';
+import { errorHandler } from './middleware/errorHandler';
 
 // 检查环境变量
 checkEnvVariables();
@@ -111,6 +112,9 @@ sequelize.authenticate()
   })
   .catch(err => {
     console.error('数据库连接失败:', err);
+    
+    // 在Vercel环境中，不中断应用启动
+    console.log('在Serverless环境中继续运行，API可能会返回数据库错误');
   });
 
 // 路由
@@ -128,6 +132,17 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/garden-designs', gardenDesignRoutes);
 app.use('/api/custom-styles', customStyleRoutes);
 app.use('/api/garden-advisors', gardenAdvisorRoutes);
+
+// 404处理
+app.use((req, res, next) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `找不到资源: ${req.method} ${req.url}`
+  });
+});
+
+// 全局错误处理中间件 - 必须放在所有路由之后
+app.use(errorHandler);
 
 // 启动服务器
 app.listen(PORT, () => {

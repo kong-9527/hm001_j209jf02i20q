@@ -5,9 +5,8 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { User as UserModel } from '../models';
+import { User } from '../models';
 import { generateAvatarFromNickName } from '../utils/avatarGenerator';
-import User from '../models/User';
 
 /**
  * JWT 配置
@@ -15,50 +14,54 @@ import User from '../models/User';
  * 请确保在项目根目录下的 .env 文件中设置以下环境变量：
  * 
  * JWT_SECRET=一个安全的随机字符串，用于签名JWT令牌
+ * JWT_EXPIRES_IN=JWT令牌的有效期，例如：7d表示7天
  * 
  * 会话超时机制说明：
  * 1. JWT令牌有效期为30分钟
  * 2. 前端应在用户有活动时调用refreshSession接口刷新令牌
  * 3. 如果用户30分钟内无活动，令牌将过期，需要重新登录
  */
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-// 会话超时时间 (30分钟)
-const SESSION_TIMEOUT = 30 * 60; // 秒
+const JWT_SECRET = process.env.JWT_SECRET || 'default_jwt_secret_key';
+// JWT过期时间设置（7天）
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 // 如果未设置 JWT 密钥，在控制台显示警告
-if (JWT_SECRET === 'your-secret-key') {
+if (JWT_SECRET === 'default_jwt_secret_key') {
   console.warn('警告: 使用默认的 JWT 密钥！在生产环境中，请在 .env 文件中设置 JWT_SECRET 环境变量。');
 }
 
 /**
- * 创建JWT令牌和设置Cookie
+ * 创建JWT令牌并设置到Cookie中
  * @param user 用户对象
- * @param res Express响应对象
- * @returns JWT令牌
+ * @param res 响应对象
  */
 const createTokenAndSetCookie = (user: any, res: Response) => {
-  // 生成 JWT 令牌
+  // 创建JWT令牌
   const token = jwt.sign(
     { 
-      id: user.id,
+      id: user.id, 
       email: user.email,
-      nickName: user.nick_name,
-      registerType: user.register_type,
-      googleId: user.google_id
-    },
-    JWT_SECRET,
-    { expiresIn: `${SESSION_TIMEOUT}s` } // 设置为30分钟
+      nickname: user.nick_name,
+    }, 
+    JWT_SECRET, 
+    { expiresIn: JWT_EXPIRES_IN }
   );
 
-  // 将令牌保存到 Cookie
-  res.cookie('authToken', token, {
+  // 获取前端URL（用于CORS配置）
+  const clientUrl = process.env.CLIENT_URL;
+  
+  // 设置Cookie - 设置为HttpOnly以增强安全性（防止XSS攻击）
+  const cookieOptions = { 
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: SESSION_TIMEOUT * 1000 // 毫秒
-  });
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7天后过期
+    sameSite: 'lax' as const,
+    secure: process.env.NODE_ENV === 'production', // 在生产环境中使用HTTPS
+    path: '/'
+  };
 
-  return token;
-};
+  // 设置JWT令牌作为cookie
+  res.cookie('jwt', token, cookieOptions);
+}
 
 /**
  * 处理 Google 认证回调
@@ -226,34 +229,70 @@ export const googleCallback = async (req: Request, res: Response) => {
 };
 
 /**
- * 获取当前登录用户信息
- * 验证 JWT 令牌并返回用户数据
+ * 获取当前登录用户的信息
  */
 export const getCurrentUser = async (req: Request, res: Response) => {
   try {
-    // 从 Cookie 中获取令牌
-    const token = req.cookies.authToken;
+    // 从cookie中获取JWT令牌
+    const token = req.cookies.jwt || req.cookies.authToken; // 兼容两种cookie名称
     
     if (!token) {
-      return res.status(401).json({ message: '未授权，请先登录' });
+      console.log('未找到JWT令牌');
+      return res.status(401).json({ 
+        error: 'Unauthorized', 
+        message: '未找到认证令牌，请登录' 
+      });
     }
     
-    // 验证令牌
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    
-    // 获取用户信息
-    const user = await (UserModel as any).findByPk(decoded.id, {
-      attributes: ['id', 'email', 'nick_name', 'register_type', 'head_pic', 'points', 'ctime', 'google_id']
-    });
-    
-    if (!user) {
-      return res.status(404).json({ message: '用户不存在' });
+    // 验证JWT令牌
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
+      
+      // 获取用户信息（不包含密码）
+      try {
+        const user = await User.findByPk(decoded.id, {
+          attributes: { exclude: ['password'] }
+        });
+        
+        if (!user) {
+          console.log('找不到用户:', decoded.id);
+          return res.status(404).json({ 
+            error: 'Not Found', 
+            message: '用户不存在' 
+          });
+        }
+        
+        return res.json(user);
+      } catch (error: any) {
+        console.error('数据库查询出错:', error);
+        
+        // 特别处理可能的数据库连接错误
+        if (error.name === 'SequelizeConnectionError' || 
+            (error.message && (error.message.includes('install pg') || error.message.includes('database')))) {
+          return res.status(500).json({ 
+            error: 'Database Connection Error', 
+            message: '数据库连接失败，请稍后再试或联系管理员' 
+          });
+        }
+        
+        return res.status(500).json({ 
+          error: 'Server Error', 
+          message: '服务器错误，无法获取用户信息' 
+        });
+      }
+    } catch (error) {
+      console.error('JWT验证失败:', error);
+      return res.status(401).json({ 
+        error: 'Unauthorized', 
+        message: '认证令牌无效或已过期，请重新登录' 
+      });
     }
-    
-    return res.status(200).json(user);
   } catch (error) {
-    console.error('获取当前用户信息失败:', error);
-    return res.status(401).json({ message: '令牌无效或已过期' });
+    console.error('获取当前用户信息时出错:', error);
+    return res.status(500).json({ 
+      error: 'Server Error', 
+      message: '服务器错误，请稍后再试' 
+    });
   }
 };
 
@@ -275,7 +314,7 @@ export const refreshSession = async (req: Request, res: Response) => {
       const decoded = jwt.verify(token, JWT_SECRET) as any;
       
       // 获取用户信息
-      const user = await (UserModel as any).findByPk(decoded.id);
+      const user = await (User as any).findByPk(decoded.id);
       
       if (!user) {
         return res.status(404).json({ message: '用户不存在' });
