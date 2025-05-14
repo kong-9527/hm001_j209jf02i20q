@@ -241,16 +241,35 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     // 验证令牌
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     
-    // 获取用户信息
-    const user = await (UserModel as any).findByPk(decoded.id, {
-      attributes: ['id', 'email', 'nick_name', 'register_type', 'head_pic', 'points', 'ctime', 'google_id']
-    });
-    
-    if (!user) {
-      return res.status(404).json({ message: '用户不存在' });
+    try {
+      // 尝试获取用户信息（如果数据库可用）
+      const user = await (UserModel as any).findByPk(decoded.id, {
+        attributes: ['id', 'email', 'nick_name', 'register_type', 'head_pic', 'points', 'ctime', 'google_id']
+      });
+      
+      if (!user) {
+        return res.status(404).json({ message: '用户不存在' });
+      }
+      
+      // 返回用户信息
+      return res.json(user);
+    } catch (dbError) {
+      console.error('数据库查询失败，尝试使用JWT令牌中的用户信息:', dbError);
+      
+      // 当数据库连接失败时，使用令牌中的基本用户信息
+      return res.json({
+        id: decoded.id,
+        email: decoded.email,
+        nick_name: decoded.nickName,
+        register_type: decoded.registerType || 'google',
+        google_id: decoded.googleId,
+        head_pic: generateAvatarFromNickName(decoded.nickName),
+        points: 0,
+        ctime: new Date(),
+        /* 注意: 这是有限的用户信息，仅包含令牌中的数据 */
+        _source: 'jwt_token',
+      });
     }
-    
-    return res.status(200).json(user);
   } catch (error) {
     console.error('获取当前用户信息失败:', error);
     return res.status(401).json({ message: '令牌无效或已过期' });

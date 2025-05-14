@@ -12,6 +12,10 @@ console.log('尝试加载 .env 文件:', envPath);
 // 加载环境变量
 dotenv.config({ path: envPath });
 
+// 输出版本信息
+console.log('Node.js 版本:', process.version);
+console.log('操作系统:', process.platform, process.arch);
+
 // 设置HTTP代理（必须在其他网络请求之前）
 import setupProxy from './config/httpProxy';
 const proxyEnabled = setupProxy();
@@ -29,7 +33,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import { sequelize } from './models';
+import { sequelize, dbConnectionStatus, initializeDatabase } from './models';
 import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
 import goodsRoutes from './routes/goodsRoutes';
@@ -42,6 +46,7 @@ import passport from './config/passport';
 import checkEnvVariables from './utils/envCheck';
 import customStyleRoutes from './routes/customStyleRoutes';
 import startTaskChecker from './services/taskStatusChecker';
+import { databaseCheck } from './middlewares/databaseCheck';
 
 // 检查环境变量
 checkEnvVariables();
@@ -101,14 +106,63 @@ app.use(passport.initialize());
 // 静态文件服务
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// 测试数据库连接
-sequelize.authenticate()
-  .then(() => {
-    console.log('数据库连接成功');
-  })
-  .catch(err => {
-    console.error('数据库连接失败:', err);
+// 添加服务器状态检查端点
+app.get('/api/status', (req, res) => {
+  res.json({
+    status: 'ok',
+    server: 'running',
+    env: process.env.NODE_ENV,
+    db_connected: dbConnectionStatus.connected,
+    db_error: dbConnectionStatus.error ? dbConnectionStatus.error.message : null,
+    time: new Date().toISOString()
   });
+});
+
+// 强制要求数据库连接成功，立即执行数据库连接并等待结果
+(async () => {
+  console.log('正在连接数据库...');
+  
+  try {
+    // 确保数据库连接成功
+    await sequelize.authenticate();
+    console.log('数据库连接成功 ✅');
+    
+    // 为了在出现问题时抛出异常，我们先尝试一个查询
+    await sequelize.query('SELECT 1+1 AS result');
+    console.log('数据库查询测试成功 ✅');
+    
+    // 启动服务器
+    app.listen(PORT, () => {
+      console.log(`服务器运行在端口 ${PORT}`);
+      
+      // 启动任务状态检查服务
+      startTaskChecker();
+      console.log('Garden设计任务状态检查服务已启动');
+    });
+    
+  } catch (error) {
+    console.error('致命错误: 数据库连接失败:', error);
+    
+    // 输出环境变量配置（不包含敏感信息）
+    console.error('数据库配置信息:');
+    console.error('- DB_DIALECT:', process.env.DB_DIALECT);
+    console.error('- DB_HOST:', process.env.DB_HOST);
+    console.error('- DB_PORT:', process.env.DB_PORT);
+    console.error('- DB_NAME:', process.env.DB_NAME);
+    console.error('- DB_USER 是否设置:', !!process.env.DB_USER);
+    
+    // 检查pg包是否正确安装
+    try {
+      const pg = require('pg');
+      console.error('pg 版本:', pg.version);
+    } catch (e) {
+      console.error('pg 包安装错误:', e);
+    }
+    
+    // 抛出异常终止程序
+    throw new Error('数据库连接失败，终止服务启动');
+  }
+})();
 
 // 路由
 app.get('/', (req, res) => {
@@ -125,14 +179,5 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/garden-designs', gardenDesignRoutes);
 app.use('/api/custom-styles', customStyleRoutes);
 app.use('/api/garden-advisors', gardenAdvisorRoutes);
-
-// 启动服务器
-app.listen(PORT, () => {
-  console.log(`服务器运行在端口 ${PORT}`);
-  
-  // 启动任务状态检查服务
-  startTaskChecker();
-  console.log('Garden设计任务状态检查服务已启动');
-}); 
 
 module.exports = app;
