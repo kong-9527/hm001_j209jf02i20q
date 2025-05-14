@@ -108,7 +108,11 @@ export const loginWithGooglePopup = () => {
       
     } catch (popupError) {
       console.error('打开Google认证弹窗时发生异常:', popupError);
-      reject(new Error(`打开认证弹窗失败: ${popupError.message}`));
+      // 处理unknown类型
+      const errorMessage = popupError instanceof Error 
+        ? popupError.message 
+        : '未知错误';
+      reject(new Error(`打开认证弹窗失败: ${errorMessage}`));
       return;
     }
     
