@@ -6,11 +6,24 @@ const router = Router();
 
 // 检查是否配置了 Google 客户端 ID
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+console.log('Google Client ID是否设置:', !!GOOGLE_CLIENT_ID);
+console.log('Google回调URL:', process.env.GOOGLE_CALLBACK_URL);
 
 // 定义扩展的 Request 接口以包含 isPopup 属性
 interface ExtendedRequest extends Request {
   isPopup?: boolean;
 }
+
+// 添加调试路由
+router.get('/debug', (req, res) => {
+  res.json({
+    googleConfigured: !!GOOGLE_CLIENT_ID,
+    callbackUrl: process.env.GOOGLE_CALLBACK_URL,
+    clientUrl: process.env.CLIENT_URL,
+    env: process.env.NODE_ENV,
+    timestamp: new Date().toISOString()
+  });
+});
 
 // 只有在配置了 Google 客户端 ID 时才启用 Google 登录路由
 if (GOOGLE_CLIENT_ID) {
@@ -18,6 +31,12 @@ if (GOOGLE_CLIENT_ID) {
   router.get(
     '/google',
     (req: ExtendedRequest, res: Response, next: NextFunction) => {
+      console.log('收到Google登录请求:', {
+        query: req.query,
+        headers: req.headers['user-agent'],
+        referer: req.headers.referer
+      });
+      
       // 处理弹窗模式
       const isPopup = req.query.popup === 'true';
       
@@ -45,6 +64,12 @@ if (GOOGLE_CLIENT_ID) {
   router.get(
     '/google/callback',
     (req: ExtendedRequest, res: Response, next: NextFunction) => {
+      console.log('收到Google回调请求:', {
+        query: req.query,
+        headers: req.headers['user-agent'],
+        referer: req.headers.referer
+      });
+      
       // 从state参数中获取popup状态
       let isPopup = false;
       try {
@@ -72,6 +97,12 @@ if (GOOGLE_CLIENT_ID) {
 } else {
   // 当未配置 Google 登录时，提供替代路由返回错误信息
   router.get('/google', (req: Request, res: Response) => {
+    console.log('收到Google登录请求，但未配置Google登录:', {
+      query: req.query,
+      headers: req.headers['user-agent'],
+      referer: req.headers.referer
+    });
+    
     // 判断是否为弹窗模式
     const isPopup = req.query.popup === 'true';
     const clientUrl = process.env.CLIENT_URL;
@@ -119,6 +150,12 @@ if (GOOGLE_CLIENT_ID) {
   });
   
   router.get('/google/callback', (req: Request, res: Response) => {
+    console.log('收到Google回调请求，但未配置Google登录:', {
+      query: req.query,
+      headers: req.headers['user-agent'],
+      referer: req.headers.referer
+    });
+    
     const isPopup = req.query.popup === 'true';
     const clientUrl = process.env.CLIENT_URL;
     
