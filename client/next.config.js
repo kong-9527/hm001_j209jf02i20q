@@ -46,6 +46,12 @@ const nextConfig = {
         port: '4000',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   // 在统一部署模型下，不需要特殊的 API 重写，删除或注释掉这部分

@@ -6,6 +6,7 @@ import PointsLog from '../models/PointsLog';
 import { getUserIdFromRequest } from '../utils/auth';
 import axios from 'axios';
 import { Op } from 'sequelize';
+import sequelize from '../config/database';
 
 /**
  * 获取当前用户和项目的花园设计图片
@@ -212,17 +213,35 @@ export const generateDesign = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    // 创建当前日期，仅包含年月日部分
+    const now = new Date();
+    // 将日期转换为YYYY-MM-DD格式的字符串
+    const todayStr = now.toISOString().split('T')[0];
+    // 创建只包含日期的Date对象
+    const today = new Date(todayStr);
+    
+    console.log('今天日期(字符串格式):', todayStr);
+    console.log('今天日期(Date对象):', today);
+
     // 检查用户是否有活跃订阅
     const activeSubscription = await UserOrder.findOne({
       where: {
         user_id,
         member_start_date: {
-          [Op.lte]: new Date() // 开始日期小于等于当前日期
+          [Op.lte]: today // 开始日期小于等于当前日期
         },
         member_end_date: {
-          [Op.gte]: new Date() // 结束日期大于等于当前日期
+          [Op.gte]: today // 结束日期大于等于当前日期
         }
       }
+    });
+
+    // 调试日志
+    console.log('查询订阅条件:', {
+      user_id,
+      'member_start_date <=': todayStr,
+      'member_end_date >=': todayStr,
+      'Date对象': today
     });
 
     if (!activeSubscription) {
@@ -230,6 +249,12 @@ export const generateDesign = async (req: Request, res: Response) => {
       return res.status(403).json({ 
         error: 'No active subscription',
         message: 'There are no active subscriptions, please check the annual discount subscription information.'
+      });
+    } else {
+      console.log('Found active subscription:', {
+        id: activeSubscription.id,
+        start_date: activeSubscription.member_start_date,
+        end_date: activeSubscription.member_end_date
       });
     }
 

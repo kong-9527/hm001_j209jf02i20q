@@ -318,8 +318,18 @@ export const handlePaymentCallback = async (req: Request, res: Response) => {
       
       // 获取当前日期
       const currentDate = new Date();
+      // 转换为YYYY-MM-DD格式字符串用于日志
+      const startDateStr = currentDate.toISOString().split('T')[0];
       // 计算会员结束日期：当前日期 + 商品的during天数
       const endDate = addDays(currentDate, goodsItem.during || 0);
+      const endDateStr = endDate.toISOString().split('T')[0];
+      
+      // 创建新的Date对象，仅包含日期部分
+      const startDateOnly = new Date(startDateStr);
+      const endDateOnly = new Date(endDateStr);
+      
+      console.log('订单开始日期(字符串):', startDateStr);
+      console.log('订单结束日期(字符串):', endDateStr);
       
       // 1. 在user_order表中创建新记录
       await UserOrder.create({
@@ -329,8 +339,8 @@ export const handlePaymentCallback = async (req: Request, res: Response) => {
         order_type: 1, // 订单类型
         points_num: goodsItem.points, // 使用商品的points字段
         points_remain: goodsItem.points, // 剩余点数初始等于总点数
-        member_start_date: currentDate, // 会员开始日期为当前日期
-        member_end_date: endDate, // 会员结束日期
+        member_start_date: startDateOnly, // 会员开始日期，使用Date对象
+        member_end_date: endDateOnly, // 会员结束日期，使用Date对象
         ctime: Math.floor(Date.now() / 1000),
         utime: Math.floor(Date.now() / 1000)
       });

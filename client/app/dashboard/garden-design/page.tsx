@@ -10,6 +10,7 @@ import { useProject } from '@/app/contexts/ProjectContext';
 import { useEventBus } from '@/app/contexts/EventBus';
 import { createCustomStyle, getUserCustomStyles, deleteCustomStyle, getCustomStyleById, updateCustomStyle } from '@/app/services/customStyleService';
 import { useNotification } from '@/app/components/NotificationCenter';
+import { uploadImage } from '@/app/services/uploadService';
 
 // 定义图片数据类型
 interface ImageData {
@@ -58,18 +59,17 @@ const getImageDimensions = (url: string): Promise<string> => {
 
 export default function PhotoGenerator() {
   const [selectedTab, setSelectedTab] = useState('premade');
-  const [uploadedImage, setUploadedImage] = useState(false); // 修改为默认没有上传图片
-  // 增加图片URL状态
+  const [uploadedImage, setUploadedImage] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
-  // 增加本地预览图片URL状态，初始为null
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
-  const [recentImagesState, setRecentImagesState] = useState<'empty' | 'single' | 'multiple' | 'many'>('empty'); // 默认显示为空状态
+  const [recentImagesState, setRecentImagesState] = useState<'empty' | 'single' | 'multiple' | 'many'>('empty');
   const [recentImages, setRecentImages] = useState<GardenDesignImage[]>([]);
   const [designImages, setDesignImages] = useState<GardenDesignImage[]>([]);
   const [deletedImages, setDeletedImages] = useState<GardenDesignImage[]>([]);
   const [debugInput, setDebugInput] = useState('');
   const [draggedImage, setDraggedImage] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isUploading, setIsUploading] = useState(false); // Add uploading state
   const uploadAreaRef = useRef<HTMLDivElement>(null);
   const { currentProject } = useProject();
   const { on } = useEventBus();
@@ -1029,50 +1029,61 @@ export default function PhotoGenerator() {
   // 处理文件上传
   const handleFileUpload = async (file: File) => {
     try {
-      console.log('Garden Design: 开始上传文件:', file.name);
+      console.log('Garden Design: Starting file upload:', file.name);
       
-      // 创建文件的预览URL用于显示
+      // Create file preview URL for display
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target && e.target.result) {
-          // 设置本地预览
+          // Set local preview
           setPreviewImageUrl(e.target.result.toString());
         }
       };
       reader.readAsDataURL(file);
       
-      // 创建FormData用于上传
-      const formData = new FormData();
-      formData.append('image', file);
+      // Set uploading state
+      setIsUploading(true);
       
-      // 如果有当前项目ID，添加到表单数据
-      if (currentProject?.id) {
-        formData.append('project_id', currentProject.id.toString());
+      try {
+        // Upload image to Cloudinary using uploadImage service
+        const imageUrl = await uploadImage(file);
+        
+        console.log('Garden Design: File upload successful, returned URL:', imageUrl);
+        
+        // Set uploaded status and save URL
+        setUploadedImage(true);
+        setUploadedImageUrl(imageUrl);
+        
+        // Add success notification
+        addNotification({
+          type: 'success',
+          message: 'Image uploaded successfully',
+          duration: 3000
+        });
+      } catch (error) {
+        console.error('Garden Design: File upload failed:', error);
+        
+        // Add error notification
+        addNotification({
+          type: 'error',
+          message: error instanceof Error ? error.message : 'Failed to upload image',
+          duration: 5000
+        });
+        
+        // Reset preview
+        setPreviewImageUrl(null);
+      } finally {
+        setIsUploading(false);
       }
-      
-      // 调用上传API - 这里需要替换为实际的上传API
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${API_URL}/upload/image`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '文件上传失败');
-      }
-      
-      const data = await response.json();
-      console.log('Garden Design: 文件上传成功，返回数据:', data);
-      
-      // 设置为已上传状态并保存URL
-      setUploadedImage(true);
-      setUploadedImageUrl(data.url);
       
     } catch (error) {
-      console.error('Garden Design: 文件上传失败:', error);
-      alert('文件上传失败，请重试');
+      console.error('Garden Design: File processing failed:', error);
+      addNotification({
+        type: 'error',
+        message: 'Failed to process image',
+        duration: 5000
+      });
+      setIsUploading(false);
     }
   };
   
@@ -2158,7 +2169,7 @@ export default function PhotoGenerator() {
                   </div>
                 </div>
                 
-                {/* 上传图片状态 */}
+                {/* Upload Image Area */}
                 {!uploadedImage ? (
                   <div 
                     ref={uploadAreaRef}
@@ -2174,16 +2185,26 @@ export default function PhotoGenerator() {
                       </svg>
                     </div>
                     <p className="text-sm font-medium text-center mb-1">
-                      {isDragOver ? '松开鼠标上传图片' : '拖放图片到此处或点击上传'}
+                      {isDragOver ? 'Drop image to upload' : 'Drag and drop image here or click to upload'}
                     </p>
-                    <p className="text-xs text-gray-500 text-center">支持JPG、PNG、WEBP格式</p>
-                    <p className="text-xs text-gray-500 text-center mt-1">或从最近图片中拖拽一张图片到此处</p>
+                    <p className="text-xs text-gray-500 text-center">Supports JPG, PNG, WEBP formats</p>
+                    <p className="text-xs text-gray-500 text-center mt-1">Or drag an image from Recent Images section</p>
                     <label className="mt-4">
                       <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={handleFileInputChange} />
                       <span className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition cursor-pointer">
-                        选择文件
+                        Select File
                       </span>
                     </label>
+                    
+                    {/* Upload progress indicator */}
+                    {isUploading && (
+                      <div className="absolute inset-0 bg-white bg-opacity-80 flex flex-col items-center justify-center">
+                        <div className="w-12 h-12 mb-3 relative">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+                        </div>
+                        <p className="text-sm font-medium text-emerald-600">Uploading...</p>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div 
@@ -2194,7 +2215,7 @@ export default function PhotoGenerator() {
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     onClick={(e) => {
-                      // 确保点击事件只在div内部触发，而不是冒泡
+                      // Ensure click event only triggers on the div itself, not bubbling
                       if (e.currentTarget === e.target || e.target instanceof Node && e.currentTarget.contains(e.target)) {
                         const fileInput = e.currentTarget.querySelector('input[type="file"]') as HTMLInputElement;
                         if (fileInput) fileInput.click();
@@ -2203,7 +2224,7 @@ export default function PhotoGenerator() {
                   >
                     <div className="relative aspect-video overflow-hidden rounded-md">
                       <Image 
-                        src={previewImageUrl || '/uploads/garden-sample.png'} 
+                        src={previewImageUrl || uploadedImageUrl || '/uploads/garden-sample.png'} 
                         alt="Uploaded Garden" 
                         fill
                         sizes="100%"
@@ -2212,7 +2233,7 @@ export default function PhotoGenerator() {
                       />
                       <div className={`absolute inset-0 flex items-center justify-center ${isDragOver ? 'bg-black bg-opacity-40' : 'bg-black bg-opacity-0 group-hover:bg-opacity-40'} transition-all`}>
                         <p className={`text-white font-medium ${isDragOver ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
-                          {isDragOver ? '松开鼠标替换图片' : '点击更换图片'}
+                          {isDragOver ? 'Drop to replace image' : 'Click to change image'}
                         </p>
                       </div>
                     </div>
@@ -2224,8 +2245,17 @@ export default function PhotoGenerator() {
                     />
                     {uploadedImageUrl && (
                       <div className="mt-2 text-xs text-gray-500 truncate px-1">
-                        <span className="font-medium">图片URL: </span>
-                        <span className="opacity-70">{uploadedImageUrl}</span>
+                        <span className="font-medium">Image uploaded successfully</span>
+                      </div>
+                    )}
+                    
+                    {/* Upload progress indicator */}
+                    {isUploading && (
+                      <div className="absolute inset-0 bg-white bg-opacity-80 flex flex-col items-center justify-center">
+                        <div className="w-12 h-12 mb-3 relative">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+                        </div>
+                        <p className="text-sm font-medium text-emerald-600">Uploading...</p>
                       </div>
                     )}
                   </div>

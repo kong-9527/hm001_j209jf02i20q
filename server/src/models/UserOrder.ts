@@ -109,5 +109,8 @@ UserOrder.belongsTo(Goods, {
 const currentDate = new Date();
 console.log('服务器当前时间:', currentDate.toISOString());
 console.log('本地格式时间:', currentDate.toLocaleString());
+// 创建一个只包含日期部分的新日期对象
+const dateOnly = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+console.log('只包含日期的时间对象:', dateOnly.toISOString().split('T')[0]);
 
 export default UserOrder; 
