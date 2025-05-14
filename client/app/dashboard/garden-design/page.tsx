@@ -70,6 +70,7 @@ export default function PhotoGenerator() {
   const [draggedImage, setDraggedImage] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false); // Add uploading state
+  const [isGenerating, setIsGenerating] = useState(false); // Add generating state
   const uploadAreaRef = useRef<HTMLDivElement>(null);
   const { currentProject } = useProject();
   const { on } = useEventBus();
@@ -1927,6 +1928,9 @@ export default function PhotoGenerator() {
         return;
       }
       
+      // 设置生成中状态
+      setIsGenerating(true);
+      
       console.log('Garden Design: 提交生成请求');
       console.log('- 图片URL:', uploadedImageUrl);
       const styleType = selectedTab === 'premade' ? 'Classic styles' : 'Custom styles';
@@ -1983,9 +1987,49 @@ export default function PhotoGenerator() {
             
           // 重新加载图片列表
           fetchGardenDesignList(projectId);
+          
+          // 刷新左侧最近图片
+          if (projectId) {
+            getGardenDesignImages(projectId)
+              .then(images => {
+                setRecentImages(images);
+                
+                // 根据图片数量设置状态
+                if (images.length === 0) {
+                  setRecentImagesState('empty');
+                } else if (images.length <= 4) {
+                  setRecentImagesState('single');
+                } else if (images.length <= 8) {
+                  setRecentImagesState('multiple');
+                } else {
+                  setRecentImagesState('many');
+                }
+              })
+              .catch(error => {
+                console.error('Failed to refresh recent images:', error);
+              });
+          }
+          
+          // 重置左半部分参数
+          if (selectedTab === 'custom') {
+            setPositiveWords([]);
+            setNegativeWords([]);
+            setPositiveInput('');
+            setNegativeInput('');
+          }
+          setResemblancePercent(75); // 重置结构相似度
+          setUploadedImage(false);
+          setUploadedImageUrl(null);
+          setPreviewImageUrl(null);
+          setSelectedStyleId(null);
+          
+          // 重置生成中状态
+          setIsGenerating(false);
         })
         .catch((error) => {
           console.error('生成失败:', error);
+          // 重置生成中状态
+          setIsGenerating(false);
             
           // 检查是否是订阅相关错误
           if (error.message && error.message.includes('active subscription')) {
@@ -2008,6 +2052,8 @@ export default function PhotoGenerator() {
       // 使用箭头函数保留this上下文
       imgElement.onerror = () => {
         console.error('无法加载图片以获取尺寸');
+        // 重置生成中状态
+        setIsGenerating(false);
         addNotification({
           type: 'error',
           message: '无法加载图片，请重新上传',
@@ -2019,6 +2065,8 @@ export default function PhotoGenerator() {
       imgElement.src = uploadedImageUrl;
     } catch (error) {
       console.error('Garden Design: 生成图片失败:', error);
+      // 重置生成中状态
+      setIsGenerating(false);
       addNotification({
         type: 'error',
         message: '生成图片失败，请重试',
@@ -2466,15 +2514,27 @@ export default function PhotoGenerator() {
                 
                 <button 
                   className={`w-full bg-emerald-600 text-white py-3 rounded-lg font-medium hover:bg-emerald-700 transition flex items-center justify-center ${
-                    (!uploadedImage || (!selectedStyleId && selectedTab === 'premade')) ? 'opacity-50 cursor-not-allowed' : ''
+                    (isGenerating || !uploadedImage || (!selectedStyleId && selectedTab === 'premade')) ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
-                  disabled={!uploadedImage || (!selectedStyleId && selectedTab === 'premade')}
+                  disabled={isGenerating || !uploadedImage || (!selectedStyleId && selectedTab === 'premade')}
                   onClick={handleGenerate}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-                  </svg>
-                  Generate Your Garden Design
+                  {isGenerating ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                      </svg>
+                      Generate Your Garden Design
+                    </>
+                  )}
                 </button>
               </div>
               
