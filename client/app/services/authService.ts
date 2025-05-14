@@ -44,10 +44,8 @@ export const refreshSession = async () => {
 
 // Google login URL
 export const getGoogleLoginUrl = () => {
-  // 使用固定的生产环境URL，避免重定向问题
-  const baseUrl = process.env.NODE_ENV === 'production'
-    ? 'https://aigardendesign.vercel.app'
-    : API_URL;
+  // 使用服务器端的绝对URL，直接指向服务器API
+  const baseUrl = 'https://aigardendesign.vercel.app/api';
   
   return `${baseUrl}/auth/google`;
 };
@@ -57,10 +55,8 @@ export const loginWithGooglePopup = () => {
   return new Promise((resolve, reject) => {
     console.log('Starting Google login popup flow');
     
-    // 使用固定的生产环境URL，避免重定向问题
-    const baseUrl = process.env.NODE_ENV === 'production'
-      ? 'https://aigardendesign.vercel.app'
-      : API_URL;
+    // 使用服务器端的绝对URL，直接指向服务器API
+    const baseUrl = 'https://aigardendesign.vercel.app/api';
     
     const googleAuthUrl = `${baseUrl}/auth/google?popup=true`;
     console.log('Google Auth URL:', googleAuthUrl);

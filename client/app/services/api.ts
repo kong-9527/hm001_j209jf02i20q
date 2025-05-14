@@ -1,7 +1,13 @@
 import axios from 'axios';
 
+// 使用固定的API URL
+const DEFAULT_API_URL = 'https://aigardendesign.vercel.app/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
+
+console.log('API配置URL:', API_URL);
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: API_URL,
   withCredentials: true,  // 允许跨域请求携带凭证
   headers: {
     'Content-Type': 'application/json',
@@ -25,13 +31,11 @@ api.interceptors.request.use(
 
 // 响应拦截器
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      // 处理token过期
-      localStorage.removeItem('token');
-      window.location.href = '/signin';
-    }
+  (response) => {
+    return response;
+  },
+  (error) => {
+    console.error('API请求错误:', error);
     return Promise.reject(error);
   }
 );
