@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Sequelize, Op } from 'sequelize';
 import GardenDesign from '../models/GardenDesign';
+import { downloadAndUploadToCloudinary } from './imageService';
 
 // API配置
 const API_BASE_URL = 'https://dashscope.aliyuncs.com/api/v1/tasks';
@@ -133,6 +134,8 @@ function isTaskRunningTooLong(design: any): boolean {
 async function checkPendingTasks() {
   try {
     console.log('开始检查未完成的garden_design任务...');
+    console.log('当前时间：', new Date().toISOString());
+    console.log('imageService是否已导入：', typeof downloadAndUploadToCloudinary === 'function' ? '是' : '否');
     
     // 查找状态为"生成中"，未删除，且有第三方任务ID的记录
     const pendingDesigns = await GardenDesign.findAll({
@@ -182,14 +185,40 @@ async function checkPendingTasks() {
         });
       } else if (result) {
         // 任务成功，获取到了图片URL
-        console.log(`更新设计ID ${design.id} 的状态和图片URL`);
+        console.log(`获取到设计ID ${design.id} 的原始图片URL: ${result}`);
+        console.log(`原始图片URL类型: ${typeof result}, 长度: ${result.length}`);
         
-        // 更新记录
-        await design.update({
-          status: 2,                       // 2代表生成成功
-          pic_result: result,              // 保存图片URL
-          utime: Math.floor(Date.now() / 1000) // 更新10位时间戳
-        });
+        try {
+          // 下载图片并上传到Cloudinary
+          console.log(`开始下载和上传图片到Cloudinary...`);
+          const userId = design.user_id || 0;
+          console.log(`用户ID: ${userId}`);
+          
+          console.time(`设计ID ${design.id} 的图片处理时间`);
+          const cloudinaryUrl = await downloadAndUploadToCloudinary(result, userId);
+          console.timeEnd(`设计ID ${design.id} 的图片处理时间`);
+          
+          console.log(`图片处理完成，Cloudinary URL: ${cloudinaryUrl}`);
+          console.log(`Cloudinary URL类型: ${typeof cloudinaryUrl}, 长度: ${cloudinaryUrl.length}`);
+          console.log(`是否与原URL相同: ${cloudinaryUrl === result ? '是（处理失败）' : '否（处理成功）'}`);
+          
+          // 更新记录使用Cloudinary URL
+          await design.update({
+            status: 2,                     // 2代表生成成功
+            pic_result: cloudinaryUrl,     // 保存Cloudinary图片URL
+            utime: Math.floor(Date.now() / 1000) // 更新10位时间戳
+          });
+        } catch (imageError) {
+          console.error(`处理图片时出错: ${imageError}`);
+          console.error(`错误详情: ${JSON.stringify(imageError)}`);
+          console.error(`错误堆栈: ${imageError instanceof Error ? imageError.stack : '无堆栈信息'}`);
+          // 发生错误时，仍使用原始URL更新记录，确保流程不中断
+          await design.update({
+            status: 2,                 // 2代表生成成功
+            pic_result: result,        // 保存原始图片URL
+            utime: Math.floor(Date.now() / 1000) // 更新10位时间戳
+          });
+        }
         
         console.log(`设计ID ${design.id} 更新完成`);
       } else {
@@ -201,6 +230,8 @@ async function checkPendingTasks() {
     console.log('完成本轮任务检查');
   } catch (error) {
     console.error(`检查任务时出错: ${error}`);
+    console.error(`错误详情: ${JSON.stringify(error)}`);
+    console.error(`错误堆栈: ${error instanceof Error ? error.stack : '无堆栈信息'}`);
     // 出错时不会中断服务，等待下一次定时调用
   }
 }
