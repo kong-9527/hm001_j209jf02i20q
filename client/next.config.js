@@ -52,7 +52,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://apiaigardendesign.vercel.app/api/:path*',
+        destination: '/api/:path*',  // 指向同一个部署中的 API 路由
       },
     ]
   },
