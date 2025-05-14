@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+console.log('环境变量 NEXT_PUBLIC_API_URL:', API_URL);
 
 // Configure axios instance
 const api = axios.create({
@@ -50,6 +51,7 @@ export const getGoogleLoginUrl = () => {
 export const loginWithGooglePopup = () => {
   return new Promise((resolve, reject) => {
     console.log('Starting Google login popup flow');
+    console.log('Google Auth URL:', `${API_URL}/auth/google?popup=true`);
     
     // 清理可能存在的残留状态
     if (window.googleLoginPopup && !window.googleLoginPopup.closed) {
@@ -80,17 +82,42 @@ export const loginWithGooglePopup = () => {
     let userCancelled = false;
     
     // Open popup with popup=true parameter
-    const popup = window.open(
-      `${API_URL}/auth/google?popup=true`,
-      'googleLogin',
-      `width=${width},height=${height},left=${left},top=${top}`
-    );
+    const googleAuthUrl = `${API_URL}/auth/google?popup=true`;
+    console.log('尝试打开弹窗URL:', googleAuthUrl);
+    
+    let popup;
+    try {
+      popup = window.open(
+        googleAuthUrl,
+        'googleLogin',
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+      
+      // 在打开弹窗后记录弹窗对象信息
+      console.log('弹窗状态:', popup ? '成功创建' : '创建失败', 
+                 popup ? (popup.closed ? '已关闭' : '未关闭') : 'N/A');
+      
+      // 尝试访问弹窗的location属性，如果失败可能是因为跨域限制
+      try {
+        if (popup && popup.location) {
+          console.log('弹窗初始地址:', popup.location.href);
+        }
+      } catch (locationErr) {
+        console.log('无法访问弹窗地址（正常，因为跨域限制）');
+      }
+      
+    } catch (popupError) {
+      console.error('打开Google认证弹窗时发生异常:', popupError);
+      reject(new Error(`打开认证弹窗失败: ${popupError.message}`));
+      return;
+    }
     
     // 存储弹窗引用以便后续清理
     window.googleLoginPopup = popup;
     
     // If popup is blocked
     if (!popup || popup.closed) {
+      console.error('弹窗被浏览器阻止或立即关闭');
       isAuthenticating = false;
       window.googleLoginInProgress = false;
       reject(new Error('Popup was blocked by the browser, please allow popups and try again'));
@@ -102,7 +129,12 @@ export const loginWithGooglePopup = () => {
     // 设置消息监听器，用于接收授权弹窗的消息
     const messageHandler = async (event: MessageEvent) => {
       // 确保消息来源是安全的
-      if (event.origin !== new URL(API_URL as string).origin) {
+      const apiOrigin = API_URL ? new URL(API_URL as string).origin : '';
+      console.log('消息来源:', event.origin);
+      console.log('预期来源:', apiOrigin);
+      
+      if (event.origin !== apiOrigin) {
+        console.warn('收到未知来源消息，已忽略:', event.origin);
         return;
       }
       

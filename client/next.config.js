@@ -51,6 +51,11 @@ const nextConfig = {
   },
   async rewrites() {
     return [
+      // 增加对认证API路由的明确支持
+      {
+        source: '/api/auth/:path*',
+        destination: process.env.NEXT_PUBLIC_API_URL + '/auth/:path*',
+      },
       // 所有API路由保持在同一服务器内处理
       {
         source: '/api/:path*',
