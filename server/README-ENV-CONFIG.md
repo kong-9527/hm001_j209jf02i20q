@@ -63,4 +63,39 @@ services:
 2. 支付功能将无法工作
 3. 所有签名验证都将失败
 
-请立即设置正确的环境变量以确保系统功能正常。 
+请立即设置正确的环境变量以确保系统功能正常。
+
+## 环境变量配置
+
+本项目使用以下环境变量：
+
+```env
+# 数据库配置
+DB_DIALECT=postgres
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+DB_HOST=your_database_host
+DB_PORT=5432
+
+# JWT配置
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=7d
+
+# Google OAuth配置
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+
+# Cloudinary配置
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# 其他配置
+PORT=3001
+NODE_ENV=development
+CLIENT_URL=http://localhost:3000
+```
+
+请确保在开发和生产环境中正确设置这些环境变量。 

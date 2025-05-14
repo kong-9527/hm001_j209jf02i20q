@@ -20,20 +20,23 @@ export const uploadImage = async (file: File): Promise<string> => {
     
     const response = await fetch(`${API_URL}/upload/image`, {
       method: 'POST',
-      headers: {
-        // 不需要显式添加 Authorization 头，因为 cookie 会自动发送
-      },
       body: formData,
       credentials: 'include', // 包含 cookie
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to upload image');
+      let errorMessage = 'Failed to upload image';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch (e) {
+        // 无法解析JSON，使用默认错误消息
+      }
+      throw new Error(errorMessage);
     }
     
     const data = await response.json();
-    return data.url;
+    return data.url; // Cloudinary返回的URL
   } catch (error) {
     console.error('Error uploading image:', error);
     throw error;

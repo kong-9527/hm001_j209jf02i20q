@@ -21,6 +21,23 @@ DB_PORT=3306
 DB_NAME=garden_db
 DB_USER=root
 DB_PASSWORD=your_password
+
+# JWT配置
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=7d
+
+# Google OAuth配置
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+
+# Cloudinary配置 (图片上传)
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# 其他配置
+CLIENT_URL=http://localhost:3000
 ```
 
 ### 数据库配置
@@ -75,4 +92,43 @@ npm start
   "nick_name": "用户昵称",
   "register_type": 1
 }
-``` 
+```
+
+## 环境变量配置
+
+本项目需要配置以下环境变量，请在项目根目录创建`.env`文件：
+
+```
+# 数据库配置
+DB_DIALECT=postgres
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+DB_HOST=your_database_host
+DB_PORT=5432
+
+# JWT配置
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=7d
+
+# Google OAuth配置
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+
+# Cloudinary配置 (图片上传)
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# 其他配置
+PORT=3001
+NODE_ENV=development
+CLIENT_URL=http://localhost:3000
+```
+
+### Cloudinary配置
+
+1. 注册[Cloudinary](https://cloudinary.com/)账号
+2. 登录后在控制面板获取云名称、API密钥和API密钥
+3. 将这些值添加到`.env`文件中 
