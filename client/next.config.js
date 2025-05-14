@@ -48,14 +48,15 @@ const nextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: '/api/:path*',  // 指向同一个部署中的 API 路由
-      },
-    ]
-  },
+  // 在统一部署模型下，不需要特殊的 API 重写，删除或注释掉这部分
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/:path*',
+  //       destination: 'http://apiaigardendesign.vercel.app/api/:path*',
+  //     },
+  //   ]
+  // },
 }
 
 module.exports = nextConfig 

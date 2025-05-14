@@ -1,6 +1,18 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// 根据环境确定 API_URL
+// 如果在浏览器中，就尝试从 window.location 获取基础URL
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    return `${window.location.protocol}//${window.location.host}`;
+  }
+  return '';
+};
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || `${getBaseUrl()}/api`;
+
+// 输出当前使用的 API URL 以便调试
+console.log('Using API URL:', API_URL);
 
 // Configure axios instance
 const api = axios.create({
