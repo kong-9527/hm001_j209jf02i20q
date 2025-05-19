@@ -6,6 +6,8 @@ export interface GardenStyle {
   image?: string;
   description?: string;
   isActive?: boolean;
+  positivePrompts: string;
+  negativePrompts: string;
 }
 
 const gardenStyles: GardenStyle[] = [
@@ -22,7 +24,9 @@ const gardenStyles: GardenStyle[] = [
     before: '/images/comparison/woodland-before.png',
     after: '/images/comparison/woodland-after.png',
     image: '/images/comparison/woodland-after.png',
-    description: "Naturalistic design with native trees, shade-loving plants, and organic pathways."
+    description: "Naturalistic design with native trees, shade-loving plants, and organic pathways.",
+    positivePrompts: "shady woodland, native trees, ferns, moss, wildflowers, natural pathways, dappled sunlight, woodland floor, organic shapes",
+    negativePrompts: ""
   },
   {
     id: 'contemporary-urban',
@@ -30,7 +34,9 @@ const gardenStyles: GardenStyle[] = [
     before: '/images/comparison/contemporary-before.png',
     after: '/images/comparison/contemporary-after.png',
     image: '/images/comparison/contemporary-after.png',
-    description: "Innovative use of space with vertical gardens, container plants, and modern materials."
+    description: "Innovative use of space with vertical gardens, container plants, and modern materials.",
+    positivePrompts: "modern architecture, vertical garden, geometric shapes, minimalist design, urban oasis, container plants, clean lines, contemporary materials",
+    negativePrompts: ""
   },
   {
     id: 'english-cottage',
@@ -38,7 +44,9 @@ const gardenStyles: GardenStyle[] = [
     before: '/images/comparison/english-before.png',
     after: '/images/comparison/english-after.png',
     image: '/images/comparison/english-after.png',
-    description: "Lush, romantic garden with densely planted flowering perennials, climbing roses, and informal design."
+    description: "Lush, romantic garden with densely planted flowering perennials, climbing roses, and informal design.",
+    positivePrompts: "romantic flowers, climbing roses, cottage garden, wildflowers, informal design, lush vegetation, traditional English garden, mixed borders",
+    negativePrompts: ""
   },
   {
     id: 'modern-minimalist',
@@ -46,7 +54,9 @@ const gardenStyles: GardenStyle[] = [
     before: '/images/comparison/modern-before.png',
     after: '/images/comparison/modern-after.png',
     image: '/images/comparison/modern-after.png',
-    description: "Clean lines, architectural plants, and simple color palette with emphasis on form and texture."
+    description: "Clean lines, architectural plants, and simple color palette with emphasis on form and texture.",
+    positivePrompts: "minimalist design, architectural plants, clean lines, monochromatic, geometric shapes, simple palette, modern aesthetics, structured layout",
+    negativePrompts: ""
   },
   // {
   //   id: 'mediterranean',
@@ -102,8 +112,22 @@ const gardenStyles: GardenStyle[] = [
     before: '/images/comparison/coastal-before.png',
     after: '/images/comparison/coastal-after.png',
     image: '/images/comparison/coastal-after.png',
-    description: "Seaside-inspired garden featuring salt-tolerant plants, grasses, and coastal elements."
+    description: "Seaside-inspired garden featuring salt-tolerant plants, grasses, and coastal elements.",
+    positivePrompts: "coastal plants, beach grasses, driftwood, seashells, sandy soil, salt-tolerant vegetation, ocean breeze, coastal landscape",
+    negativePrompts: ""
   }
 ];
 
-export default gardenStyles; 
+export default gardenStyles;
+
+// 通用花园相关提示词
+export const commonGardenPrompts = {
+  positivePrompts: "beautiful garden, well-maintained, professional landscaping, perfect lighting, natural beauty, harmonious design, balanced composition, seasonal flowers, healthy plants, vibrant colors, detailed textures, perfect weather, ideal conditions, professional photography",
+  negativePrompts: "overgrown, weeds, dead plants, poor maintenance, artificial looking, unrealistic colors, poor lighting, bad weather, low quality, blurry, distorted perspective, unnatural elements"
+};
+
+// 通用渲染质量相关提示词
+export const commonRenderingPrompts = {
+  positivePrompts: "high quality, 8k resolution, photorealistic, detailed textures, perfect lighting, sharp focus, professional photography, cinematic composition, perfect exposure, natural colors, depth of field, atmospheric effects, perfect shadows, realistic materials",
+  negativePrompts: "low quality, blurry, pixelated, unrealistic, artificial looking, poor lighting, bad composition, oversaturated, underexposed, distorted, amateur photography, unrealistic materials, poor textures"
+}; 
