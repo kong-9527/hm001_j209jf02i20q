@@ -107,11 +107,11 @@ GardenDesign.init(
       comment: '自定义时：custom style',
     },
     positive_words: {
-      type: DataTypes.STRING(1024),
+      type: DataTypes.STRING(4096),
       allowNull: true,
     },
     negative_words: {
-      type: DataTypes.STRING(1024),
+      type: DataTypes.STRING(4096),
       allowNull: true,
     },
     structural_similarity: {

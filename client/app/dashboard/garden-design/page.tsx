@@ -4,6 +4,7 @@ import React, { useState, FormEvent, useRef, useEffect, useCallback } from 'reac
 import type { DragEvent } from 'react';
 import Image from 'next/image';
 import gardenStylesData from '../../data/gardenStyles';
+import { positiveWordOptions, negativeWordOptions, WordTag } from '../../data/gardenWords';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
 import { getGardenDesignImages, getGardenDesignList, getDeletedGardenDesigns, getLikedGardenDesigns, updateGardenDesignLikeStatus, deleteGardenDesign, GardenDesignImage, generateGardenDesign } from '@/app/services/gardenDesignService';
 import { useProject } from '@/app/contexts/ProjectContext';
@@ -26,12 +27,6 @@ interface ImageData {
   size?: string;
   positiveWords?: string[];
   negativeWords?: string[];
-}
-
-// 定义词汇标签类型
-interface WordTag {
-  id: number;
-  text: string;
 }
 
 // 定义风格数据类型
@@ -139,25 +134,7 @@ export default function PhotoGenerator() {
   const [currentPage, setCurrentPage] = useState(1);
   const stylesPerPage = 5;
   
-  // 预设词汇选项
-  const positiveWordOptions: WordTag[] = [
-    { id: 1, text: 'silver and white flowers' },
-    { id: 2, text: 'gold accents' },
-    { id: 3, text: 'ornamental perennials' },
-    { id: 4, text: 'pale timber' },
-    { id: 5, text: 'artistic sightlines' },
-    { id: 6, text: 'hiding places' },
-    { id: 7, text: 'monumental sculptures' }
-  ];
-  
-  const negativeWordOptions: WordTag[] = [
-    { id: 1, text: 'heavyweight materials' },
-    { id: 2, text: 'corporate design' },
-    { id: 3, text: 'artificial materials' },
-    { id: 4, text: 'formal arrangements' },
-    { id: 5, text: 'industrial elements' },
-    { id: 6, text: 'historical references' }
-  ];
+    // 预设词汇选项从gardenWords.ts导入
   
   // 计算token数量的函数
   const calculateTokens = (words: WordTag[]): number => {
