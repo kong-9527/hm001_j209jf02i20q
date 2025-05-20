@@ -10,6 +10,7 @@ interface GardenDesignAttributes {
   project_id: number | null;
   pic_orginial: string | null;
   pic_result: string | null;
+  pic_third_orginial: string | null;
   status: number | null;
   points_cost: number | null;
   style_id: number | null;
@@ -38,6 +39,7 @@ class GardenDesign extends Model<GardenDesignAttributes, GardenDesignCreationAtt
   public project_id!: number | null;
   public pic_orginial!: string | null;
   public pic_result!: string | null;
+  public pic_third_orginial!: string | null;
   public status!: number | null;
   public points_cost!: number | null;
   public style_id!: number | null;
@@ -79,6 +81,11 @@ GardenDesign.init(
     pic_result: {
       type: DataTypes.STRING(255),
       allowNull: true,
+    },
+    pic_third_orginial: {
+      type: DataTypes.STRING(1024),
+      allowNull: true,
+      comment: '第三方接口返回的原始图片URL',
     },
     status: {
       type: DataTypes.INTEGER,
