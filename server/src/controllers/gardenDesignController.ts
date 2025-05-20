@@ -483,7 +483,8 @@ export const generateDesign = async (req: Request, res: Response) => {
     // 计算strength参数：从6.00~1.00，相似度每增加1%，减少0.05
     const ctrlnet_strength = 6.0 - (similarity * 0.05);
     // 计算start_percent参数：从0~0.50，相似度每增加2%，增加0.01
-    const ctrlnet_start_percent = Math.min(0.5, (similarity * 0.01) / 2);
+    // const ctrlnet_start_percent = Math.min(0.5, (similarity * 0.01) / 2);
+    const ctrlnet_start_percent = 0;
 
     console.log('Structural similarity:', similarity);
     console.log('Calculated ctrlnet_strength:', ctrlnet_strength);
