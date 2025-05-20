@@ -142,7 +142,12 @@ async function getTaskResultFromBridge(generateId: number) {
       if (taskData.images[0].previewPath) {
         const imgUrl = taskData.images[0].previewPath;
         console.log(`获取到图片URL: ${imgUrl}, generateId=${generateId}`);
-        return imgUrl;
+        
+        // 返回一个对象，包含图片URL和完整的任务数据，以便保存更多信息
+        return {
+          imageUrl: imgUrl,
+          taskData: taskData
+        };
       } else {
         console.log(`任务已完成但未找到图片URL (previewPath为空), generateId=${generateId}`);
         return 'FAILED'; // 任务完成但没有图片URL，可能是失败
@@ -236,10 +241,11 @@ async function checkPendingTasks() {
           status: 3, // 3代表生成失败
           utime: Math.floor(Date.now() / 1000)
         });
-      } else if (result) {
+      } else if (result && typeof result === 'object' && result.imageUrl) {
         // 任务成功，获取到了图片URL
-        console.log(`获取到设计ID ${design.id} 的原始图片URL: ${result}`);
-        console.log(`原始图片URL类型: ${typeof result}, 长度: ${result.length}`);
+        const originalImageUrl = result.imageUrl;
+        console.log(`获取到设计ID ${design.id} 的原始图片URL: ${originalImageUrl}`);
+        console.log(`原始图片URL类型: ${typeof originalImageUrl}, 长度: ${originalImageUrl.length}`);
         
         try {
           // 下载图片并上传到Cloudinary
@@ -248,25 +254,27 @@ async function checkPendingTasks() {
           console.log(`用户ID: ${userId}`);
           
           console.time(`设计ID ${design.id} 的图片处理时间`);
-          const cloudinaryUrl = await downloadAndUploadToCloudinary(result, userId);
+          const cloudinaryUrl = await downloadAndUploadToCloudinary(originalImageUrl, userId);
           console.timeEnd(`设计ID ${design.id} 的图片处理时间`);
           
           console.log(`图片处理完成，Cloudinary URL: ${cloudinaryUrl}`);
           
-          if (!cloudinaryUrl || cloudinaryUrl === result) {
-            console.error(`Cloudinary处理失败，使用原始URL: ${result}`);
+          if (!cloudinaryUrl || cloudinaryUrl === originalImageUrl) {
+            console.error(`Cloudinary处理失败，使用原始URL: ${originalImageUrl}`);
             // 使用原始URL更新记录
             await design.update({
-              status: 2,                 // 2代表生成成功
-              pic_result: result,        // 保存原始图片URL
-              utime: Math.floor(Date.now() / 1000) // 更新10位时间戳
+              status: 2,                        // 2代表生成成功
+              pic_result: originalImageUrl,     // 保存原始图片URL作为结果
+              pic_third_orginial: originalImageUrl, // 保存第三方接口返回的原始图片URL
+              utime: Math.floor(Date.now() / 1000)  // 更新10位时间戳
             });
           } else {
             // 更新记录使用Cloudinary URL
             await design.update({
-              status: 2,                     // 2代表生成成功
-              pic_result: cloudinaryUrl,     // 保存Cloudinary图片URL
-              utime: Math.floor(Date.now() / 1000) // 更新10位时间戳
+              status: 2,                        // 2代表生成成功
+              pic_result: cloudinaryUrl,        // 保存Cloudinary图片URL
+              pic_third_orginial: originalImageUrl, // 保存第三方接口返回的原始图片URL
+              utime: Math.floor(Date.now() / 1000)  // 更新10位时间戳
             });
           }
         } catch (imageError) {
@@ -275,9 +283,10 @@ async function checkPendingTasks() {
           console.error(`错误堆栈: ${imageError instanceof Error ? imageError.stack : '无堆栈信息'}`);
           // 发生错误时，仍使用原始URL更新记录，确保流程不中断
           await design.update({
-            status: 2,                 // 2代表生成成功
-            pic_result: result,        // 保存原始图片URL
-            utime: Math.floor(Date.now() / 1000) // 更新10位时间戳
+            status: 2,                        // 2代表生成成功
+            pic_result: originalImageUrl,     // 保存原始图片URL
+            pic_third_orginial: originalImageUrl, // 保存第三方接口返回的原始图片URL
+            utime: Math.floor(Date.now() / 1000)  // 更新10位时间戳
           });
         }
         
