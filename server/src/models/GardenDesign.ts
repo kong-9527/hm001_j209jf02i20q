@@ -20,6 +20,7 @@ interface GardenDesignAttributes {
   is_like: number | null;
   is_del: number | null;
   third_task_id: string | null;
+  third_generate_id: number | null;
   seed: string | null;
   ctrlnet_strength: number | null;
   ctrlnet_start_percent: number | null;
@@ -47,6 +48,7 @@ class GardenDesign extends Model<GardenDesignAttributes, GardenDesignCreationAtt
   public is_like!: number | null;
   public is_del!: number | null;
   public third_task_id!: string | null;
+  public third_generate_id!: number | null;
   public seed!: string | null;
   public ctrlnet_strength!: number | null;
   public ctrlnet_start_percent!: number | null;
@@ -114,6 +116,11 @@ GardenDesign.init(
       type: DataTypes.STRING(255),
       allowNull: true,
       comment: '第三方任务ID',
+    },
+    third_generate_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: '第三方生成ID',
     },
     seed: {
       type: DataTypes.STRING(255),

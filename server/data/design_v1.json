@@ -161,7 +161,7 @@
 					"mode": 0,
 					"inputs": [],
 					"outputs": [{
-						"label": "Ä£ÐÍ",
+						"label": "Ä£ï¿½ï¿½",
 						"name": "MODEL",
 						"type": "MODEL",
 						"slot_index": 0,
@@ -182,19 +182,19 @@
 					"properties": {
 						"Node name for S&R": "CheckpointLoaderSimple"
 					},
-					"widgets_values": ["majicMIX realistic ÂóéÙÐ´Êµ_v6"],
+					"widgets_values": ["majicMIX realistic ï¿½ï¿½ï¿½ï¿½Ð´Êµ_v6"],
 					"_widget_cache_map": {
 						"AWPainting_v1.3": {
 							"name": "AWPainting_v1.4",
 							"value": "ea3f612759734012bdcc5134780825e4"
 						},
-						"ÈçÊÇÔ°_ìøÒâ_Í¥Ôº»¨Ô°_1.0_ÈçÊÇÔ°_ìøÒâÍ¥Ôº_1.0": {
-							"name": "ÈçÊÇÔ°_ìøÒâ_Í¥Ôº»¨Ô°_1.0_ÈçÊÇÔ°_ìøÒâÍ¥Ôº_1.0",
+						"ï¿½ï¿½ï¿½ï¿½Ô°_ï¿½ï¿½ï¿½ï¿½_Í¥Ôºï¿½ï¿½Ô°_1.0_ï¿½ï¿½ï¿½ï¿½Ô°_ï¿½ï¿½ï¿½ï¿½Í¥Ôº_1.0": {
+							"name": "ï¿½ï¿½ï¿½ï¿½Ô°_ï¿½ï¿½ï¿½ï¿½_Í¥Ôºï¿½ï¿½Ô°_1.0_ï¿½ï¿½ï¿½ï¿½Ô°_ï¿½ï¿½ï¿½ï¿½Í¥Ôº_1.0",
 							"baseType": 1,
 							"value": "cf0438bc7ee0460e84eb0a7b70496734"
 						},
-						"majicMIX realistic ÂóéÙÐ´Êµ_v6": {
-							"name": "majicMIX realistic ÂóéÙÐ´Êµ_v6",
+						"majicMIX realistic ï¿½ï¿½ï¿½ï¿½Ð´Êµ_v6": {
+							"name": "majicMIX realistic ï¿½ï¿½ï¿½ï¿½Ð´Êµ_v6",
 							"baseType": 1,
 							"value": "b7456d557f0a2aa33a7db6720c0b9a21"
 						}
@@ -225,7 +225,7 @@
 						"link": 8
 					}],
 					"outputs": [{
-						"label": "Í¼Ïñ",
+						"label": "Í¼ï¿½ï¿½",
 						"name": "IMAGE",
 						"type": "IMAGE",
 						"slot_index": 0,
@@ -250,17 +250,17 @@
 					"order": 9,
 					"mode": 0,
 					"inputs": [{
-						"label": "Ä£ÐÍ",
+						"label": "Ä£ï¿½ï¿½",
 						"name": "model",
 						"type": "MODEL",
 						"link": 1
 					}, {
-						"label": "ÕýÃæÌõ¼þ",
+						"label": "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
 						"name": "positive",
 						"type": "CONDITIONING",
 						"link": 20
 					}, {
-						"label": "¸ºÃæÌõ¼þ",
+						"label": "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
 						"name": "negative",
 						"type": "CONDITIONING",
 						"link": 21
@@ -321,12 +321,12 @@
 					"order": 8,
 					"mode": 0,
 					"inputs": [{
-						"label": "ÕýÃæÌõ¼þ",
+						"label": "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
 						"name": "positive",
 						"type": "CONDITIONING",
 						"link": 18
 					}, {
-						"label": "¸ºÃæÌõ¼þ",
+						"label": "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
 						"name": "negative",
 						"type": "CONDITIONING",
 						"link": 19
@@ -336,7 +336,7 @@
 						"type": "CONTROL_NET",
 						"link": 11
 					}, {
-						"label": "Í¼Ïñ",
+						"label": "Í¼ï¿½ï¿½",
 						"name": "image",
 						"type": "IMAGE",
 						"link": 12
@@ -347,12 +347,12 @@
 						"link": 14
 					}],
 					"outputs": [{
-						"label": "ÕýÃæÌõ¼þ",
+						"label": "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
 						"name": "positive",
 						"type": "CONDITIONING",
 						"links": [20]
 					}, {
-						"label": "¸ºÃæÌõ¼þ",
+						"label": "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
 						"name": "negative",
 						"type": "CONDITIONING",
 						"links": [21]
@@ -376,23 +376,23 @@
 					"order": 7,
 					"mode": 0,
 					"inputs": [{
-						"label": "Í¼Ïñ",
+						"label": "Í¼ï¿½ï¿½",
 						"name": "image",
 						"type": "IMAGE",
 						"link": 15
 					}],
 					"outputs": [{
-						"label": "Í¼Ïñ",
+						"label": "Í¼ï¿½ï¿½",
 						"name": "IMAGE",
 						"type": "IMAGE",
 						"links": [12]
 					}, {
-						"label": "¿í¶È",
+						"label": "ï¿½ï¿½ï¿½ï¿½",
 						"name": "width",
 						"type": "INT",
 						"links": null
 					}, {
-						"label": "¸ß¶È",
+						"label": "ï¿½ß¶ï¿½",
 						"name": "height",
 						"type": "INT",
 						"links": null
@@ -442,7 +442,7 @@
 					"mode": 0,
 					"inputs": [],
 					"outputs": [{
-						"label": "Ä£ÐÍ",
+						"label": "Ä£ï¿½ï¿½",
 						"name": "MODEL",
 						"type": "MODEL",
 						"slot_index": 0,
@@ -463,24 +463,24 @@
 					"properties": {
 						"Node name for S&R": "CheckpointLoaderSimple"
 					},
-					"widgets_values": ["majicMIX realistic ÂóéÙÐ´Êµ_v6"],
+					"widgets_values": ["majicMIX realistic ï¿½ï¿½ï¿½ï¿½Ð´Êµ_v6"],
 					"_widget_cache_map": {
 						"AWPainting_v1.3": {
 							"name": "AWPainting_v1.4",
 							"value": "ea3f612759734012bdcc5134780825e4"
 						},
-						"ÈçÊÇÔ°_ìøÒâ_Í¥Ôº»¨Ô°_1.0_ÈçÊÇÔ°_ìøÒâÍ¥Ôº_1.0": {
-							"name": "ÈçÊÇÔ°_ìøÒâ_Í¥Ôº»¨Ô°_1.0_ÈçÊÇÔ°_ìøÒâÍ¥Ôº_1.0",
+						"ï¿½ï¿½ï¿½ï¿½Ô°_ï¿½ï¿½ï¿½ï¿½_Í¥Ôºï¿½ï¿½Ô°_1.0_ï¿½ï¿½ï¿½ï¿½Ô°_ï¿½ï¿½ï¿½ï¿½Í¥Ôº_1.0": {
+							"name": "ï¿½ï¿½ï¿½ï¿½Ô°_ï¿½ï¿½ï¿½ï¿½_Í¥Ôºï¿½ï¿½Ô°_1.0_ï¿½ï¿½ï¿½ï¿½Ô°_ï¿½ï¿½ï¿½ï¿½Í¥Ôº_1.0",
 							"baseType": 1,
 							"value": "cf0438bc7ee0460e84eb0a7b70496734"
 						},
-						"¹û½´¾°¹Û_Landscape_Jam_V1.0": {
-							"name": "¹û½´¾°¹Û_Landscape_Jam_V1.0",
+						"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½_Landscape_Jam_V1.0": {
+							"name": "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½_Landscape_Jam_V1.0",
 							"baseType": 1,
 							"value": "20a9d8290c584599a5cc2ca1ac114d91"
 						},
-						"majicMIX realistic ÂóéÙÐ´Êµ_v6": {
-							"name": "majicMIX realistic ÂóéÙÐ´Êµ_v6",
+						"majicMIX realistic ï¿½ï¿½ï¿½ï¿½Ð´Êµ_v6": {
+							"name": "majicMIX realistic ï¿½ï¿½ï¿½ï¿½Ð´Êµ_v6",
 							"baseType": 1,
 							"value": "b7456d557f0a2aa33a7db6720c0b9a21"
 						}
@@ -500,7 +500,7 @@
 					"order": 11,
 					"mode": 0,
 					"inputs": [{
-						"label": "Í¼Ïñ",
+						"label": "Í¼ï¿½ï¿½",
 						"name": "images",
 						"type": "IMAGE",
 						"link": 9
@@ -526,12 +526,12 @@
 					"mode": 0,
 					"inputs": [],
 					"outputs": [{
-						"label": "Í¼Ïñ",
+						"label": "Í¼ï¿½ï¿½",
 						"name": "IMAGE",
 						"type": "IMAGE",
 						"links": [15]
 					}, {
-						"label": "ÕÚÕÖ",
+						"label": "ï¿½ï¿½ï¿½ï¿½",
 						"name": "MASK",
 						"type": "MASK",
 						"links": null
@@ -584,7 +584,7 @@
 						"link": 3
 					}],
 					"outputs": [{
-						"label": "Ìõ¼þ",
+						"label": "ï¿½ï¿½ï¿½ï¿½",
 						"name": "CONDITIONING",
 						"type": "CONDITIONING",
 						"slot_index": 0,
@@ -615,7 +615,7 @@
 						"link": 5
 					}],
 					"outputs": [{
-						"label": "Ìõ¼þ",
+						"label": "ï¿½ï¿½ï¿½ï¿½",
 						"name": "CONDITIONING",
 						"type": "CONDITIONING",
 						"slot_index": 0,

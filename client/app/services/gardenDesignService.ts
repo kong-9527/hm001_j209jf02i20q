@@ -15,6 +15,7 @@ export interface GardenDesignImage {
   is_like: number | null;
   is_del: number | null;
   third_task_id: string | null;
+  third_generate_id?: number | null;
   seed?: string | null;
   ctrlnet_strength?: number | null;
   ctrlnet_start_percent?: number | null;
@@ -25,6 +26,7 @@ export interface ComfyStatusResponse {
   message?: string;
   image_url?: string;
   garden_design?: GardenDesignImage;
+  third_generate_id?: number;
 }
 
 /**

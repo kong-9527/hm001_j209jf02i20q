@@ -546,6 +546,7 @@ export const generateDesign = async (req: Request, res: Response) => {
       });
     }
     
+    // 在调用第三方接口后，获取生成ID
     // 创建新的设计记录 - 添加新字段
     const gardenDesign = await GardenDesign.create({
       user_id,
@@ -567,6 +568,64 @@ export const generateDesign = async (req: Request, res: Response) => {
       ctime: Math.floor(Date.now() / 1000),
       utime: Math.floor(Date.now() / 1000)
     });
+
+    // 调用bridge接口获取generateId
+    try {
+      console.log('Calling bridge API to get generateId');
+      
+      // 获取当前时间戳（毫秒）
+      const timestamp = Date.now();
+      console.log('Current timestamp:', timestamp);
+      
+      // 新API配置
+      const bridgeApiUrl = `https://bridge.liblib.art/gateway/sd-api/generate/image?timestamp=${timestamp}`;
+      
+      // 请求头
+      const bridgeHeaders = {
+        'token': '77436bc86ee54798a36ebfc48f59a0f578462281277',
+        'webid': '1747364397292soukxtpq',
+        'Content-Type': 'application/json'
+      };
+      
+      // 克隆设计结果模板并修改关键参数
+      const designResultJson = require('../../data/design_result_v1.json');
+      
+      // 更新设计模板中的参数
+      designResultJson.comfyUI.prompt['3'].inputs.seed = seed;
+      designResultJson.comfyUI.prompt['6'].inputs.text = finalPrompt;
+      designResultJson.comfyUI.prompt['7'].inputs.text = finalNegativePrompt;
+      designResultJson.comfyUI.prompt['16'].inputs.strength = ctrlnet_strength;
+      designResultJson.comfyUI.prompt['16'].inputs.start_percent = ctrlnet_start_percent;
+      
+      console.log('Bridge API Payload prepared with updated parameters');
+      
+      // 发送POST请求
+      const bridgeResponse = await axios.post(bridgeApiUrl, designResultJson, { headers: bridgeHeaders });
+      
+      // 检查响应
+      if (bridgeResponse.status !== 200) {
+        throw new Error(`Bridge API responded with status code ${bridgeResponse.status}`);
+      }
+      
+      const bridgeResult = bridgeResponse.data;
+      console.log(`Bridge API response:`, bridgeResult);
+      
+      if (bridgeResult.code === 0 && bridgeResult.data) {
+        const generateId = parseInt(bridgeResult.data);
+        console.log(`Retrieved generateId: ${generateId}`);
+        
+        // 更新gardenDesign记录，添加generateId
+        await gardenDesign.update({
+          third_generate_id: generateId,
+          utime: Math.floor(Date.now() / 1000)
+        });
+      } else {
+        console.log('Failed to get valid generateId from bridge API');
+      }
+    } catch (bridgeError: any) {
+      console.error('Error calling bridge API:', bridgeError);
+      // 记录错误但不中断流程
+    }
 
     // 处理积分扣除
     try {
@@ -701,7 +760,8 @@ export const checkComfyStatus = async (req: Request, res: Response) => {
           return res.status(200).json({
             status: 'completed',
             image_url: imageUrl,
-            garden_design: gardenDesign
+            garden_design: gardenDesign,
+            third_generate_id: gardenDesign.third_generate_id
           });
         } else {
           return res.status(404).json({ error: 'Garden design not found' });
