@@ -20,6 +20,9 @@ interface GardenDesignAttributes {
   is_like: number | null;
   is_del: number | null;
   third_task_id: string | null;
+  seed: string | null;
+  ctrlnet_strength: number | null;
+  ctrlnet_start_percent: number | null;
   ctime: number | null;
   utime: number | null;
 }
@@ -44,6 +47,9 @@ class GardenDesign extends Model<GardenDesignAttributes, GardenDesignCreationAtt
   public is_like!: number | null;
   public is_del!: number | null;
   public third_task_id!: string | null;
+  public seed!: string | null;
+  public ctrlnet_strength!: number | null;
+  public ctrlnet_start_percent!: number | null;
   public ctime!: number | null;
   public utime!: number | null;
 }
@@ -108,6 +114,21 @@ GardenDesign.init(
       type: DataTypes.STRING(255),
       allowNull: true,
       comment: '第三方任务ID',
+    },
+    seed: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      comment: '生成图片使用的种子数',
+    },
+    ctrlnet_strength: {
+      type: DataTypes.FLOAT(11, 2),
+      allowNull: true,
+      comment: 'ControlNet的强度参数',
+    },
+    ctrlnet_start_percent: {
+      type: DataTypes.FLOAT(11, 2),
+      allowNull: true,
+      comment: 'ControlNet的开始百分比参数',
     },
     is_like: {
       type: DataTypes.INTEGER,

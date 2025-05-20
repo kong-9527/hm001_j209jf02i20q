@@ -125,7 +125,7 @@ export interface GardenStyle {
     positivePrompts: "beautiful garden, well-maintained, professional landscaping, perfect lighting, natural beauty, harmonious design, balanced composition, seasonal flowers, healthy plants, vibrant colors, detailed textures, perfect weather, ideal conditions, professional photography",
     negativePrompts: "overgrown, weeds, dead plants, poor maintenance, artificial looking, unrealistic colors, poor lighting, bad weather, low quality, blurry, distorted perspective, unnatural elements"
   };
-  
+    
   // 通用渲染质量相关提示词
   export const commonRenderingPrompts = {
     positivePrompts: "high quality, 8k resolution, photorealistic, detailed textures, perfect lighting, sharp focus, professional photography, cinematic composition, perfect exposure, natural colors, depth of field, atmospheric effects, perfect shadows, realistic materials",

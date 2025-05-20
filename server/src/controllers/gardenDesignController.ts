@@ -478,40 +478,53 @@ export const generateDesign = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid size format, expected format: width*height' });
     }
 
+    // 解析结构相似度参数，调整为新接口要求的参数格式
+    const similarity = parseInt(structuralSimilarity);
+    // 计算strength参数：从6.00~1.00，相似度每增加1%，减少0.05
+    const ctrlnet_strength = 6.0 - (similarity * 0.05);
+    // 计算start_percent参数：从0~0.50，相似度每增加2%，增加0.01
+    const ctrlnet_start_percent = Math.min(0.5, (similarity * 0.01) / 2);
+
+    console.log('Structural similarity:', similarity);
+    console.log('Calculated ctrlnet_strength:', ctrlnet_strength);
+    console.log('Calculated ctrlnet_start_percent:', ctrlnet_start_percent);
+
     // 先调用第三方接口生成图片
-    let task_id = null;
+    let prompt_id = null;
+    let seed = 0; // 添加seed变量声明
+
     try {
-      console.log('Calling third-party API to generate image');
+      console.log('Calling new third-party API to generate image');
       
-      // API配置
-      const apiUrl = "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis";
-      const apiKey = "sk-93f08f8aec02495ebad527ed5c2a7d8c"; // 应该从环境变量获取
+      // 生成16位随机数作为seed
+      seed = Math.floor(Math.random() * 9000000000000000) + 1000000000000000;
+      console.log('Generated seed:', seed);
+      
+      // 新API配置
+      const apiUrl = "https://comfy.liblib.art/api/prompt";
       
       // 请求头
       const headers = {
-        'X-DashScope-Async': 'enable',
-        'Authorization': `Bearer ${apiKey}`,
+        'cookie': '_ga=GA1.1.1162931253.1716176209; usertokenExt=77436bc86ee54798a36ebfc48f59a0f578462281277; webidExt=1747364397292soukxtpq; Hm_lvt_2f4541bcbee365f31b21f65f00e8ae8b=1746006316,1747222382,1747271432,1747633187; Hm_lpvt_2f4541bcbee365f31b21f65f00e8ae8b=1747633187; HMACCOUNT=81D27ED34A2F576D; _ga_24MVZ5C982=GS2.1.s1747632878$o162$g1$t1747633187$j60$l0$h1041395821; acw_tc=2fec4273-5167-4dbd-a7b4-eab365ca19d51be89d857f6063d84bfb5700bf4a93ae',
+        'origin': 'https://comfy.liblib.art',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
         'Content-Type': 'application/json'
       };
       
-      // 请求体 - 使用合并后的提示词
-      const payload = {
-        "model": "wanx2.1-t2i-plus",
-        "input": {
-          "prompt": finalPrompt,
-          "negative_prompt": finalNegativePrompt
-        },
-        "parameters": {
-          "size": size,
-          "n": 1,
-          "prompt_extend": true
-        }
-      };
+      // 克隆设计模板并修改关键参数
+      const designJson = require('../../data/design_v1.json');
       
-      console.log('API Payload:', JSON.stringify(payload, null, 2));
+      // 更新设计模板中的参数
+      designJson.prompt['3'].inputs.seed = seed;
+      designJson.prompt['6'].inputs.text = finalPrompt;
+      designJson.prompt['7'].inputs.text = finalNegativePrompt;
+      designJson.prompt['16'].inputs.strength = ctrlnet_strength;
+      designJson.prompt['16'].inputs.start_percent = ctrlnet_start_percent;
+      
+      console.log('API Payload prepared with updated parameters');
       
       // 发送POST请求
-      const response = await axios.post(apiUrl, payload, { headers });
+      const response = await axios.post(apiUrl, designJson, { headers });
       
       // 检查响应
       if (response.status !== 200) {
@@ -519,11 +532,11 @@ export const generateDesign = async (req: Request, res: Response) => {
       }
       
       const result = response.data;
-      task_id = result.output.task_id;
-      console.log(`Task created successfully, task_id: ${task_id}`);
+      prompt_id = result.prompt_id;
+      console.log(`Task created successfully, prompt_id: ${prompt_id}`);
 
-      if (!task_id) {
-        throw new Error('Failed to get task_id from third-party API');
+      if (!prompt_id) {
+        throw new Error('Failed to get prompt_id from third-party API');
       }
     } catch (apiError: any) {
       console.error('Error calling third-party API:', apiError);
@@ -533,7 +546,7 @@ export const generateDesign = async (req: Request, res: Response) => {
       });
     }
     
-    // 创建新的设计记录 - 保存为逗号分隔的字符串，不再使用JSON格式
+    // 创建新的设计记录 - 添加新字段
     const gardenDesign = await GardenDesign.create({
       user_id,
       project_id: projectId,
@@ -547,7 +560,10 @@ export const generateDesign = async (req: Request, res: Response) => {
       is_like: 0,
       is_del: 0,
       points_cost: 1, // 记录消耗的点数
-      third_task_id: task_id,
+      third_task_id: prompt_id, // 保存prompt_id
+      seed: seed.toString(), // 新增：保存seed值
+      ctrlnet_strength, // 新增：保存strength值
+      ctrlnet_start_percent, // 新增：保存start_percent值
       ctime: Math.floor(Date.now() / 1000),
       utime: Math.floor(Date.now() / 1000)
     });
@@ -602,5 +618,109 @@ export const generateDesign = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error generating garden design:', error);
     return res.status(500).json({ error: 'Failed to generate garden design' });
+  }
+};
+
+/**
+ * 检查Comfy图片生成状态
+ * @route GET /api/garden-designs/check-comfy-status/:promptId
+ */
+export const checkComfyStatus = async (req: Request, res: Response) => {
+  try {
+    console.log('API call received: GET /api/garden-designs/check-comfy-status/:promptId');
+    console.log('Request params:', req.params);
+    
+    // 从请求中获取用户ID
+    const user_id = getUserIdFromRequest(req);
+    console.log('Extracted user_id:', user_id);
+    
+    if (!user_id) {
+      console.log('Authentication failed: No user ID found');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    // 获取prompt_id
+    const { promptId } = req.params;
+    
+    if (!promptId) {
+      console.log('Validation failed: Missing promptId');
+      return res.status(400).json({ error: 'promptId is required' });
+    }
+    
+    try {
+      // 查询Comfy API获取状态
+      console.log('Checking status for prompt ID:', promptId);
+      
+      // API配置
+      const apiUrl = `https://comfy.liblib.art/api/history/${promptId}`;
+      
+      // 请求头
+      const headers = {
+        'cookie': '_ga=GA1.1.1162931253.1716176209; usertokenExt=77436bc86ee54798a36ebfc48f59a0f578462281277; webidExt=1747364397292soukxtpq; Hm_lvt_2f4541bcbee365f31b21f65f00e8ae8b=1746006316,1747222382,1747271432,1747633187; Hm_lpvt_2f4541bcbee365f31b21f65f00e8ae8b=1747633187; HMACCOUNT=81D27ED34A2F576D; _ga_24MVZ5C982=GS2.1.s1747632878$o162$g1$t1747633187$j60$l0$h1041395821; acw_tc=2fec4273-5167-4dbd-a7b4-eab365ca19d51be89d857f6063d84bfb5700bf4a93ae',
+        'origin': 'https://comfy.liblib.art',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36'
+      };
+      
+      // 发送GET请求
+      const response = await axios.get(apiUrl, { headers });
+      
+      // 检查响应
+      if (response.status !== 200) {
+        throw new Error(`API responded with status code ${response.status}`);
+      }
+      
+      const result = response.data;
+      console.log(`Status check result:`, result);
+      
+      if (!result) {
+        return res.status(400).json({ status: 'pending', message: 'No result found' });
+      }
+      
+      // 检查是否有输出图片
+      if (result.outputs && result.outputs['9'] && result.outputs['9'].images && result.outputs['9'].images.length > 0) {
+        // 获取生成的图片URL
+        const imageUrl = `https://comfy.liblib.art/view?filename=${result.outputs['9'].images[0].filename}&type=temp`;
+        console.log('Generated image URL:', imageUrl);
+        
+        // 查找对应的design记录并更新状态
+        const gardenDesign = await GardenDesign.findOne({
+          where: {
+            third_task_id: promptId,
+            user_id
+          }
+        });
+        
+        if (gardenDesign) {
+          // 更新设计状态为成功
+          await gardenDesign.update({
+            pic_result: imageUrl,
+            status: 2, // 2代表成功
+            utime: Math.floor(Date.now() / 1000)
+          });
+          
+          return res.status(200).json({
+            status: 'completed',
+            image_url: imageUrl,
+            garden_design: gardenDesign
+          });
+        } else {
+          return res.status(404).json({ error: 'Garden design not found' });
+        }
+      }
+      
+      // 如果无图片，返回进行中状态
+      return res.status(200).json({ status: 'pending', message: 'Generation in progress' });
+      
+    } catch (apiError: any) {
+      console.error('Error calling Comfy API:', apiError);
+      return res.status(500).json({ 
+        error: 'Failed to check generation status', 
+        details: apiError.message 
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error checking comfy status:', error);
+    return res.status(500).json({ error: 'Failed to check comfy status' });
   }
 }; 

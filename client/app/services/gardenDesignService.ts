@@ -15,6 +15,16 @@ export interface GardenDesignImage {
   is_like: number | null;
   is_del: number | null;
   third_task_id: string | null;
+  seed?: string | null;
+  ctrlnet_strength?: number | null;
+  ctrlnet_start_percent?: number | null;
+}
+
+export interface ComfyStatusResponse {
+  status: 'pending' | 'completed';
+  message?: string;
+  image_url?: string;
+  garden_design?: GardenDesignImage;
 }
 
 /**
@@ -268,6 +278,39 @@ export const generateGardenDesign = async (
     return data;
   } catch (error) {
     console.error('Error generating garden design:', error);
+    throw error;
+  }
+};
+
+/**
+ * 检查Comfy图片生成状态
+ */
+export const checkComfyStatus = async (promptId: string): Promise<ComfyStatusResponse> => {
+  try {
+    const user = await getCurrentUser();
+    
+    if (!user) {
+      throw new Error('Authentication required');
+    }
+    
+    console.log(`Calling API: ${API_URL}/garden-designs/check-comfy-status/${promptId}`);
+    
+    const response = await fetch(`${API_URL}/garden-designs/check-comfy-status/${promptId}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('API error response:', errorData);
+      throw new Error(errorData.error || 'Failed to check Comfy status');
+    }
+    
+    const data = await response.json();
+    console.log('API success response for Comfy status check:', data);
+    return data;
+  } catch (error) {
+    console.error('Error checking Comfy status:', error);
     throw error;
   }
 }; 

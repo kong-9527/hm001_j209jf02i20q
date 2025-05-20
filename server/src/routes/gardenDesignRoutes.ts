@@ -1,5 +1,5 @@
 import express from 'express';
-import { getGardenDesigns, updateLikeStatus, softDeleteDesign, generateDesign } from '../controllers/gardenDesignController';
+import { getGardenDesigns, updateLikeStatus, softDeleteDesign, generateDesign, checkComfyStatus } from '../controllers/gardenDesignController';
 import { authenticateJWT } from '../middlewares/authMiddleware';
 
 const router = express.Router();
@@ -15,5 +15,8 @@ router.put('/:id/delete', authenticateJWT, softDeleteDesign);
 
 // 生成花园设计图片
 router.post('/generate', authenticateJWT, generateDesign);
+
+// 检查Comfy的生成状态
+router.get('/check-comfy-status/:promptId', authenticateJWT, checkComfyStatus);
 
 export default router; 
