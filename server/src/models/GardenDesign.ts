@@ -85,7 +85,7 @@ GardenDesign.init(
     pic_third_orginial: {
       type: DataTypes.STRING(1024),
       allowNull: true,
-      comment: '第三方接口返回的原始图片URL',
+      comment: '第三方接口原始图片URL',
     },
     status: {
       type: DataTypes.INTEGER,
