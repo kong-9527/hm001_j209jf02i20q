@@ -1943,14 +1943,15 @@ export default function PhotoGenerator() {
       if (selectedTab === 'premade') {
         console.log('- 预设风格ID:', selectedStyleId);
         console.log('- 预设风格名称:', getSelectedStyle()?.name);
-        // 对于预设风格，用风格名称作为positiveWords
+        // 对于预设风格，只传递风格名称
         positiveWordsParam = getSelectedStyle()?.name || '';
+        negativeWordsParam = ''; // 对于Classic styles，负向词交由后端处理
       } else {
         console.log('- 正向词:', positiveWords);
         console.log('- 负向词:', negativeWords);
-        // 对于自定义风格，将词组数组转换为JSON字符串
-        positiveWordsParam = JSON.stringify(positiveWords);
-        negativeWordsParam = JSON.stringify(negativeWords);
+        // 对于自定义风格，将词组数组转换为逗号分隔的字符串
+        positiveWordsParam = positiveWords.map(word => word.text).join(',');
+        negativeWordsParam = negativeWords.map(word => word.text).join(',');
       }
         
       const structuralSimilarity = resemblancePercent.toString();

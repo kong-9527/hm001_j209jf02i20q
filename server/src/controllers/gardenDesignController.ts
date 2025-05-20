@@ -7,6 +7,13 @@ import { getUserIdFromRequest } from '../utils/auth';
 import axios from 'axios';
 import { Op } from 'sequelize';
 import sequelize from '../config/database';
+import gardenStylesData, { commonGardenPrompts, commonRenderingPrompts } from '../data/gardenStyles';
+
+// 添加WordTag接口定义
+interface WordTag {
+  id: number | string;
+  text: string;
+}
 
 /**
  * 获取当前用户和项目的花园设计图片
@@ -290,42 +297,180 @@ export const generateDesign = async (req: Request, res: Response) => {
     }
     
     // 解析参数
-    let prompt = '';
-    let negative_prompt = '';
-    let style_id = '';
-    let style_name = '';
-    
-    // 根据styleType设置参数
+    let finalPrompt = '';  // 最终发送给API的正向提示词
+    let finalNegativePrompt = ''; // 最终发送给API的负向提示词
+    let style_id = '';  // 风格ID
+    let style_name = ''; // 风格名称
+    let positiveWordsArr: WordTag[] = []; // 正向词数组
+    let negativeWordsArr: WordTag[] = []; // 负向词数组
+
+    // 限制每种类型词组的数量
+    const MAX_STYLE_WORDS = 5;
+    const MAX_COMMON_GARDEN_WORDS = 5;
+    const MAX_COMMON_RENDERING_WORDS = 5;
+
+    // 根据styleType进行不同处理
     if (styleType === 'Classic styles') {
-      // Classic styles使用风格名称作为prompt
-      prompt = positiveWords;
-      negative_prompt = '';
-      style_id = '1'; // 假设1代表Classic styles
-      style_name = positiveWords;
-    } else if (styleType === 'Custom styles') {
-      try {
-        // Custom styles使用用户输入的prompt和negative_prompt
-        // 解析JSON字符串，并提取所有text字段组成新数组
-        const positiveWordsArray = JSON.parse(positiveWords);
-        prompt = JSON.stringify(positiveWordsArray.map((item: any) => item.text));
+      // Classic styles: 使用风格名称查找预设风格
+      style_name = positiveWords; // 风格名称保存在positiveWords
+      
+      // 在gardenStylesData中查找对应风格
+      const styleIndex = gardenStylesData.findIndex((style: any) => style.name === style_name);
+      
+      if (styleIndex !== -1) {
+        style_id = (styleIndex + 1).toString(); // 风格ID为索引+1
         
-        if (negativeWords && negativeWords.trim() !== '') {
-          const negativeWordsArray = JSON.parse(negativeWords);
-          negative_prompt = JSON.stringify(negativeWordsArray.map((item: any) => item.text));
-        } else {
-          negative_prompt = '';
+        // 获取该风格的预设正向词和负向词
+        const stylePositivePrompts = gardenStylesData[styleIndex].positivePrompts;
+        const styleNegativePrompts = gardenStylesData[styleIndex].negativePrompts;
+        
+        // 将风格名称作为WordTag添加到positiveWordsArr，限制数量
+        positiveWordsArr = stylePositivePrompts.split(',')
+          .slice(0, MAX_STYLE_WORDS)
+          .map((text: string) => ({
+          id: Date.now() + Math.random(),
+          text: text.trim()
+        }));
+        
+        // 如果有负向词，也添加到negativeWordsArr，限制数量
+        if (styleNegativePrompts) {
+          negativeWordsArr = styleNegativePrompts.split(',')
+            .slice(0, MAX_STYLE_WORDS)
+            .map((text: string) => ({
+            id: Date.now() + Math.random(),
+            text: text.trim()
+          }));
         }
         
-        style_id = '99'; // 99代表Custom styles
-        style_name = 'custom style';
-      } catch (error) {
-        console.error('Error parsing JSON words:', error);
-        return res.status(400).json({ error: 'Invalid JSON format for words' });
+        // 添加通用花园提示词，限制数量
+        const commonGardenPositive = commonGardenPrompts.positivePrompts.split(',')
+          .slice(0, MAX_COMMON_GARDEN_WORDS)
+          .map((text: string) => ({
+          id: Date.now() + Math.random(),
+          text: text.trim()
+        }));
+        
+        const commonGardenNegative = commonGardenPrompts.negativePrompts.split(',')
+          .slice(0, MAX_COMMON_GARDEN_WORDS)
+          .map((text: string) => ({
+          id: Date.now() + Math.random(),
+          text: text.trim()
+        }));
+        
+        // 添加通用渲染质量提示词，限制数量
+        const commonRenderingPositive = commonRenderingPrompts.positivePrompts.split(',')
+          .slice(0, MAX_COMMON_RENDERING_WORDS)
+          .map((text: string) => ({
+          id: Date.now() + Math.random(),
+          text: text.trim()
+        }));
+        
+        const commonRenderingNegative = commonRenderingPrompts.negativePrompts.split(',')
+          .slice(0, MAX_COMMON_RENDERING_WORDS)
+          .map((text: string) => ({
+          id: Date.now() + Math.random(),
+          text: text.trim()
+        }));
+        
+        // 合并所有正向词
+        positiveWordsArr = [
+          ...positiveWordsArr,
+          ...commonGardenPositive,
+          ...commonRenderingPositive
+        ];
+        
+        // 合并所有负向词
+        negativeWordsArr = [
+          ...negativeWordsArr,
+          ...commonGardenNegative,
+          ...commonRenderingNegative
+        ];
+      } else {
+        console.log('Style not found:', style_name);
+        return res.status(400).json({ error: 'Invalid style name' });
+      }
+    } else if (styleType === 'Custom styles') {
+      // Custom styles: 解析用户提供的自定义词汇
+      style_id = '99'; // 99代表Custom styles
+      style_name = 'custom style';
+
+      try {
+        // 处理用户提供的正向词，已是逗号分隔的字符串
+        const userPositiveWordsArray = positiveWords ? positiveWords.split(',') : [];
+        positiveWordsArr = userPositiveWordsArray
+          .slice(0, MAX_STYLE_WORDS)
+          .map((text: string) => ({
+            id: Date.now() + Math.random(),
+            text: text.trim()
+          }));
+        
+        // 处理用户提供的负向词，已是逗号分隔的字符串
+        const userNegativeWordsArray = negativeWords ? negativeWords.split(',') : [];
+        negativeWordsArr = userNegativeWordsArray
+          .slice(0, MAX_STYLE_WORDS)
+          .map((text: string) => ({
+            id: Date.now() + Math.random(),
+            text: text.trim()
+          }));
+        
+        // 添加通用花园提示词，限制数量
+        const commonGardenPositive = commonGardenPrompts.positivePrompts.split(',')
+          .slice(0, MAX_COMMON_GARDEN_WORDS)
+          .map((text: string) => ({
+          id: Date.now() + Math.random(),
+          text: text.trim()
+        }));
+        
+        const commonGardenNegative = commonGardenPrompts.negativePrompts.split(',')
+          .slice(0, MAX_COMMON_GARDEN_WORDS)
+          .map((text: string) => ({
+          id: Date.now() + Math.random(),
+          text: text.trim()
+        }));
+        
+        // 添加通用渲染质量提示词，限制数量
+        const commonRenderingPositive = commonRenderingPrompts.positivePrompts.split(',')
+          .slice(0, MAX_COMMON_RENDERING_WORDS)
+          .map((text: string) => ({
+          id: Date.now() + Math.random(),
+          text: text.trim()
+        }));
+        
+        const commonRenderingNegative = commonRenderingPrompts.negativePrompts.split(',')
+          .slice(0, MAX_COMMON_RENDERING_WORDS)
+          .map((text: string) => ({
+          id: Date.now() + Math.random(),
+          text: text.trim()
+        }));
+        
+        // 合并所有正向词
+        positiveWordsArr = [
+          ...positiveWordsArr,
+          ...commonGardenPositive,
+          ...commonRenderingPositive
+        ];
+        
+        // 合并所有负向词
+        negativeWordsArr = [
+          ...negativeWordsArr,
+          ...commonGardenNegative,
+          ...commonRenderingNegative
+        ];
+      } catch (e) {
+        console.error('Error parsing word tags:', e);
+        return res.status(400).json({ error: 'Invalid word tag format' });
       }
     } else {
       console.log('Validation failed: Invalid style type');
       return res.status(400).json({ error: 'Invalid style type' });
     }
+    
+    // 将WordTag数组转换为字符串，用英文逗号分隔
+    finalPrompt = positiveWordsArr.map(tag => tag.text).filter(Boolean).join(', ');
+    finalNegativePrompt = negativeWordsArr.map(tag => tag.text).filter(Boolean).join(', ');
+    
+    console.log('Final positive prompt:', finalPrompt);
+    console.log('Final negative prompt:', finalNegativePrompt);
     
     // 解析图片尺寸
     if (!size.includes('*')) {
@@ -349,12 +494,12 @@ export const generateDesign = async (req: Request, res: Response) => {
         'Content-Type': 'application/json'
       };
       
-      // 请求体
+      // 请求体 - 使用合并后的提示词
       const payload = {
         "model": "wanx2.1-t2i-plus",
         "input": {
-          "prompt": prompt,
-          "negative_prompt": negative_prompt
+          "prompt": finalPrompt,
+          "negative_prompt": finalNegativePrompt
         },
         "parameters": {
           "size": size,
@@ -388,7 +533,7 @@ export const generateDesign = async (req: Request, res: Response) => {
       });
     }
     
-    // 创建新的设计记录
+    // 创建新的设计记录 - 保存为逗号分隔的字符串，不再使用JSON格式
     const gardenDesign = await GardenDesign.create({
       user_id,
       project_id: projectId,
@@ -396,8 +541,8 @@ export const generateDesign = async (req: Request, res: Response) => {
       status: 1, // 1代表生成中
       style_id: Number(style_id),
       style_name,
-      positive_words: prompt, // 直接存储JSON格式字符串
-      negative_words: negative_prompt, // 直接存储JSON格式字符串
+      positive_words: positiveWordsArr.map(tag => tag.text).join(','), // 保存为逗号分隔的字符串
+      negative_words: negativeWordsArr.map(tag => tag.text).join(','), // 保存为逗号分隔的字符串
       structural_similarity: parseInt(structuralSimilarity),
       is_like: 0,
       is_del: 0,
