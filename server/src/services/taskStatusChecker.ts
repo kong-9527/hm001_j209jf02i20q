@@ -4,26 +4,42 @@ import GardenDesign from '../models/GardenDesign';
 import { downloadAndUploadToCloudinary } from './imageService';
 
 // API配置
-const API_BASE_URL = 'https://dashscope.aliyuncs.com/api/v1/tasks';
-const API_KEY = process.env.DASHSCOPE_API_KEY || 'sk-93f08f8aec02495ebad527ed5c2a7d8c'; // 从环境变量获取API密钥
 const MAX_RETRIES = 3; // 最大重试次数
 const RETRY_DELAY = 1000; // 重试延迟（毫秒）
 const TIMEOUT = 10000; // 请求超时（毫秒）
 const MAX_RUNNING_TIME = 60 * 60 * 1000; // 任务最长运行时间（1小时）
 
+// 新API配置
+const BRIDGE_API_BASE_URL = 'https://bridge.liblib.art/gateway/sd-api/generate/progress/msg/v3';
+const BRIDGE_TOKEN = '77436bc86ee54798a36ebfc48f59a0f578462281277';
+const BRIDGE_WEBID = '1747364397292soukxtpq';
+
 /**
  * 带重试机制的发送请求
  * @param url 请求URL
  * @param headers 请求头
+ * @param data 请求数据
+ * @param method 请求方法
  * @param retries 剩余重试次数
  * @returns 响应数据或null
  */
-async function sendRequestWithRetry(url: string, headers: any, retries = MAX_RETRIES): Promise<any> {
+async function sendRequestWithRetry(
+  url: string, 
+  headers: any, 
+  data: any = null, 
+  method: 'GET' | 'POST' = 'GET', 
+  retries = MAX_RETRIES
+): Promise<any> {
   try {
-    const response = await axios.get(url, { 
+    const options = {
+      method,
+      url,
       headers,
-      timeout: TIMEOUT 
-    });
+      timeout: TIMEOUT,
+      data: method === 'POST' ? data : undefined
+    };
+    
+    const response = await axios(options);
     return response.data;
   } catch (error: any) {
     // 如果是请求超时或网络错误，且还有重试机会，则进行重试
@@ -32,14 +48,14 @@ async function sendRequestWithRetry(url: string, headers: any, retries = MAX_RET
         retries > 0) {
       console.log(`请求失败，将在 ${RETRY_DELAY}ms 后重试，剩余重试次数: ${retries-1}`);
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-      return sendRequestWithRetry(url, headers, retries - 1);
+      return sendRequestWithRetry(url, headers, data, method, retries - 1);
     }
     
     // 如果是服务器错误（5xx），也进行重试
     if (axios.isAxiosError(error) && error.response && error.response.status >= 500 && retries > 0) {
       console.log(`服务器错误 ${error.response.status}，将在 ${RETRY_DELAY}ms 后重试，剩余重试次数: ${retries-1}`);
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-      return sendRequestWithRetry(url, headers, retries - 1);
+      return sendRequestWithRetry(url, headers, data, method, retries - 1);
     }
     
     // 打印详细错误信息
@@ -64,42 +80,76 @@ async function sendRequestWithRetry(url: string, headers: any, retries = MAX_RET
 }
 
 /**
- * 根据task_id获取任务状态和结果
- * @param taskId 任务ID
+ * 从新接口获取任务结果
+ * @param generateId 生成ID
  * @returns 任务结果或null
  */
-async function getTaskResult(taskId: string) {
+async function getTaskResultFromBridge(generateId: number) {
   try {
-    const url = `${API_BASE_URL}/${taskId}`;
+    // 获取当前时间戳，精确到毫秒
+    const timestamp = Date.now();
+    const url = `${BRIDGE_API_BASE_URL}/${generateId}?timestamp=${timestamp}`;
     
     const headers = {
-      'Authorization': `Bearer ${API_KEY}`
+      'token': BRIDGE_TOKEN,
+      'webid': BRIDGE_WEBID,
+      'Content-Type': 'application/json'
     };
     
-    console.log(`正在请求任务状态: ${taskId}`);
-    const result = await sendRequestWithRetry(url, headers);
+    const data = { flag: 0 };
+    
+    console.log(`正在请求任务状态: ${generateId}`);
+    const result = await sendRequestWithRetry(url, headers, data, 'POST');
     
     if (!result) {
-      console.error(`获取任务结果失败: ${taskId}`);
+      console.error(`获取任务结果失败: ${generateId}`);
       return null;
     }
     
-    console.log(`任务状态:`, result.status || '未知');
+    // 检查返回码
+    if (result.code !== 0) {
+      console.error(`任务状态请求返回错误码: ${result.code}, 消息: ${result.msg || '无错误信息'}`);
+      return null;
+    }
     
     // 检查任务状态
-    if (result.status === 'FAILED') {
-      console.error(`任务失败: ${taskId}, 错误信息:`, result.error || '未知错误');
-      // 返回特殊值表示任务失败
+    const taskData = result.data;
+    console.log(`任务状态: generateId=${generateId}, subStatus=${taskData.subStatus}, 进度=${taskData.percentCompleted}%, subTypeName=${taskData.subTypeName || '未知'}`);
+    
+    // 如果有错误信息
+    if (taskData.errorMsg) {
+      console.error(`任务失败: ${generateId}, 错误信息: ${taskData.errorMsg}`);
       return 'FAILED';
     }
     
-    // 检查任务结果中是否有图片URL
-    if (result.output && result.output.results && result.output.results.length > 0) {
-      const imgUrl = result.output.results[0].url;
-      console.log(`获取到图片URL: ${imgUrl}`);
-      return imgUrl;
+    // 检查任务是否异常
+    if (taskData.subStatus === 3) {
+      console.error(`任务异常: ${generateId}, 状态码: ${taskData.subStatus}`);
+      return 'FAILED';
+    }
+    
+    // 首先检查子状态和完成百分比
+    if (taskData.subStatus === 2 && taskData.percentCompleted === 100) {
+      console.log(`任务已完成 (generateId=${generateId}, subStatus=2, percentCompleted=100)，检查图片URL`);
+      
+      // 检查是否有图片信息
+      if (!taskData.images || taskData.images.length === 0) {
+        console.log(`任务已完成但没有images数组, generateId=${generateId}`);
+        return 'FAILED';
+      }
+      
+      // 检查是否有图片URL (previewPath)
+      if (taskData.images[0].previewPath) {
+        const imgUrl = taskData.images[0].previewPath;
+        console.log(`获取到图片URL: ${imgUrl}, generateId=${generateId}`);
+        return imgUrl;
+      } else {
+        console.log(`任务已完成但未找到图片URL (previewPath为空), generateId=${generateId}`);
+        return 'FAILED'; // 任务完成但没有图片URL，可能是失败
+      }
     } else {
-      console.log(`任务 ${taskId} 尚未完成或未找到图片URL`);
+      // 任务尚未完成
+      console.log(`任务 ${generateId} 尚未完成 (subStatus=${taskData.subStatus}, percentCompleted=${taskData.percentCompleted}%)`);
       return null;
     }
   } catch (error) {
@@ -137,30 +187,33 @@ async function checkPendingTasks() {
     console.log('当前时间：', new Date().toISOString());
     console.log('imageService是否已导入：', typeof downloadAndUploadToCloudinary === 'function' ? '是' : '否');
     
-    // 查找状态为"生成中"，未删除，且有第三方任务ID的记录
+    // 查找状态为"生成中"，未删除，且有第三方生成ID的记录
     const pendingDesigns = await GardenDesign.findAll({
       where: {
         status: 1, // 1代表生成中
         is_del: 0, // 未删除
-        third_task_id: {
-          [Op.not]: null, // third_task_id不为空
-          [Op.ne]: ''     // third_task_id不为空字符串
+        third_generate_id: {
+          [Op.not]: null // third_generate_id不为空
         }
-      }
+      },
+      order: [
+        ['ctime', 'ASC'] // 按创建时间升序排序，先处理早的任务
+      ],
+      limit: 10 // 每次只处理10条记录，避免处理太多
     });
     
     console.log(`找到 ${pendingDesigns.length} 个待处理任务`);
     
     // 遍历每个任务并检查状态
     for (const design of pendingDesigns) {
-      const taskId = design.third_task_id;
+      const generateId = design.third_generate_id;
       
-      if (!taskId) {
-        console.log(`任务ID为空，跳过: ${design.id}`);
+      if (!generateId) {
+        console.log(`生成ID为空，跳过: ${design.id}`);
         continue;
       }
       
-      console.log(`处理任务ID: ${taskId}, 设计ID: ${design.id}`);
+      console.log(`处理生成ID: ${generateId}, 设计ID: ${design.id}`);
       
       // 检查任务是否运行时间过长
       if (isTaskRunningTooLong(design)) {
@@ -173,7 +226,7 @@ async function checkPendingTasks() {
       }
       
       // 获取任务结果
-      const result = await getTaskResult(taskId);
+      const result = await getTaskResultFromBridge(generateId);
       
       // 处理不同的结果
       if (result === 'FAILED') {
@@ -199,15 +252,23 @@ async function checkPendingTasks() {
           console.timeEnd(`设计ID ${design.id} 的图片处理时间`);
           
           console.log(`图片处理完成，Cloudinary URL: ${cloudinaryUrl}`);
-          console.log(`Cloudinary URL类型: ${typeof cloudinaryUrl}, 长度: ${cloudinaryUrl.length}`);
-          console.log(`是否与原URL相同: ${cloudinaryUrl === result ? '是（处理失败）' : '否（处理成功）'}`);
           
-          // 更新记录使用Cloudinary URL
-          await design.update({
-            status: 2,                     // 2代表生成成功
-            pic_result: cloudinaryUrl,     // 保存Cloudinary图片URL
-            utime: Math.floor(Date.now() / 1000) // 更新10位时间戳
-          });
+          if (!cloudinaryUrl || cloudinaryUrl === result) {
+            console.error(`Cloudinary处理失败，使用原始URL: ${result}`);
+            // 使用原始URL更新记录
+            await design.update({
+              status: 2,                 // 2代表生成成功
+              pic_result: result,        // 保存原始图片URL
+              utime: Math.floor(Date.now() / 1000) // 更新10位时间戳
+            });
+          } else {
+            // 更新记录使用Cloudinary URL
+            await design.update({
+              status: 2,                     // 2代表生成成功
+              pic_result: cloudinaryUrl,     // 保存Cloudinary图片URL
+              utime: Math.floor(Date.now() / 1000) // 更新10位时间戳
+            });
+          }
         } catch (imageError) {
           console.error(`处理图片时出错: ${imageError}`);
           console.error(`错误详情: ${JSON.stringify(imageError)}`);
