@@ -8,12 +8,13 @@ interface GardenAdvisorSpacePlantAttributes {
   space_id: number | null;
   plant_name: string | null;
   plant_pic: string | null;
-  overview: string | null;
+  reason: string | null;
   conditions_sunlight: string | null;
   conditions_water: string | null;
   conditions_soil: string | null;
-  characteristic_height: number | null;
-  characteristic_distance: number | null;
+  growth_environment: string | null;
+  characteristic_height: string | null;
+  characteristic_distance: string | null;
   characteristic_bloom: string | null;
   characteristic_lifespan: string | null;
   growing_habits: string | null;
@@ -22,7 +23,7 @@ interface GardenAdvisorSpacePlantAttributes {
   growing_match: string | null;
   growing_cutting: string | null;
   growing_pest: string | null;
-  growing_harvest: string | null;
+  growing_flower_harvest: string | null;
   planting_instructions: string | null;
   tips: string | null;
 }
@@ -36,12 +37,13 @@ class GardenAdvisorSpacePlant extends Model<GardenAdvisorSpacePlantAttributes, G
   public space_id!: number | null;
   public plant_name!: string | null;
   public plant_pic!: string | null;
-  public overview!: string | null;
+  public reason!: string | null;
   public conditions_sunlight!: string | null;
   public conditions_water!: string | null;
   public conditions_soil!: string | null;
-  public characteristic_height!: number | null;
-  public characteristic_distance!: number | null;
+  public growth_environment!: string | null;
+  public characteristic_height!: string | null;
+  public characteristic_distance!: string | null;
   public characteristic_bloom!: string | null;
   public characteristic_lifespan!: string | null;
   public growing_habits!: string | null;
@@ -50,7 +52,7 @@ class GardenAdvisorSpacePlant extends Model<GardenAdvisorSpacePlantAttributes, G
   public growing_match!: string | null;
   public growing_cutting!: string | null;
   public growing_pest!: string | null;
-  public growing_harvest!: string | null;
+  public growing_flower_harvest!: string | null;
   public planting_instructions!: string | null;
   public tips!: string | null;
 }
@@ -68,91 +70,96 @@ GardenAdvisorSpacePlant.init(
       allowNull: true,
     },
     plant_name: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     plant_pic: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
     },
-    overview: {
-      type: DataTypes.STRING(255),
+    reason: {
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '推荐理由',
     },
     conditions_sunlight: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     conditions_water: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     conditions_soil: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
     },
+    growth_environment: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: '生长环境要求',
+    },
     characteristic_height: {
-      type: DataTypes.DOUBLE,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     characteristic_distance: {
-      type: DataTypes.DOUBLE,
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '间距',
     },
     characteristic_bloom: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '开花时间',
     },
     characteristic_lifespan: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '寿命周期，如多年生，常年，季节性，……',
     },
     growing_habits: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '生长习性',
     },
     growing_month: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '种植月份',
     },
     growing_fertilizer: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '如何施肥',
     },
     growing_match: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '跟其他植物搭配',
     },
     growing_cutting: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '修剪事项',
     },
     growing_pest: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '害虫防治',
     },
-    growing_harvest: {
-      type: DataTypes.STRING(255),
+    growing_flower_harvest: {
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '种下去多久收获',
     },
     planting_instructions: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '如何栽种',
     },
     tips: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
       comment: '维护提示',
     },
