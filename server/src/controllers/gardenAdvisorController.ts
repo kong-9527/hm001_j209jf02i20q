@@ -560,7 +560,7 @@ Watering method: ${waterAccessMap[space.water_access || 1] || 'Convenient for wa
           { role: "user", content: promptContent }
         ]
       },
-      { timeout: 60000 } // 60秒超时
+      { timeout: 600000 } // 600秒超时
     );
     
     console.log(`[植物生成] 空间 ID: ${space.id} 获取API响应成功`);
