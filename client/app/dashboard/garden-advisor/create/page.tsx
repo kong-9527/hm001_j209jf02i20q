@@ -253,10 +253,10 @@ export default function CreateGardenAdvisorPage() {
                 onChange={(e) => setGardenLocation(e.target.value)}
               >
                 <option value="">Select a country or a region (optional)</option>
-                <option value="us">United States</option>
-                <option value="ca">Canada</option>
-                <option value="uk">United Kingdom</option>
-                <option value="au">Australia</option>
+                <option value="United States">United States</option>
+                <option value="Canada">Canada</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="Australia">Australia</option>
               </select>
             </div>
             
@@ -268,32 +268,32 @@ export default function CreateGardenAdvisorPage() {
                 onChange={(e) => setHardinessZone(e.target.value)}
               >
                 <option value="">Select a hardiness zone (optional)</option>
-                <option value="1">1a</option>
-                <option value="2">1b</option>
-                <option value="3">2a</option>
-                <option value="4">2b</option>
-                <option value="5">3a</option>
-                <option value="6">3b</option>
-                <option value="7">4a</option>
-                <option value="8">4b</option>
-                <option value="9">5a</option>
-                <option value="10">5b</option>
-                <option value="11">6a</option>
-                <option value="12">6b</option>
-                <option value="13">7a</option>
-                <option value="14">7b</option>
-                <option value="15">8a</option>
-                <option value="16">8b</option>
-                <option value="17">9a</option>
-                <option value="18">9b</option>
-                <option value="19">10a</option>
-                <option value="20">10b</option>
-                <option value="21">11a</option>
-                <option value="22">11b</option>
-                <option value="23">12a</option>
-                <option value="24">12b</option>
-                <option value="25">13a</option>
-                <option value="26">13b</option>
+                <option value="1a">1a</option>
+                <option value="1b">1b</option>
+                <option value="2a">2a</option>
+                <option value="2b">2b</option>
+                <option value="3a">3a</option>
+                <option value="3b">3b</option>
+                <option value="4a">4a</option>
+                <option value="4b">4b</option>
+                <option value="5a">5a</option>
+                <option value="5b">5b</option>
+                <option value="6a">6a</option>
+                <option value="6b">6b</option>
+                <option value="7a">7a</option>
+                <option value="7b">7b</option>
+                <option value="8a">8a</option>
+                <option value="8b">8b</option>
+                <option value="9a">9a</option>
+                <option value="9b">9b</option>
+                <option value="10a">10a</option>
+                <option value="10b">10b</option>
+                <option value="11a">11a</option>
+                <option value="11b">11b</option>
+                <option value="12a">12a</option>
+                <option value="12b">12b</option>
+                <option value="13a">13a</option>
+                <option value="13b">13b</option>
               </select>
               <Link href="https://planthardiness.ars.usda.gov/" target="_blank" rel="noopener noreferrer" className="text-blue-500 text-xs hover:underline inline-block mt-1.5">
                 Learn more about hardiness zones
