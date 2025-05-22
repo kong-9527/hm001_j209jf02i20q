@@ -560,10 +560,27 @@ Watering method: ${waterAccessMap[space.water_access || 1] || 'Convenient for wa
           { role: "user", content: promptContent }
         ]
       },
-      { timeout: 600000 } // 60秒超时
+      { timeout: 60000 } // 60秒超时
     );
     
     console.log(`[植物生成] 空间 ID: ${space.id} 获取API响应成功`);
+    
+    // 保存完整原始响应对象到文件
+    try {
+      // 确保目录存在
+      const outputDir = path.join(__dirname, '../../data/output');
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+        console.log(`[植物生成] 创建输出目录: ${outputDir}`);
+      }
+      
+      // 保存完整响应对象
+      const fullResponseFile = path.join(outputDir, `full_response_${space.id}.json`);
+      fs.writeFileSync(fullResponseFile, JSON.stringify(completion, null, 2));
+      console.log(`[植物生成] 已保存完整响应对象到文件: ${fullResponseFile}`);
+    } catch (fileError) {
+      console.error(`[植物生成] 保存完整响应对象到文件失败:`, fileError);
+    }
     
     // 解析API返回的结果
     const content = completion.choices[0]?.message?.content;
@@ -577,14 +594,7 @@ Watering method: ${waterAccessMap[space.water_access || 1] || 'Convenient for wa
     
     // 保存原始响应内容到文件
     try {
-      // 确保目录存在
-      const outputDir = path.join(__dirname, '../../data/output');
-      if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-        console.log(`[植物生成] 创建输出目录: ${outputDir}`);
-      }
-      
-      const outputFile = path.join(outputDir, `response_${space.id}.txt`);
+      const outputFile = path.join(path.join(__dirname, '../../data/output'), `response_${space.id}.txt`);
       fs.writeFileSync(outputFile, content);
       console.log(`[植物生成] 已保存原始响应内容到文件: ${outputFile}`);
     } catch (fileError) {
