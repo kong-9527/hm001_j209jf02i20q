@@ -268,13 +268,34 @@ export default function CreateGardenAdvisorPage() {
                 onChange={(e) => setHardinessZone(e.target.value)}
               >
                 <option value="">Select a hardiness zone (optional)</option>
-                <option value="1">Zone 1</option>
-                <option value="2">Zone 2</option>
-                <option value="3">Zone 3</option>
-                <option value="4">Zone 4</option>
-                <option value="5">Zone 5</option>
+                <option value="1">1a</option>
+                <option value="2">1b</option>
+                <option value="3">2a</option>
+                <option value="4">2b</option>
+                <option value="5">3a</option>
+                <option value="6">3b</option>
+                <option value="7">4a</option>
+                <option value="8">4b</option>
+                <option value="9">5a</option>
+                <option value="10">5b</option>
+                <option value="11">6a</option>
+                <option value="12">6b</option>
+                <option value="13">7a</option>
+                <option value="14">7b</option>
+                <option value="15">8a</option>
+                <option value="16">8b</option>
+                <option value="17">9a</option>
+                <option value="18">9b</option>
+                <option value="19">10a</option>
+                <option value="20">10b</option>
+                <option value="21">11a</option>
+                <option value="22">11b</option>
+                <option value="23">12a</option>
+                <option value="24">12b</option>
+                <option value="25">13a</option>
+                <option value="26">13b</option>
               </select>
-              <Link href="#" className="text-blue-500 text-xs hover:underline inline-block mt-1.5">
+              <Link href="https://planthardiness.ars.usda.gov/" target="_blank" rel="noopener noreferrer" className="text-blue-500 text-xs hover:underline inline-block mt-1.5">
                 Learn more about hardiness zones
               </Link>
             </div>

@@ -1,0 +1,26 @@
+You are a professional horticultural consultant. Please recommend 7-15 suitable plants for cultivation based on the following information and provide detailed planting advice and analysis for each plant. Please ensure that all suggestions are in line with my actual conditions and explained in a way that is easy to understand and implement.
+
+1. My gardening information is as follows:
+
+
+2. Please recommend 7-15 suitable plants for cultivation, and each recommended plant needs to provide the following 14 items:
+Recommended plant name: Recommended plant names
+Recommendation reason: Reasons for recommendation (why it meets my needs, such as budget, management difficulty, effectiveness, etc.)
+Requirements for growth environment: (temperature, humidity, light, soil type, etc.)
+Growth habits: (speed, lifecycle, adaptability)
+Fertilization suggestions: (which fertilizer to choose, frequency, and application method?)
+Disease and pest control measures: (common problems and prevention methods)
+Suitable planting months: (which seasons are suitable for sowing/transplanting)
+Flowering or ripening period: (flowering/fruiting time)
+Recommended planting spacing: (suitable plant spacing)
+Suggestions for plant compatibility: (suitable plants for planting and reasons for pairing)
+Pruning suggestions: (whether pruning is necessary and when to proceed)
+Planting and transplanting precautions: (key steps and reminders)
+Daily maintenance suggestions: (lighting, watering frequency, soil inspection, pot rotation, etc.)
+Photos: A high-definition close-up photo (showing the appearance of plants, please search for real, high-definition close-up pictures of the plant on the internet, do not use placeholder examples)
+
+3. Additional requirements:
+Please make sure to screen out plants that are related to my allergens or contraindications.
+If a certain plant is suitable but does not meet my budget or time constraints, please explain the reason why it is not recommended.
+All instructions should be as specific and practical as possible, and recommendations should be adjusted based on the parameters I have filled in.
+Please organize the text content you recommend according to hierarchical relationships and organize it in JSON format.The specific JSON structure is as follows:\n\n```json\n{\n  \"plants\": [\n    {\n      \n    },\n    {\n      \n    }\n  ]\n}\n```
