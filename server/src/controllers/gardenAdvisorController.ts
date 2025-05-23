@@ -565,22 +565,9 @@ Watering method: ${waterAccessMap[space.water_access || 1] || 'Convenient for wa
     
     console.log(`[植物生成] 空间 ID: ${space.id} 获取API响应成功`);
     
-    // 保存完整原始响应对象到文件
-    try {
-      // 确保目录存在
-      const outputDir = path.join(__dirname, '../../data/output');
-      if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-        console.log(`[植物生成] 创建输出目录: ${outputDir}`);
-      }
-      
-      // 保存完整响应对象
-      const fullResponseFile = path.join(outputDir, `full_response_${space.id}.json`);
-      fs.writeFileSync(fullResponseFile, JSON.stringify(completion, null, 2));
-      console.log(`[植物生成] 已保存完整响应对象到文件: ${fullResponseFile}`);
-    } catch (fileError) {
-      console.error(`[植物生成] 保存完整响应对象到文件失败:`, fileError);
-    }
+    // 打印完整的API响应对象到控制台
+    console.log(`[植物生成] API完整响应对象 (空间 ID: ${space.id}):`);
+    console.log(JSON.stringify(completion, null, 2));
     
     // 解析API返回的结果
     const content = completion.choices[0]?.message?.content;
@@ -590,16 +577,8 @@ Watering method: ${waterAccessMap[space.water_access || 1] || 'Convenient for wa
     }
     
     console.log(`[植物生成] API返回内容长度: ${content.length} 字符`);
-    console.log(`[植物生成] API返回内容前200字符: ${content.substring(0, 200)}...`);
-    
-    // 保存原始响应内容到文件
-    try {
-      const outputFile = path.join(path.join(__dirname, '../../data/output'), `response_${space.id}.txt`);
-      fs.writeFileSync(outputFile, content);
-      console.log(`[植物生成] 已保存原始响应内容到文件: ${outputFile}`);
-    } catch (fileError) {
-      console.error(`[植物生成] 保存响应内容到文件失败:`, fileError);
-    }
+    console.log(`[植物生成] API返回内容 (空间 ID: ${space.id}):`);
+    console.log(content);
     
     // 尝试提取JSON内容（处理可能被包装在markdown代码块中的情况）
     let jsonContent = content;
