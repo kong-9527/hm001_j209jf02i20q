@@ -20,8 +20,13 @@ interface PlanActionParams {
   fertilizer?: string;
 }
 
+// 临时扩展GardenAdvisor类型，将status视为数字类型
+interface GardenAdvisorWithNumericStatus extends Omit<GardenAdvisor, 'status'> {
+  status: number;
+}
+
 export default function GardenPlansPage() {
-  const [gardenPlans, setGardenPlans] = useState<GardenAdvisor[]>([]);
+  const [gardenPlans, setGardenPlans] = useState<GardenAdvisorWithNumericStatus[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -39,7 +44,8 @@ export default function GardenPlansPage() {
     try {
       setIsLoading(true);
       const data = await getGardenAdvisorList(projectId);
-      setGardenPlans(data);
+      // 将数据视为具有数字类型status的数组
+      setGardenPlans(data as unknown as GardenAdvisorWithNumericStatus[]);
     } catch (error) {
       console.error('获取Garden Advisor列表失败:', error);
     } finally {
@@ -130,27 +136,27 @@ export default function GardenPlansPage() {
     }
   };
   
-  const getStatusColorClass = (status: string) => {
+  const getStatusColorClass = (status: number) => {
     switch (status) {
-      case 'completed':
+      case 1:
         return 'bg-green-100 text-green-800';
-      case 'generating':
+      case 0:
         return 'bg-blue-100 text-blue-800';
-      case 'failed':
+      case 2:
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
   
-  // 根据status字符串返回对应的状态文本
-  const getStatusText = (status: string): string => {
+  // 根据status数值返回对应的状态文本
+  const getStatusText = (status: number): string => {
     switch (status) {
-      case 'generating':
+      case 0:
         return 'Generating';
-      case 'completed':
+      case 1:
         return 'Completed';
-      case 'failed':
+      case 2:
         return 'Failed';
       default:
         return 'Unknown';
@@ -188,9 +194,9 @@ export default function GardenPlansPage() {
             {gardenPlans.map(plan => (
               <div 
                 key={plan.id}
-                className={`border rounded-lg overflow-hidden flex flex-col h-full shadow-sm ${plan.status === 'completed' ? 'hover:shadow-md hover:bg-green-50 transition-shadow cursor-pointer' : ''}`}
+                className={`border rounded-lg overflow-hidden flex flex-col h-full shadow-sm ${plan.status === 1 ? 'hover:shadow-md hover:bg-green-50 transition-shadow cursor-pointer' : ''}`}
                 onClick={() => {
-                  if (plan.status === 'completed') {
+                  if (plan.status === 1) {
                     window.location.href = `/dashboard/garden-advisor/${plan.id}`;
                   }
                 }}
@@ -219,7 +225,7 @@ export default function GardenPlansPage() {
                         </svg>
                       </button>
 
-                      {plan.status === 'failed' && (
+                      {plan.status === 2 && (
                         <button 
                           onClick={(e) => {
                             e.preventDefault(); // 阻止导航事件
@@ -275,7 +281,7 @@ export default function GardenPlansPage() {
                     {getStatusText(plan.status)}
                   </span>
                   
-                  {plan.status === 'completed' && (
+                  {plan.status === 1 && (
                     <div className="mt-2 text-xs text-primary">
                       <span className="flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">

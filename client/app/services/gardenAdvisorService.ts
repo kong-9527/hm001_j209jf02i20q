@@ -12,7 +12,7 @@ export interface GardenAdvisor {
   hardiness_zone: string;
   experience: number;
   fertilizer: number;
-  status: string;
+  status: number; // 修改为数字类型：0=生成中，1=已完成，2=失败
   ctime: number; // unix timestamp
 }
 
