@@ -509,26 +509,42 @@ async function generatePlantsForSpace(advisor: GardenAdvisor, space: GardenAdvis
   try {
     console.log(`[植物生成] 开始为空间 ID: ${space.id} 生成植物推荐`);
     
+    // 打印空间原始数据
+    console.log(`[空间尺寸-原始数据] 空间ID: ${space.id}, 类型: ${space.cultivation}, 长度: ${space.length}, 宽度: ${space.width}, 高度: ${space.height}, 直径: ${space.diameter}, 计量单位: ${space.measurement}`);
+    
     // 构建容器尺寸说明
     let containerSizeDesc = '';
     const measurementUnit = space.measurement === 1 ? 'inches' : 'cm';
+    console.log(`[空间尺寸-单位] 使用计量单位: ${measurementUnit} (measurement值: ${space.measurement})`);
     
     if (space.diameter) {
       containerSizeDesc = `diameter ${space.diameter}${measurementUnit}`;
+      console.log(`[空间尺寸-拼接] 添加直径信息: ${containerSizeDesc}`);
+      
       if (space.height) {
         containerSizeDesc += `, height ${space.height}${measurementUnit}`;
+        console.log(`[空间尺寸-拼接] 添加高度信息后: ${containerSizeDesc}`);
       }
     } else {
-      if (space.length) containerSizeDesc += `length ${space.length}${measurementUnit}`;
+      if (space.length) {
+        containerSizeDesc += `length ${space.length}${measurementUnit}`;
+        console.log(`[空间尺寸-拼接] 添加长度信息: ${containerSizeDesc}`);
+      }
+      
       if (space.width) {
         if (containerSizeDesc) containerSizeDesc += ', ';
         containerSizeDesc += `width ${space.width}${measurementUnit}`;
+        console.log(`[空间尺寸-拼接] 添加宽度信息后: ${containerSizeDesc}`);
       }
+      
       if (space.height) {
         if (containerSizeDesc) containerSizeDesc += ', ';
         containerSizeDesc += `height ${space.height}${measurementUnit}`;
+        console.log(`[空间尺寸-拼接] 添加高度信息后: ${containerSizeDesc}`);
       }
     }
+    
+    console.log(`[空间尺寸-最终结果] 空间ID: ${space.id}, 最终尺寸描述: "${containerSizeDesc || '未提供尺寸信息'}"`);
     
     // 构建请求内容 - 使用Record<number, string>类型解决索引签名问题
     const experienceMap: Record<number, string> = { 1: 'Novice', 2: 'Proficient', 3: 'Expert' };
