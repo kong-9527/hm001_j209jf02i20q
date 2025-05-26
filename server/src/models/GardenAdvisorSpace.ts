@@ -11,7 +11,7 @@ interface GardenAdvisorSpaceAttributes {
   length: number | null;
   width: number | null;
   height: number | null;
-  Measurement: number | null;
+  measurement: number | null;
   diameter: number | null;
   sunlight: number | null;
   soil: number | null;
@@ -30,7 +30,7 @@ class GardenAdvisorSpace extends Model<GardenAdvisorSpaceAttributes, GardenAdvis
   public length!: number | null;
   public width!: number | null;
   public height!: number | null;
-  public Measurement!: number | null;
+  public measurement!: number | null;
   public diameter!: number | null;
   public sunlight!: number | null;
   public soil!: number | null;
@@ -69,7 +69,7 @@ GardenAdvisorSpace.init(
       type: DataTypes.FLOAT,
       allowNull: true,
     },
-    Measurement: {
+    measurement: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },

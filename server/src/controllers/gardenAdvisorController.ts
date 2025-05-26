@@ -250,22 +250,39 @@ export const createGardenAdvisor = async (req: Request, res: Response): Promise<
           advisor_id: advisor.id,
           in_out: space.inOut === 'indoor' ? 1 : 2, // indoor=1, outdoor=2
           cultivation: getCultivationTypeId(space.type),
-          Measurement: getMeasurementUnitId(space.measurement),
+          measurement: getMeasurementUnitId(space.measurement),
           sunlight: getSunlightTypeId(space.sunlight),
           soil: getSoilTypeId(space.soil),
           water_access: getWaterAccessTypeId(space.waterAccess)
         };
 
         // 处理尺寸数据
-        if (space.type === 'round-pot' && space.diameter) {
-          // 对于圆形花盆，使用直径值设置所有尺寸
-          const diameterValue = parseFloat(String(space.diameter));
-          spaceData.diameter = diameterValue;
-          spaceData.length = diameterValue;
-          spaceData.width = diameterValue;
-          spaceData.height = space.height ? parseFloat(String(space.height)) : diameterValue;
+        if (space.type === 'round-pot') {
+          // 对于圆形花盆，只保留直径和高度，强制清空长度和宽度
+          spaceData.diameter = space.diameter ? parseFloat(String(space.diameter)) : null;
+          spaceData.height = space.height ? parseFloat(String(space.height)) : null;
+          spaceData.length = null;
+          spaceData.width = null;
+        } else if (space.type === 'square-pot') {
+          // 方形花盆：保留length, width, height，清空diameter
+          spaceData.length = space.length ? parseFloat(String(space.length)) : null;
+          spaceData.width = space.width ? parseFloat(String(space.width)) : null;
+          spaceData.height = space.height ? parseFloat(String(space.height)) : null;
+          spaceData.diameter = null;
+        } else if (space.type === 'raised-bed') {
+          // 高床：保留length, width, height，清空diameter
+          spaceData.length = space.length ? parseFloat(String(space.length)) : null;
+          spaceData.width = space.width ? parseFloat(String(space.width)) : null;
+          spaceData.height = space.height ? parseFloat(String(space.height)) : null;
+          spaceData.diameter = null;
+        } else if (space.type === 'ground') {
+          // 地上种植：保留length和width，清空height和diameter
+          spaceData.length = space.length ? parseFloat(String(space.length)) : null;
+          spaceData.width = space.width ? parseFloat(String(space.width)) : null;
+          spaceData.height = null;
+          spaceData.diameter = null;
         } else {
-          // 对于其他类型的容器
+          // 其他未知类型
           spaceData.length = space.length ? parseFloat(String(space.length)) : null;
           spaceData.width = space.width ? parseFloat(String(space.width)) : null;
           spaceData.height = space.height ? parseFloat(String(space.height)) : null;
@@ -376,8 +393,9 @@ function getMeasurementUnitId(unit: string | undefined | null): number {
   if (!unit) return 1; // 默认值
   
   const unitMap: {[key: string]: number} = {
-    'cm': 1,
-    'inch': 2
+    'inches': 1,
+    'inch': 1,
+    'cm': 2
   };
   return unitMap[unit.toLowerCase()] || 1;
 }
@@ -493,7 +511,7 @@ async function generatePlantsForSpace(advisor: GardenAdvisor, space: GardenAdvis
     
     // 构建容器尺寸说明
     let containerSizeDesc = '';
-    const measurementUnit = space.Measurement === 1 ? 'inches' : 'cm';
+    const measurementUnit = space.measurement === 1 ? 'inches' : 'cm';
     
     if (space.diameter) {
       containerSizeDesc = `diameter ${space.diameter}${measurementUnit}`;
