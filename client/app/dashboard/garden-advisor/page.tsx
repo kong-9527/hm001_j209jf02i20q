@@ -143,6 +143,20 @@ export default function GardenPlansPage() {
     }
   };
   
+  // 根据status字符串返回对应的状态文本
+  const getStatusText = (status: string): string => {
+    switch (status) {
+      case 'generating':
+        return 'Generating';
+      case 'completed':
+        return 'Completed';
+      case 'failed':
+        return 'Failed';
+      default:
+        return 'Unknown';
+    }
+  };
+  
   return (
     <WithProjectCheck>
       <div className="p-6">
@@ -172,10 +186,14 @@ export default function GardenPlansPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {gardenPlans.map(plan => (
-              <Link 
+              <div 
                 key={plan.id}
-                href={`/dashboard/garden-advisor/${plan.id}`}
-                className={`border rounded-lg overflow-hidden flex flex-col h-full shadow-sm hover:shadow-md hover:bg-green-50 transition-shadow cursor-pointer`}
+                className={`border rounded-lg overflow-hidden flex flex-col h-full shadow-sm ${plan.status === 'completed' ? 'hover:shadow-md hover:bg-green-50 transition-shadow cursor-pointer' : ''}`}
+                onClick={() => {
+                  if (plan.status === 'completed') {
+                    window.location.href = `/dashboard/garden-advisor/${plan.id}`;
+                  }
+                }}
               >
                 <div className="p-4 flex flex-col h-full">
                   <div className="flex justify-between items-start mb-3">
@@ -254,10 +272,21 @@ export default function GardenPlansPage() {
                   </div>
                   
                   <span className={`inline-block ${getStatusColorClass(plan.status)} text-xs px-2 py-1 rounded mt-2 w-fit`}>
-                    {plan.status}
+                    {getStatusText(plan.status)}
                   </span>
+                  
+                  {plan.status === 'completed' && (
+                    <div className="mt-2 text-xs text-primary">
+                      <span className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                        Click to view details
+                      </span>
+                    </div>
+                  )}
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
