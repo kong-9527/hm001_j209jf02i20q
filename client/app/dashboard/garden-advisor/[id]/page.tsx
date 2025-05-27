@@ -410,21 +410,17 @@ export default function GardenAdvisorDetail() {
                 </div>
               ) : plantDetail ? (
                 <div className="flex-1 overflow-y-auto p-6">
-                  {/* 植物图片 */}
-              <div className="aspect-w-16 aspect-h-9 mb-6">
-                    {plantDetail.image ? (
+                  {/* 植物图片 - 暂时隐藏 */}
+                  {/* {plantDetail.image && (
+                    <div className="aspect-w-16 aspect-h-9 mb-6">
                       <img 
                         src={plantDetail.image} 
                         alt={plantDetail.name} 
                         className="w-full h-48 object-cover rounded-lg"
                       />
-                    ) : (
-                <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-500">Plant Image</span>
-                </div>
-                    )}
-              </div>
-              
+                    </div>
+                  )} */}
+                  
                   {/* Why We Recommend - 显示reason */}
                   {plantDetail.reason && (
               <div className="mb-6">
