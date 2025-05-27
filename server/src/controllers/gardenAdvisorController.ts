@@ -921,3 +921,86 @@ function getWaterAccessText(waterAccess: number | null): string {
     default: return '';
   }
 }
+
+/**
+ * 获取植物详情
+ */
+export const getPlantDetail = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = req.user as UserInfo;
+    const userId = user?.id;
+    const { spaceId, plantName } = req.params;
+
+    // 参数校验
+    if (!userId) {
+      res.status(401).json({ message: '用户未认证' });
+      return;
+    }
+
+    if (!spaceId || !plantName) {
+      res.status(400).json({ message: '参数不完整' });
+      return;
+    }
+
+    // 查询空间信息以验证用户权限
+    const space = await GardenAdvisorSpace.findOne({
+      where: { id: spaceId },
+      include: [
+        {
+          model: GardenAdvisor,
+          as: 'advisor',
+          where: { user_id: userId },
+          required: true
+        }
+      ]
+    });
+
+    if (!space) {
+      res.status(404).json({ message: '空间不存在或无权访问' });
+      return;
+    }
+
+    // 查询植物详情
+    const plant = await GardenAdvisorSpacePlant.findOne({
+      where: {
+        space_id: spaceId,
+        plant_name: plantName
+      }
+    });
+
+    if (!plant) {
+      res.status(404).json({ message: '植物不存在' });
+      return;
+    }
+
+    // 格式化和返回植物详情
+    const result = {
+      id: plant.id,
+      name: plant.plant_name,
+      image: plant.plant_pic,
+      reason: plant.reason,
+      growingMonth: plant.growing_month,
+      flowerHarvest: plant.growing_flower_harvest,
+      characteristicDistance: plant.characteristic_distance,
+      growingHabits: plant.growing_habits,
+      growingFertilizer: plant.growing_fertilizer,
+      plantingInstructions: plant.planting_instructions,
+      growingCutting: plant.growing_cutting,
+      growingPest: plant.growing_pest,
+      tips: plant.tips,
+      growingMatch: plant.growing_match,
+      // 添加其他基本信息
+      sunlight: plant.conditions_sunlight,
+      water: plant.conditions_water,
+      soil: plant.conditions_soil,
+      height: plant.characteristic_height,
+      bloom: plant.characteristic_bloom,
+      lifespan: plant.characteristic_lifespan
+    };
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('获取植物详情失败:', error);
+    res.status(500).json({ message: '获取植物详情失败', error });
+  }
+};

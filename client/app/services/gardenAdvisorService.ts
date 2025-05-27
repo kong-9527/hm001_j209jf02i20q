@@ -81,6 +81,31 @@ export interface GardenAdvisorDetail {
   spaces: Space[];
 }
 
+// 植物详情类型定义
+export interface PlantDetail {
+  id: number;
+  name: string;
+  image: string | null;
+  reason: string | null;
+  growingMonth: string | null;
+  flowerHarvest: string | null;
+  characteristicDistance: string | null;
+  growingHabits: string | null;
+  growingFertilizer: string | null;
+  plantingInstructions: string | null;
+  growingCutting: string | null;
+  growingPest: string | null;
+  tips: string | null;
+  growingMatch: string | null;
+  // 其他基本信息
+  sunlight: string | null;
+  water: string | null;
+  soil: string | null;
+  height: string | null;
+  bloom: string | null;
+  lifespan: string | null;
+}
+
 // 帮助函数：将经验级别转换为文本
 const formatExperience = (experience: number | null): string => {
   switch (experience) {
@@ -232,6 +257,24 @@ export const createGardenAdvisor = async (data: CreateGardenAdvisorData): Promis
       console.error('服务器响应数据:', error.response.data);
     }
     
+    throw error;
+  }
+};
+
+// 获取植物详情
+export const getPlantDetail = async (spaceId: number, plantName: string): Promise<PlantDetail> => {
+  try {
+    // 对plantName进行URL编码，因为它可能包含特殊字符
+    const encodedPlantName = encodeURIComponent(plantName);
+    
+    // 发起请求获取植物详情
+    const response = await axios.get(`${API_URL}/garden-advisors/plant-detail/${spaceId}/${encodedPlantName}`, {
+      withCredentials: true
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('获取植物详情失败:', error);
     throw error;
   }
 }; 
