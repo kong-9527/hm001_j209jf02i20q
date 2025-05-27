@@ -51,25 +51,17 @@ export default function Sidebar() {
     console.log('Sidebar: Menu item clicked:', href);
     console.log('Sidebar: Current project state:', currentProject);
     
-    // 更新用户点数
+    // 获取最新的用户信息，包括points
     try {
-      const response = await fetch('/api/user/points');
-      if (!response.ok) {
-        throw new Error('Failed to fetch points');
-      }
-      const data = await response.json();
-      if (data.points !== undefined) {
-        // 更新用户上下文中的点数
-        if (user) {
-          user.points = data.points.toString();
-        }
+      const userData = await getCurrentUser();
+      if (userData) {
         // 发送更新事件
         emit('user_points_updated', { 
-          points: data.points
+          points: userData.points || '0'
         });
       }
     } catch (error) {
-      console.error('Error fetching user points:', error);
+      console.error('获取最新用户信息失败:', error);
     }
     
     // 处理Garden Design和Garden Advisor页面的跳转
