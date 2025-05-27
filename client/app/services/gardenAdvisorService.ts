@@ -44,6 +44,43 @@ export interface CreateGardenAdvisorData {
   }>;
 }
 
+// Garden Advisor详情类型定义
+export interface Plant {
+  name: string;
+}
+
+export interface Space {
+  id: number;
+  in_out: string;
+  cultivation: string;
+  dimensions: string;
+  sunlight: string;
+  soil: string;
+  water_access: string;
+  plants: Plant[];
+}
+
+export interface GardenPlan {
+  id: string | number;
+  name: string;
+  location: string;
+  experience: string;
+  budget: string;
+  time: string;
+  maintenance: string;
+  fertilizer: string;
+  goals: string;
+  plantTypes: string;
+  spaces: number;
+  allergies: string;
+  createdAt: string;
+}
+
+export interface GardenAdvisorDetail {
+  gardenPlan: GardenPlan;
+  spaces: Space[];
+}
+
 // 获取Garden Advisor列表
 export const getGardenAdvisorList = async (projectId: number): Promise<GardenAdvisor[]> => {
   try {
@@ -57,6 +94,25 @@ export const getGardenAdvisorList = async (projectId: number): Promise<GardenAdv
     return response.data;
   } catch (error) {
     console.error('获取Garden Advisor列表失败:', error);
+    throw error;
+  }
+};
+
+// 获取Garden Advisor详情
+export const getGardenAdvisorDetail = async (advisorId: string | number): Promise<GardenAdvisorDetail> => {
+  try {
+    // 处理advisorId是数组的情况
+    const id = Array.isArray(advisorId) ? advisorId[0] : advisorId;
+    
+    // 发起请求获取garden-advisor详情
+    const response = await axios.get(`${API_URL}/garden-advisors/detail/${id}`, {
+      withCredentials: true
+    });
+    
+    // 返回数据
+    return response.data;
+  } catch (error) {
+    console.error('获取Garden Advisor详情失败:', error);
     throw error;
   }
 };

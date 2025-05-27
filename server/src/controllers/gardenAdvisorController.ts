@@ -681,3 +681,243 @@ Watering method: ${waterAccessMap[space.water_access || 1] || 'Convenient for wa
     console.log(`[植物生成-详细] 离开generatePlantsForSpace函数，空间ID: ${space.id}`);
   }
 }
+
+/**
+ * 获取花园顾问详情
+ */
+export const getGardenAdvisorDetail = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = req.user as UserInfo;
+    const userId = user?.id;
+    const advisorId = req.params.id;
+
+    // 参数校验
+    if (!userId) {
+      res.status(401).json({ message: '用户未认证' });
+      return;
+    }
+
+    if (!advisorId) {
+      res.status(400).json({ message: 'ID不能为空' });
+      return;
+    }
+
+    // 查询花园顾问详情
+    const advisor = await GardenAdvisor.findOne({
+      where: {
+        id: advisorId,
+        user_id: userId
+      }
+    });
+
+    if (!advisor) {
+      res.status(404).json({ message: '花园顾问不存在' });
+      return;
+    }
+
+    // 查询所有相关空间
+    const spaces = await GardenAdvisorSpace.findAll({
+      where: {
+        advisor_id: advisorId
+      }
+    });
+
+    // 查询每个空间的植物
+    const spacesWithPlants = await Promise.all(spaces.map(async (space) => {
+      const plants = await GardenAdvisorSpacePlant.findAll({
+        where: {
+          space_id: space.id
+        }
+      });
+
+      // 格式化尺寸信息
+      let dimensions = '';
+      const unit = space.measurement === 1 ? 'inches' : 'cm';
+      
+      if (space.cultivation === 1) { // Square Pot
+        dimensions = `L${space.length}${unit} x W${space.width}${unit} x H${space.height}${unit}`;
+      } else if (space.cultivation === 2) { // Round pot
+        dimensions = `D${space.diameter}${unit} x H${space.height}${unit}`;
+      } else if (space.cultivation === 3) { // Raised Bed
+        dimensions = `L${space.length}${unit} x W${space.width}${unit} x H${space.height}${unit}`;
+      } else if (space.cultivation === 4) { // Ground
+        dimensions = `L${space.length}${unit} x W${space.width}${unit}`;
+      }
+
+      // 转换枚举值为对应文本
+      const inOutText = getInOutText(space.in_out);
+      const cultivationText = getCultivationText(space.cultivation);
+      const sunlightText = getSunlightText(space.sunlight);
+      const soilText = getSoilText(space.soil);
+      const waterAccessText = getWaterAccessText(space.water_access);
+
+      // 格式化植物数据
+      const plantsData = plants.map(plant => ({
+        name: plant.plant_name
+      }));
+
+      return {
+        id: space.id,
+        in_out: inOutText,
+        cultivation: cultivationText,
+        dimensions: dimensions,
+        sunlight: sunlightText,
+        soil: soilText,
+        water_access: waterAccessText,
+        plants: plantsData
+      };
+    }));
+
+    // 格式化顾问数据
+    const formattedLocation = advisor.location && advisor.hardiness_zone 
+      ? `${advisor.location} ${advisor.hardiness_zone}`
+      : 'no information';
+    
+    const formattedExperience = getExperienceText(advisor.experience);
+    const formattedBudget = getBudgetText(advisor.budget);
+    const formattedTime = getTimeText(advisor.time);
+    const formattedMaintenance = getMaintenanceText(advisor.maintenance);
+    const formattedFertilizer = getFertilizerText(advisor.fertilizer);
+    
+    // 格式化创建时间
+    const createdAt = formatTimestamp(advisor.ctime);
+
+    // 组装返回数据
+    const result = {
+      gardenPlan: {
+        id: advisor.id,
+        name: advisor.plan_name,
+        location: formattedLocation,
+        experience: formattedExperience,
+        budget: formattedBudget,
+        time: formattedTime,
+        maintenance: formattedMaintenance,
+        fertilizer: formattedFertilizer,
+        goals: advisor.goals,
+        plantTypes: advisor.plant_types,
+        spaces: advisor.spaces,
+        allergies: advisor.allergies,
+        createdAt: createdAt
+      },
+      spaces: spacesWithPlants
+    };
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('获取花园顾问详情失败:', error);
+    res.status(500).json({ message: '获取花园顾问详情失败', error });
+  }
+};
+
+// 辅助函数：格式化时间戳为yyyy/mm/dd格式
+function formatTimestamp(timestamp: number | null): string {
+  if (!timestamp) return '';
+  
+  const date = new Date(timestamp * 1000);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  
+  return `${year}/${month}/${day}`;
+}
+
+// 辅助函数：获取经验水平文本
+function getExperienceText(experience: number | null): string {
+  switch (experience) {
+    case 1: return 'Novice';
+    case 2: return 'Proficient';
+    case 3: return 'Expert';
+    default: return '';
+  }
+}
+
+// 辅助函数：获取预算水平文本
+function getBudgetText(budget: number | null): string {
+  switch (budget) {
+    case 1: return 'Low';
+    case 2: return 'Medium';
+    case 3: return 'High';
+    default: return '';
+  }
+}
+
+// 辅助函数：获取时间投入水平文本
+function getTimeText(time: number | null): string {
+  switch (time) {
+    case 1: return 'Low';
+    case 2: return 'Medium';
+    case 3: return 'High';
+    default: return '';
+  }
+}
+
+// 辅助函数：获取维护水平文本
+function getMaintenanceText(maintenance: number | null): string {
+  switch (maintenance) {
+    case 1: return 'Low';
+    case 2: return 'Medium';
+    case 3: return 'High';
+    default: return '';
+  }
+}
+
+// 辅助函数：获取肥料类型文本
+function getFertilizerText(fertilizer: number | null): string {
+  switch (fertilizer) {
+    case 1: return 'Organic';
+    case 2: return 'Conventional';
+    default: return '';
+  }
+}
+
+// 辅助函数：获取室内/室外文本
+function getInOutText(inOut: number | null): string {
+  switch (inOut) {
+    case 1: return 'Indoor';
+    case 2: return 'Outdoor';
+    default: return '';
+  }
+}
+
+// 辅助函数：获取种植方式文本
+function getCultivationText(cultivation: number | null): string {
+  switch (cultivation) {
+    case 1: return 'Square Pot';
+    case 2: return 'Round Pot';
+    case 3: return 'Raised Bed';
+    case 4: return 'Ground';
+    default: return '';
+  }
+}
+
+// 辅助函数：获取阳光条件文本
+function getSunlightText(sunlight: number | null): string {
+  switch (sunlight) {
+    case 1: return 'Full Sun';
+    case 2: return 'Partial Sun';
+    case 3: return 'Partial Shade';
+    case 4: return 'Full Shade';
+    default: return '';
+  }
+}
+
+// 辅助函数：获取土壤类型文本
+function getSoilText(soil: number | null): string {
+  switch (soil) {
+    case 1: return 'Clay';
+    case 2: return 'Loam';
+    case 3: return 'Sandy';
+    case 4: return 'Silty';
+    default: return '';
+  }
+}
+
+// 辅助函数：获取水源类型文本
+function getWaterAccessText(waterAccess: number | null): string {
+  switch (waterAccess) {
+    case 1: return 'Easy';
+    case 2: return 'Limited';
+    case 3: return 'Rainfall';
+    default: return '';
+  }
+}
