@@ -81,6 +81,62 @@ export interface GardenAdvisorDetail {
   spaces: Space[];
 }
 
+// 帮助函数：将经验级别转换为文本
+const formatExperience = (experience: number | null): string => {
+  switch (experience) {
+    case 1: return 'Novice';
+    case 2: return 'Proficient';
+    case 3: return 'Expert';
+    default: return 'Not specified';
+  }
+};
+
+// 帮助函数：将预算级别转换为文本
+const formatBudget = (budget: number | null): string => {
+  switch (budget) {
+    case 1: return 'Low';
+    case 2: return 'Medium';
+    case 3: return 'High';
+    default: return 'Not specified';
+  }
+};
+
+// 帮助函数：将时间级别转换为文本
+const formatTime = (time: number | null): string => {
+  switch (time) {
+    case 1: return 'Low';
+    case 2: return 'Medium';
+    case 3: return 'High';
+    default: return 'Not specified';
+  }
+};
+
+// 帮助函数：将维护级别转换为文本
+const formatMaintenance = (maintenance: number | null): string => {
+  switch (maintenance) {
+    case 1: return 'Low';
+    case 2: return 'Medium';
+    case 3: return 'High';
+    default: return 'Not specified';
+  }
+};
+
+// 帮助函数：将肥料类型转换为文本
+const formatFertilizer = (fertilizer: number | null): string => {
+  switch (fertilizer) {
+    case 1: return 'Organic';
+    case 2: return 'Conventional';
+    default: return 'Not specified';
+  }
+};
+
+// 帮助函数：格式化日期
+const formatDate = (timestamp: number | null): string => {
+  if (!timestamp) return 'N/A';
+  const date = new Date(timestamp * 1000);
+  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+};
+
 // 获取Garden Advisor列表
 export const getGardenAdvisorList = async (projectId: number): Promise<GardenAdvisor[]> => {
   try {
@@ -109,8 +165,48 @@ export const getGardenAdvisorDetail = async (advisorId: string | number): Promis
       withCredentials: true
     });
     
-    // 返回数据
-    return response.data;
+    // 获取原始数据
+    const data = response.data;
+    
+    // 格式化Garden Plan数据
+    if (data.gardenPlan) {
+      // 1. 如果后端返回的location已经包含了Hardiness Zone信息，则不需要再次处理
+      // 但如果location是"no information"，则替换为更友好的表述
+      if (data.gardenPlan.location === 'no information') {
+        data.gardenPlan.location = 'No information';
+      }
+      
+      // 2. 确保枚举值正确转换为对应文本
+      // 如果后端已经返回了格式化的文本，则使用后端返回的
+      // 如果后端返回的是空字符串或null，则使用前端格式化函数处理
+      if (!data.gardenPlan.experience) {
+        data.gardenPlan.experience = formatExperience(data.gardenPlan.experience);
+      }
+      
+      if (!data.gardenPlan.budget) {
+        data.gardenPlan.budget = formatBudget(data.gardenPlan.budget);
+      }
+      
+      if (!data.gardenPlan.time) {
+        data.gardenPlan.time = formatTime(data.gardenPlan.time);
+      }
+      
+      if (!data.gardenPlan.maintenance) {
+        data.gardenPlan.maintenance = formatMaintenance(data.gardenPlan.maintenance);
+      }
+      
+      if (!data.gardenPlan.fertilizer) {
+        data.gardenPlan.fertilizer = formatFertilizer(data.gardenPlan.fertilizer);
+      }
+      
+      // 3. 如果后端返回的日期格式不是预期的格式，则使用前端格式化函数处理
+      if (!data.gardenPlan.createdAt || data.gardenPlan.createdAt === '') {
+        data.gardenPlan.createdAt = formatDate(data.gardenPlan.ctime);
+      }
+    }
+    
+    // 返回格式化后的数据
+    return data;
   } catch (error) {
     console.error('获取Garden Advisor详情失败:', error);
     throw error;
