@@ -57,27 +57,40 @@ const PORT = process.env.PORT || 5000;
 // CORS配置
 const allowedOrigins = [
   'https://aigardendesign.vercel.app',  // 生产环境前端域名
-  'http://localhost:3000',             // 开发环境前端地址
+  'http://localhost:3000',              // 开发环境前端地址
 ];
 
 // 中间件
-app.use(cors({
-  origin: function(origin, callback) {
-    // 允许没有origin的请求（比如移动端APP）
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+const corsOptions = process.env.NODE_ENV === 'production' 
+  ? {
+      // 生产环境使用更宽松的CORS配置
+      origin: true, // 允许所有域
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      exposedHeaders: ['Set-Cookie'],
+      maxAge: 86400
     }
-    return callback(null, true);
-  },
-  credentials: true,  // 允许携带凭证
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['Set-Cookie'],
-  maxAge: 86400  // 预检请求结果缓存24小时
-}));
+  : {
+      // 开发环境使用严格的CORS配置
+      origin: function(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+        // 允许没有origin的请求（比如移动端APP）
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) === -1) {
+          const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+          return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      exposedHeaders: ['Set-Cookie'],
+      maxAge: 86400
+    };
+
+app.use(cors(corsOptions));
 
 // 配置Helmet，但允许内联脚本执行（使弹窗中的脚本能够执行）
 app.use(helmet({
