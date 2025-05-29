@@ -87,9 +87,16 @@ console.log(`数据库配置: 类型=${dbDialect}, 主机=${dbHost}, 端口=${db
 let connectionString = '';
 if (dbHost.includes('supabase')) {
   console.log('检测到Supabase主机，使用特殊配置');
-  connectionString = `postgres://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}?sslmode=require`;
+  // 不在连接字符串中指定SSL模式，而是在dialectOptions中配置
+  connectionString = `postgres://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
   console.log('使用连接字符串（已隐藏密码）');
 }
+
+// 共享的SSL配置
+const sslConfig = {
+  require: true,
+  rejectUnauthorized: false // 关键修改：不验证证书，避免自签名证书问题
+};
 
 // 数据库连接配置
 const sequelize = connectionString 
@@ -110,11 +117,8 @@ const sequelize = connectionString
       acquire: 30000
     },
     dialectOptions: {
-      // 为 SSL 连接添加额外选项 (用于 Vercel)
-      ssl: process.env.NODE_ENV === 'production' ? {
-        require: true,
-        rejectUnauthorized: false
-      } : false,
+      // 为 SSL 连接添加额外选项 (适用于所有环境)
+      ssl: sslConfig,
       // 添加Supabase SCRAM-SHA-256认证支持
       client_encoding: 'UTF8',
       application_name: 'garden_app',
@@ -143,11 +147,8 @@ const sequelize = connectionString
       acquire: 30000
     },
     dialectOptions: {
-      // 为 SSL 连接添加额外选项 (用于 Vercel)
-      ssl: process.env.NODE_ENV === 'production' ? {
-        require: true,
-        rejectUnauthorized: false
-      } : false,
+      // 为 SSL 连接添加额外选项 (适用于所有环境)
+      ssl: sslConfig,
       // 添加Supabase SCRAM-SHA-256认证支持
       client_encoding: 'UTF8',
       application_name: 'garden_app',
