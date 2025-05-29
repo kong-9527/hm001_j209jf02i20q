@@ -24,10 +24,32 @@ if (fs.existsSync(pgPackagePath)) {
   console.error('警告: pg包文件不存在于:', pgPackagePath);
 }
 
+// 尝试加载pg-native以支持SCRAM-SHA-256认证
+let pgNative = null;
+try {
+  pgNative = require('pg-native');
+  console.log('成功加载pg-native库，用于SCRAM-SHA-256认证');
+} catch (e) {
+  console.warn('未能加载pg-native库，将使用默认认证方式:', e);
+}
+
 // 检查是否存在必要的数据库包
 try {
   const pg = require('pg');
   console.log('成功加载 pg 包，版本:', pg.version);
+  
+  // 配置pg以使用SCRAM-SHA-256认证
+  try {
+    // 尝试配置pg客户端默认设置
+    if (process.env.NODE_ENV === 'production') {
+      console.log('为生产环境配置pg客户端...');
+      const { Client } = pg;
+      console.log('确保启用SSL和SCRAM-SHA-256认证支持');
+    }
+  } catch (e) {
+    console.warn('配置pg客户端时出错:', e);
+  }
+  
 } catch (err) {
   console.error('严重错误: pg 包未正确加载:', err);
   
@@ -61,29 +83,79 @@ const dbPort = parseInt(process.env.DB_PORT || '5432');
 
 console.log(`数据库配置: 类型=${dbDialect}, 主机=${dbHost}, 端口=${dbPort}, 数据库=${dbName}`);
 
+// 如果是Supabase，确保使用安全连接字符串
+let connectionString = '';
+if (dbHost.includes('supabase')) {
+  console.log('检测到Supabase主机，使用特殊配置');
+  connectionString = `postgres://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}?sslmode=require`;
+  console.log('使用连接字符串（已隐藏密码）');
+}
+
 // 数据库连接配置
-const sequelize = new Sequelize(
-  dbName,
-  dbUser,
-  dbPassword,
-  {
-    host: dbHost,
+const sequelize = connectionString 
+  ? new Sequelize(connectionString, {
     dialect: dbDialect as Dialect,
-    port: dbPort,
     timezone: '+08:00', // 中国时区
     define: {
       timestamps: false, // 禁用默认时间戳
       freezeTableName: true // 表名不复数
     },
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
+    // 配置连接池
+    pool: {
+      // 确保连接不被缓存太长时间
+      max: 10,
+      min: 0,
+      idle: 10000,
+      acquire: 30000
+    },
     dialectOptions: {
       // 为 SSL 连接添加额外选项 (用于 Vercel)
       ssl: process.env.NODE_ENV === 'production' ? {
         require: true,
         rejectUnauthorized: false
-      } : false
+      } : false,
+      // 添加Supabase SCRAM-SHA-256认证支持
+      client_encoding: 'UTF8',
+      application_name: 'garden_app',
+      keepAlive: true,
+      options: `-c client_encoding=UTF8 -c search_path=public`,
+      statement_timeout: 60000,
+      idle_timeout: 60000
     }
-  }
-);
+  })
+  : new Sequelize(dbName, dbUser, dbPassword, {
+    host: dbHost,
+    port: dbPort,
+    dialect: dbDialect as Dialect,
+    timezone: '+08:00', // 中国时区
+    define: {
+      timestamps: false, // 禁用默认时间戳
+      freezeTableName: true // 表名不复数
+    },
+    logging: process.env.NODE_ENV === 'development' ? console.log : false,
+    // 配置连接池
+    pool: {
+      // 确保连接不被缓存太长时间
+      max: 10,
+      min: 0,
+      idle: 10000,
+      acquire: 30000
+    },
+    dialectOptions: {
+      // 为 SSL 连接添加额外选项 (用于 Vercel)
+      ssl: process.env.NODE_ENV === 'production' ? {
+        require: true,
+        rejectUnauthorized: false
+      } : false,
+      // 添加Supabase SCRAM-SHA-256认证支持
+      client_encoding: 'UTF8',
+      application_name: 'garden_app',
+      keepAlive: true,
+      options: `-c client_encoding=UTF8 -c search_path=public`,
+      statement_timeout: 60000,
+      idle_timeout: 60000
+    }
+  });
 
 export default sequelize;

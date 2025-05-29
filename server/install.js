@@ -45,9 +45,20 @@ try {
   // 确保安装 pg 和 pg-hstore 包
   console.log('安装 PostgreSQL 驱动...');
   
-  // 尝试先单独安装pg，这样可以确保它正确编译
+  // 尝试先单独安装最新版本的pg，这样可以确保它正确编译
+  console.log('安装pg 8.11.3...');
   execSync('npm install pg@8.11.3 --no-save --verbose', { stdio: 'inherit' });
   console.log('pg包安装完成');
+
+  // 然后安装pg-native以支持SCRAM身份验证
+  console.log('安装pg-native以支持高级身份验证...');
+  try {
+    execSync('npm install pg-native --no-save --verbose', { stdio: 'inherit' });
+    console.log('pg-native包安装完成');
+  } catch (e) {
+    console.warn('pg-native安装失败，这可能会影响某些高级身份验证方式:', e.message);
+    console.warn('继续安装其他依赖...');
+  }
   
   // 然后安装pg-hstore
   execSync('npm install pg-hstore@2.3.4 --no-save --verbose', { stdio: 'inherit' });
@@ -58,6 +69,10 @@ try {
     console.log('将pg添加到package.json...');
     execSync('npm install pg@8.11.3 pg-hstore@2.3.4 --save --verbose', { stdio: 'inherit' });
   }
+  
+  // 安装最新版本的sequelize
+  console.log('安装最新版本的sequelize...');
+  execSync('npm install sequelize@6.37.1 --save --verbose', { stdio: 'inherit' });
   
   // 检查 pg 是否正确安装
   try {
