@@ -559,41 +559,49 @@ async function generatePlantsForSpace(advisor: GardenAdvisor, space: GardenAdvis
     const waterAccessMap: Record<number, string> = { 1: 'Convenient for watering', 2: 'Limited watering frequency', 3: 'Relying on rainfall' };
     
     // 获取基本提示词
-    const basePrompt = fs.readFileSync(path.join(__dirname, '../data/advisor_prmopt.txt'), 'utf8');
+    const basePrompt = fs.readFileSync(path.join(__dirname, '../data/advisor_prmopt.txt'), 'utf8').replace(/\r\n/g, '\n');
     
     // 构建用户提示词
-    let promptContent = basePrompt.replace('1. My gardening information is as follows:', `1. My gardening information is as follows:
-Country: ${advisor.location || 'United States'}
-Cold resistant zone number (USDA standard): ${advisor.hardiness_zone || '6b'}
-Horticultural Experience Level: ${experienceMap[advisor.experience || 1] || 'Novice'}
-Planting purpose and use: ${advisor.goals || 'for hobbies/garden fragrance/beauty'}
-Preferred plant types: ${advisor.plant_types || 'flowers/aquatic plants/orchids/succulents'}
-Preference for Fertilization Method: ${fertilizerMap[advisor.fertilizer || 1] || 'Organic natural fertilizer'}
-Horticultural budget level: ${budgetMap[advisor.budget || 1] || 'Low'}
-Available time: ${timeMap[advisor.time || 1] || 'Low'}
-Maintenance difficulty: ${maintenanceMap[advisor.maintenance || 1] || 'Low'}
-Allergens or plant ingredients to avoid: ${advisor.allergies || 'mold/weeds/dust/shrubs/insects'}
-Cultivation location: ${inOutMap[space.in_out || 1] || 'Indoor'}
-Type of cultivation container: ${cultivationMap[space.cultivation || 1] || 'Square Pot'}
-Cultivation container size: ${containerSizeDesc || 'diameter 30cm, height 30cm'}
-Sunshine environment: ${sunlightMap[space.sunlight || 1] || 'Full Sun'}
-Soil conditions: ${soilMap[space.soil || 1] || 'Loam'}
-Watering method: ${waterAccessMap[space.water_access || 1] || 'Convenient for watering'}`);
+    const userInfo = [
+      `Country: ${advisor.location || 'United States'}`,
+      `Cold resistant zone number (USDA standard): ${advisor.hardiness_zone || '6b'}`,
+      `Horticultural Experience Level: ${experienceMap[advisor.experience || 1] || 'Novice'}`,
+      `Planting purpose and use: ${advisor.goals || 'for hobbies/garden fragrance/beauty'}`,
+      `Preferred plant types: ${advisor.plant_types || 'flowers/aquatic plants/orchids/succulents'}`,
+      `Preference for Fertilization Method: ${fertilizerMap[advisor.fertilizer || 1] || 'Organic natural fertilizer'}`,
+      `Horticultural budget level: ${budgetMap[advisor.budget || 1] || 'Low'}`,
+      `Available time: ${timeMap[advisor.time || 1] || 'Low'}`,
+      `Maintenance difficulty: ${maintenanceMap[advisor.maintenance || 1] || 'Low'}`,
+      `Allergens or plant ingredients to avoid: ${advisor.allergies || 'mold/weeds/dust/shrubs/insects'}`,
+      `Cultivation location: ${inOutMap[space.in_out || 1] || 'Indoor'}`,
+      `Type of cultivation container: ${cultivationMap[space.cultivation || 1] || 'Square Pot'}`,
+      `Cultivation container size: ${containerSizeDesc || 'diameter 30cm, height 30cm'}`,
+      `Sunshine environment: ${sunlightMap[space.sunlight || 1] || 'Full Sun'}`,
+      `Soil conditions: ${soilMap[space.soil || 1] || 'Loam'}`,
+      `Watering method: ${waterAccessMap[space.water_access || 1] || 'Convenient for watering'}`
+    ].join('\n');
+    
+    let promptContent = basePrompt.replace('1. My gardening information is as follows:', `1. My gardening information is as follows:\n${userInfo}`);
     
     console.log(`[植物生成] 开始为空间 ID: ${space.id} 调用API生成植物推荐`);
     console.log(`[植物生成] 使用API密钥: ${process.env.DASHSCOPE_API_KEY ? '已配置' : '未配置'}`);
     console.log(`[植物生成] 提示词长度: ${promptContent.length} 字符`);
     
+    // 打印完整的API提交参数
+    const apiParams = {
+      model: "qwen-plus",
+      messages: [
+        { role: "system" as const, content: "You are a helpful assistant." },
+        { role: "user" as const, content: promptContent }
+      ]
+    };
+    
+    console.log(`[植物生成-API参数] 完整提交参数: ${JSON.stringify(apiParams, null, 2)}`);
+    
     // 调用第三方API
     console.log(`[植物生成] 正在发送请求到模型: qwen-plus`);
     const completion = await openai.chat.completions.create(
-      {
-        model: "qwen-plus",
-        messages: [
-          { role: "system", content: "You are a helpful assistant." },
-          { role: "user", content: promptContent }
-        ]
-      },
+      apiParams,
       { timeout: 600000 } // 600秒超时
     );
     
