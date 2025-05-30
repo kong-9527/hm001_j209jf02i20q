@@ -24,13 +24,18 @@ if (fs.existsSync(pgPackagePath)) {
   console.error('警告: pg包文件不存在于:', pgPackagePath);
 }
 
-// 尝试加载pg-native以支持SCRAM-SHA-256认证
+// 尝试加载pg-native以支持SCRAM-SHA-256认证（可选的）
 let pgNative = null;
 try {
-  pgNative = require('pg-native');
-  console.log('成功加载pg-native库，用于SCRAM-SHA-256认证');
+  // 使用可选的动态导入，避免模块不存在时报错
+  if (fs.existsSync(path.resolve(process.cwd(), 'node_modules/pg-native'))) {
+    pgNative = require('pg-native');
+    console.log('成功加载pg-native库，用于SCRAM-SHA-256认证');
+  } else {
+    console.log('pg-native库不存在，将使用默认认证方式');
+  }
 } catch (e) {
-  console.warn('未能加载pg-native库，将使用默认认证方式:', e);
+  console.log('未能加载pg-native库，将使用默认认证方式');
 }
 
 // 检查是否存在必要的数据库包
