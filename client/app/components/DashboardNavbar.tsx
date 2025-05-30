@@ -229,7 +229,8 @@ export default function DashboardNavbar() {
     // 调用登出服务
     const success = await logout();
     if (success) {
-      router.push('/');
+      // 显式强制重定向到登录页面
+      window.location.href = '/signin';
     }
   };
   

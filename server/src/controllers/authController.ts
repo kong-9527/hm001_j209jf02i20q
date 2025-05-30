@@ -320,6 +320,17 @@ export const refreshSession = async (req: Request, res: Response) => {
  * 清除认证 Cookie
  */
 export const logout = (req: Request, res: Response) => {
-  res.clearCookie('authToken');
+  // 设置Cookie的expires为过去的时间，确保被浏览器立即删除
+  res.clearCookie('authToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    path: '/'
+  });
+  
+  // 设置更明确的响应头，避免浏览器缓存
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  
   return res.status(200).json({ message: '成功登出' });
 }; 

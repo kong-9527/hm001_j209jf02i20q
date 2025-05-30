@@ -35,6 +35,13 @@ export const getCurrentUser = async () => {
 export const logout = async () => {
   try {
     await api.get('/auth/logout');
+    
+    // 客户端手动删除cookie（辅助清理）
+    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    
+    // 给浏览器一点时间处理cookie变更
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     return true;
   } catch (error) {
     console.error('Logout failed:', error);
