@@ -9,6 +9,7 @@ import WithProjectCheck from '@/app/components/WithProjectCheck';
 import { useEventBus } from '@/app/contexts/EventBus';
 import { getGardenAdvisorList, GardenAdvisor } from '@/app/services/gardenAdvisorService';
 import { useProject } from '@/app/contexts/ProjectContext';
+import { useRouter } from 'next/navigation';
 
 // 定义编辑和删除计划的参数类型
 interface PlanActionParams {
@@ -38,6 +39,8 @@ export default function GardenPlansPage() {
   const { on } = useEventBus();
   // 使用项目上下文
   const { currentProject } = useProject();
+  // 使用路由
+  const router = useRouter();
   
   // 获取Garden Advisor列表数据
   const fetchGardenAdvisorList = async (projectId: number) => {
@@ -197,7 +200,7 @@ export default function GardenPlansPage() {
                 className={`border rounded-lg overflow-hidden flex flex-col h-full shadow-sm ${plan.status === 1 ? 'hover:shadow-md hover:bg-green-50 transition-shadow cursor-pointer' : ''}`}
                 onClick={() => {
                   if (plan.status === 1) {
-                    window.location.href = `/dashboard/garden-advisor/${plan.id}`;
+                    router.push(`/dashboard/garden-advisor/detail?did=${plan.id}`);
                   }
                 }}
               >

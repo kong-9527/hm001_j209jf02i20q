@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams, usePathname, useRouter } from 'next/navigation';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { headers } from 'next/headers';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
 import { getGardenAdvisorDetail, getPlantDetail } from '@/app/services/gardenAdvisorService';
@@ -18,20 +18,20 @@ const formatMultilineText = (text: string | null): string[] => {
 };
 
 export default function GardenAdvisorDetail() {
-  const params = useParams();
+  const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
   
-  // 增强ID获取方式，处理所有可能的情况
+  // 增强ID获取方式，从查询参数中获取ID
   const getAdvisorId = () => {
-    // 从URL参数中获取ID
-    let id = Array.isArray(params.id) ? params.id[0] : params.id;
-    
     try {
-      // 尝试从路径中提取ID（如果params.id未能正确提取）
-      if (!id && pathname) {
-        const segments = pathname.split('/');
-        id = segments[segments.length - 1];
+      // 从URL查询参数中获取ID
+      const id = searchParams.get('did');
+      
+      // 验证ID是否有效（防止获取到字符串"detail"等无效值）
+      if (!id || id === 'detail') {
+        console.error('无效的garden-advisor ID:', id);
+        return null;
       }
       
       // 记录当前使用的ID，用于调试
