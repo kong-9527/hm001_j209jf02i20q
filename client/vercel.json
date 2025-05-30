@@ -1,0 +1,16 @@
+{
+  "routes": [
+    {
+      "src": "/dashboard/garden-advisor/(?<id>[^/]+)(?:/)?$",
+      "dest": "/dashboard/garden-advisor/[id]?id=$id"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "trailingSlash": true
+} 

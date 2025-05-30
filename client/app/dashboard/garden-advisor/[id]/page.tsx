@@ -2,10 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
+import { headers } from 'next/headers';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
 import { getGardenAdvisorDetail, getPlantDetail } from '@/app/services/gardenAdvisorService';
 import type { GardenAdvisorDetail as GardenAdvisorDetailType, PlantDetail } from '@/app/services/gardenAdvisorService';
+
+// 添加动态标记，确保页面不会被静态生成
+export const dynamic = 'force-dynamic';
 
 // 格式化文本，将多行文本转换为数组
 const formatMultilineText = (text: string | null): string[] => {
@@ -15,8 +19,32 @@ const formatMultilineText = (text: string | null): string[] => {
 
 export default function GardenAdvisorDetail() {
   const params = useParams();
-  // 处理params.id可能是string[]的情况
-  const advisorId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const pathname = usePathname();
+  const router = useRouter();
+  
+  // 增强ID获取方式，处理所有可能的情况
+  const getAdvisorId = () => {
+    // 从URL参数中获取ID
+    let id = Array.isArray(params.id) ? params.id[0] : params.id;
+    
+    try {
+      // 尝试从路径中提取ID（如果params.id未能正确提取）
+      if (!id && pathname) {
+        const segments = pathname.split('/');
+        id = segments[segments.length - 1];
+      }
+      
+      // 记录当前使用的ID，用于调试
+      console.log('使用的garden-advisor ID:', id, '路径:', pathname);
+      
+      return id;
+    } catch (error) {
+      console.error('获取garden-advisor ID出错:', error);
+      return null;
+    }
+  };
+  
+  const advisorId = getAdvisorId();
   
   // 添加状态来保存API返回的数据
   const [advisorData, setAdvisorData] = useState<GardenAdvisorDetailType | null>(null);
@@ -33,8 +61,18 @@ export default function GardenAdvisorDetail() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        if (!advisorId) {
+          setError('无效的garden-advisor ID');
+          setLoading(false);
+          return;
+        }
+        
         setLoading(true);
+        console.log('开始获取garden-advisor详情, ID:', advisorId);
+        
         const data = await getGardenAdvisorDetail(advisorId);
+        console.log('获取garden-advisor详情成功');
+        
         setAdvisorData(data);
         setError(null);
       } catch (err) {
@@ -47,6 +85,9 @@ export default function GardenAdvisorDetail() {
 
     if (advisorId) {
       fetchData();
+    } else {
+      setError('无效的garden-advisor ID');
+      setLoading(false);
     }
   }, [advisorId]);
 
@@ -57,7 +98,11 @@ export default function GardenAdvisorDetail() {
       
       try {
         setLoadingPlantDetail(true);
+        console.log('开始获取植物详情, 植物:', selectedPlant, '空间ID:', selectedSpace);
+        
         const data = await getPlantDetail(selectedSpace, selectedPlant);
+        console.log('获取植物详情成功');
+        
         setPlantDetail(data);
       } catch (err) {
         console.error('获取植物详情失败:', err);
@@ -93,6 +138,12 @@ export default function GardenAdvisorDetail() {
       <WithProjectCheck>
         <div className="p-6">
           <p className="text-red-500">{error}</p>
+          <button 
+            onClick={() => router.push('/dashboard/garden-advisor')}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-green-700 transition-colors"
+          >
+            返回列表
+          </button>
         </div>
       </WithProjectCheck>
     );
@@ -104,6 +155,12 @@ export default function GardenAdvisorDetail() {
       <WithProjectCheck>
         <div className="p-6">
           <p>未找到相关数据</p>
+          <button 
+            onClick={() => router.push('/dashboard/garden-advisor')}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-green-700 transition-colors"
+          >
+            返回列表
+          </button>
         </div>
       </WithProjectCheck>
     );

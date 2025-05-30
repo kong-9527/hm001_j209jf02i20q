@@ -507,7 +507,7 @@ export const generateDesign = async (req: Request, res: Response) => {
       
       // 请求头
       const headers = {
-        'cookie': '_ga=GA1.1.1162931253.1716176209; usertokenExt=77436bc86ee54798a36ebfc48f59a0f578462281277; webidExt=1747364397292soukxtpq; Hm_lvt_2f4541bcbee365f31b21f65f00e8ae8b=1746006316,1747222382,1747271432,1747633187; Hm_lpvt_2f4541bcbee365f31b21f65f00e8ae8b=1747633187; HMACCOUNT=81D27ED34A2F576D; _ga_24MVZ5C982=GS2.1.s1747632878$o162$g1$t1747633187$j60$l0$h1041395821; acw_tc=2fec4273-5167-4dbd-a7b4-eab365ca19d51be89d857f6063d84bfb5700bf4a93ae',
+        'cookie': '_ga=GA1.1.1162931253.1716176209; webidExt=1747364397292soukxtpq; usertokenExt=b965a3a5c25a40a186c15a83d425324678462281277; usertoken_online=b965a3a5c25a40a186c15a83d425324678462281277; Hm_lvt_2f4541bcbee365f31b21f65f00e8ae8b=1747633187,1747731026,1748410786,1748584742; HMACCOUNT=81D27ED34A2F576D; acw_tc=19d314f4-2975-48a7-801c-bd648d8e22ee6d1f482aab1650aa7761749c7ef968d5; Hm_lpvt_2f4541bcbee365f31b21f65f00e8ae8b=1748584873; _ga_24MVZ5C982=GS2.1.s1748584745$o174$g1$t1748584874$j48$l0$h1128649205',
         'origin': 'https://comfy.liblib.art',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
         'Content-Type': 'application/json'
@@ -717,7 +717,7 @@ export const checkComfyStatus = async (req: Request, res: Response) => {
       
       // 请求头
       const headers = {
-        'cookie': '_ga=GA1.1.1162931253.1716176209; usertokenExt=77436bc86ee54798a36ebfc48f59a0f578462281277; webidExt=1747364397292soukxtpq; Hm_lvt_2f4541bcbee365f31b21f65f00e8ae8b=1746006316,1747222382,1747271432,1747633187; Hm_lpvt_2f4541bcbee365f31b21f65f00e8ae8b=1747633187; HMACCOUNT=81D27ED34A2F576D; _ga_24MVZ5C982=GS2.1.s1747632878$o162$g1$t1747633187$j60$l0$h1041395821; acw_tc=2fec4273-5167-4dbd-a7b4-eab365ca19d51be89d857f6063d84bfb5700bf4a93ae',
+        'cookie': '_ga=GA1.1.1162931253.1716176209; webidExt=1747364397292soukxtpq; usertokenExt=b965a3a5c25a40a186c15a83d425324678462281277; usertoken_online=b965a3a5c25a40a186c15a83d425324678462281277; Hm_lvt_2f4541bcbee365f31b21f65f00e8ae8b=1747633187,1747731026,1748410786,1748584742; HMACCOUNT=81D27ED34A2F576D; acw_tc=19d314f4-2975-48a7-801c-bd648d8e22ee6d1f482aab1650aa7761749c7ef968d5; Hm_lpvt_2f4541bcbee365f31b21f65f00e8ae8b=1748584873; _ga_24MVZ5C982=GS2.1.s1748584745$o174$g1$t1748584874$j48$l0$h1128649205',
         'origin': 'https://comfy.liblib.art',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36'
       };

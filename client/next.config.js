@@ -63,6 +63,36 @@ const nextConfig = {
   //     },
   //   ]
   // },
+  // 添加动态路由支持配置
+  trailingSlash: true, // 添加尾部斜杠，有助于处理动态路由
+  async rewrites() {
+    return [
+      // 确保garden-advisor详情页面的动态路由能够正确处理
+      {
+        source: '/dashboard/garden-advisor/:id/',
+        destination: '/dashboard/garden-advisor/[id]/',
+      },
+      {
+        source: '/dashboard/garden-advisor/:id',
+        destination: '/dashboard/garden-advisor/[id]',
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      // 处理可能的404情况，重定向到正确的路径
+      {
+        source: '/dashboard/garden-advisor/undefined',
+        destination: '/dashboard/garden-advisor',
+        permanent: false,
+      },
+      {
+        source: '/dashboard/garden-advisor/null',
+        destination: '/dashboard/garden-advisor',
+        permanent: false,
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig 
