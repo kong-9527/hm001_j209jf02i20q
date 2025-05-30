@@ -584,7 +584,7 @@ export const generateDesign = async (req: Request, res: Response) => {
       
       // 请求头
       const bridgeHeaders = {
-        'token': '77436bc86ee54798a36ebfc48f59a0f578462281277',
+        'token': 'b965a3a5c25a40a186c15a83d425324678462281277',
         'webid': '1747364397292soukxtpq',
         'Content-Type': 'application/json'
       };
