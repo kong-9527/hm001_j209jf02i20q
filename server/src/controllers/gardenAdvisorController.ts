@@ -456,32 +456,116 @@ async function generatePlantsForAdvisor(advisorId: number, spaces: GardenAdvisor
 
     console.log(`[植物生成] 成功获取Advisor信息: ${advisor.plan_name || '未命名计划'}`);
 
-    // 为每个空间生成植物推荐
-    for (let i = 0; i < spaces.length; i++) {
-      const space = spaces[i];
-      console.log(`[植物生成] 开始处理空间 ${i+1}/${spaces.length}, ID: ${space.id}`);
-      
-      try {
-        await generatePlantsForSpace(advisor, space);
-        console.log(`[植物生成] 空间 ${i+1}/${spaces.length} 处理完成`);
-      } catch (spaceError) {
-        console.error(`[植物生成] 为空间 ${i+1}/${spaces.length}, ID: ${space.id} 生成植物失败:`, spaceError);
-      }
-    }
+    // 创建一个队列管理器，确保植物数据入库操作顺序执行
+    const dbOperationQueue: (() => Promise<void>)[] = [];
+    let activeDbOperation: Promise<void> | null = null;
 
-    // 所有空间处理完成后，更新advisor状态为已完成(1)
-    console.log(`[植物生成] 所有空间处理完成，更新Advisor状态为已完成(1)`);
-    await GardenAdvisor.update(
-      {
-        status: 1,
-        utime: Math.floor(Date.now() / 1000)
-      },
-      {
-        where: { id: advisorId }
+    // 创建一个函数来处理队列中的数据库操作
+    const processDbQueue = async () => {
+      if (dbOperationQueue.length === 0 || activeDbOperation) return;
+      
+      // 取出队列中的第一个操作并执行
+      const operation = dbOperationQueue.shift();
+      if (operation) {
+        activeDbOperation = operation();
+        await activeDbOperation;
+        activeDbOperation = null;
+        
+        // 处理下一个操作
+        await processDbQueue();
       }
-    );
+    };
+
+    // 添加数据库操作到队列
+    const enqueueDbOperation = (operation: () => Promise<void>) => {
+      dbOperationQueue.push(operation);
+      processDbQueue();
+    };
+
+    // 并行处理所有空间，但错开API调用时间
+    const totalSpaces = spaces.length;
+    let completedSpaces = 0;
     
-    console.log(`[植物生成] Advisor ID: ${advisorId} 的植物生成任务已全部完成`);
+    // 并行处理空间，但错开API调用时间
+    const spacePromises = spaces.map((space, index) => {
+      return new Promise<void>((resolve) => {
+        // 错开时间调用API，每个请求间隔3秒
+        setTimeout(async () => {
+          console.log(`[植物生成] 开始处理空间 ${index+1}/${totalSpaces}, ID: ${space.id}, 延迟启动: ${index * 3}秒`);
+          
+          try {
+            // 调用API获取植物推荐数据
+            const plantsData = await fetchPlantsRecommendation(advisor, space);
+            
+            // 将数据库操作加入队列，确保按顺序执行
+            enqueueDbOperation(async () => {
+              try {
+                await savePlantsData(space.id, plantsData);
+                console.log(`[植物生成] 空间 ${index+1}/${totalSpaces}, ID: ${space.id} 数据保存成功`);
+              } catch (error) {
+                console.error(`[植物生成] 空间 ${index+1}/${totalSpaces}, ID: ${space.id} 数据保存失败:`, error);
+              }
+              
+              // 增加已完成空间计数
+              completedSpaces++;
+              console.log(`[植物生成] 已完成 ${completedSpaces}/${totalSpaces} 个空间的处理`);
+              
+              // 检查是否所有空间都已处理完毕
+              if (completedSpaces === totalSpaces) {
+                console.log(`[植物生成] 所有空间处理完成，更新Advisor状态为已完成(1)`);
+                await GardenAdvisor.update(
+                  {
+                    status: 1,
+                    utime: Math.floor(Date.now() / 1000)
+                  },
+                  {
+                    where: { id: advisorId }
+                  }
+                );
+                console.log(`[植物生成] Advisor ID: ${advisorId} 的植物生成任务已全部完成`);
+              }
+            });
+            
+            console.log(`[植物生成] 空间 ${index+1}/${totalSpaces}, ID: ${space.id} API调用完成，数据已加入处理队列`);
+          } catch (spaceError) {
+            console.error(`[植物生成] 为空间 ${index+1}/${totalSpaces}, ID: ${space.id} 生成植物失败:`, spaceError);
+            
+            // 即使出错也要增加计数，确保流程能继续
+            enqueueDbOperation(async () => {
+              completedSpaces++;
+              console.log(`[植物生成] 已完成 ${completedSpaces}/${totalSpaces} 个空间的处理（失败）`);
+              
+              // 检查是否所有空间都已处理完毕
+              if (completedSpaces === totalSpaces) {
+                console.log(`[植物生成] 所有空间处理完成，更新Advisor状态为已完成(1)`);
+                await GardenAdvisor.update(
+                  {
+                    status: 1,
+                    utime: Math.floor(Date.now() / 1000)
+                  },
+                  {
+                    where: { id: advisorId }
+                  }
+                );
+                console.log(`[植物生成] Advisor ID: ${advisorId} 的植物生成任务已全部完成`);
+              }
+            });
+          } finally {
+            resolve();
+          }
+        }, index * 3000); // 每个空间错开3秒
+      });
+    });
+    
+    // 等待所有空间的API调用完成
+    await Promise.all(spacePromises);
+    
+    // 等待所有数据库操作完成
+    while (dbOperationQueue.length > 0 || activeDbOperation) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    console.log(`[植物生成] Advisor ID: ${advisorId} 所有API调用和数据库操作已完成`);
   } catch (error) {
     console.error(`[植物生成] 生成植物推荐失败 (Advisor ID: ${advisorId}):`, error);
     
@@ -500,12 +584,13 @@ async function generatePlantsForAdvisor(advisorId: number, spaces: GardenAdvisor
 }
 
 /**
- * 为单个空间生成植物推荐
+ * 调用API获取植物推荐数据
  * @param advisor Garden Advisor记录
  * @param space 空间记录
+ * @returns 植物推荐数据
  */
-async function generatePlantsForSpace(advisor: GardenAdvisor, space: GardenAdvisorSpace): Promise<void> {
-  console.log(`[植物生成-详细] 进入generatePlantsForSpace函数，空间ID: ${space.id}`);
+async function fetchPlantsRecommendation(advisor: GardenAdvisor, space: GardenAdvisorSpace): Promise<any[]> {
+  console.log(`[植物生成-详细] 进入fetchPlantsRecommendation函数，空间ID: ${space.id}`);
   try {
     console.log(`[植物生成] 开始为空间 ID: ${space.id} 生成植物推荐`);
     
@@ -645,7 +730,26 @@ async function generatePlantsForSpace(advisor: GardenAdvisor, space: GardenAdvis
     }
     
     console.log(`[植物生成] 解析成功，共获取到 ${plantsList.length} 个植物推荐`);
-    
+    return plantsList;
+  } catch (error) {
+    console.error(`[植物生成] 为空间 ID: ${space.id} 生成植物失败:`, error);
+    if (error instanceof SyntaxError) {
+      console.error('[植物生成] JSON解析错误，可能是API返回的内容格式不正确');
+    }
+    throw error;
+  } finally {
+    console.log(`[植物生成-详细] 离开fetchPlantsRecommendation函数，空间ID: ${space.id}`);
+  }
+}
+
+/**
+ * 保存植物数据到数据库
+ * @param spaceId 空间ID
+ * @param plantsList 植物列表数据
+ */
+async function savePlantsData(spaceId: number, plantsList: any[]): Promise<void> {
+  console.log(`[植物生成-详细] 进入savePlantsData函数，空间ID: ${spaceId}`);
+  try {
     // 保存每个植物的数据 - 处理字段名称差异
     for (let i = 0; i < plantsList.length; i++) {
       const plant = plantsList[i];
@@ -660,7 +764,7 @@ async function generatePlantsForSpace(advisor: GardenAdvisor, space: GardenAdvis
       };
       
       await GardenAdvisorSpacePlant.create({
-        space_id: space.id,
+        space_id: spaceId,
         plant_name: getFieldValue(['Recommended plant name', 'recommended_plant_name']),
         plant_pic: getFieldValue(['Photos', 'photos']),
         reason: getFieldValue(['Recommendation reason', 'recommendation_reason']),
@@ -678,15 +782,12 @@ async function generatePlantsForSpace(advisor: GardenAdvisor, space: GardenAdvis
       });
     }
     
-    console.log(`[植物生成] 空间 ID: ${space.id} 成功保存了 ${plantsList.length} 个植物推荐`);
+    console.log(`[植物生成] 空间 ID: ${spaceId} 成功保存了 ${plantsList.length} 个植物推荐`);
   } catch (error) {
-    console.error(`[植物生成] 为空间 ID: ${space.id} 生成植物失败:`, error);
-    if (error instanceof SyntaxError) {
-      console.error('[植物生成] JSON解析错误，可能是API返回的内容格式不正确');
-    }
+    console.error(`[植物生成] 为空间 ID: ${spaceId} 保存植物数据失败:`, error);
     throw error;
   } finally {
-    console.log(`[植物生成-详细] 离开generatePlantsForSpace函数，空间ID: ${space.id}`);
+    console.log(`[植物生成-详细] 离开savePlantsData函数，空间ID: ${spaceId}`);
   }
 }
 
