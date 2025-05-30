@@ -1,5 +1,5 @@
 import express from 'express';
-import { getGardenAdvisorListByProject, createGardenAdvisor, getGardenAdvisorDetail, getPlantDetail } from '../controllers/gardenAdvisorController';
+import { getGardenAdvisorListByProject, createGardenAdvisor, getGardenAdvisorDetail, getPlantDetail, updateGardenAdvisor } from '../controllers/gardenAdvisorController';
 import { authenticateJWT } from '../middlewares/authMiddleware';
 
 const router = express.Router();
@@ -15,5 +15,8 @@ router.get('/plant-detail/:spaceId/:plantName', authenticateJWT, getPlantDetail)
 
 // 创建花园顾问
 router.post('/create', authenticateJWT, createGardenAdvisor);
+
+// 更新花园顾问
+router.put('/:id', authenticateJWT, updateGardenAdvisor);
 
 export default router; 

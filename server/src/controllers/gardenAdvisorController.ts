@@ -1012,3 +1012,42 @@ export const getPlantDetail = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: '获取植物详情失败', error });
   }
 };
+
+// 更新花园顾问
+export const updateGardenAdvisor = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { plan_name } = req.body;
+    const user = req.user as UserInfo;
+    const userId = user?.id;
+    
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+    
+    // 查找指定的Garden Advisor记录
+    const advisor = await GardenAdvisor.findOne({
+      where: { 
+        id, 
+        user_id: userId 
+      }
+    });
+    
+    if (!advisor) {
+      res.status(404).json({ error: 'Garden Advisor not found' });
+      return;
+    }
+    
+    // 更新Garden Advisor记录
+    await advisor.update({
+      plan_name,
+      utime: Math.floor(Date.now() / 1000)
+    });
+    
+    res.status(200).json(advisor);
+  } catch (error) {
+    console.error('更新花园顾问失败:', error);
+    res.status(500).json({ message: '更新花园顾问失败', error });
+  }
+};

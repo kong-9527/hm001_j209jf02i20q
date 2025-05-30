@@ -7,7 +7,7 @@ import { EditGardenPlanModal } from '@/app/components/EditGardenPlanModal';
 import { DeleteConfirmModal } from '@/app/components/DeleteConfirmModal';
 import WithProjectCheck from '@/app/components/WithProjectCheck';
 import { useEventBus } from '@/app/contexts/EventBus';
-import { getGardenAdvisorList, GardenAdvisor } from '@/app/services/gardenAdvisorService';
+import { getGardenAdvisorList, GardenAdvisor, updateGardenAdvisor } from '@/app/services/gardenAdvisorService';
 import { useProject } from '@/app/contexts/ProjectContext';
 import { useRouter } from 'next/navigation';
 
@@ -115,9 +115,18 @@ export default function GardenPlansPage() {
     console.log('创建Garden Advisor:', planName);
   };
   
-  const handleEditGardenPlan = (planId: number, planName: string, location?: string, experience?: string, fertilizer?: string) => {
-    // 这里需要实现编辑Garden Advisor的逻辑
-    console.log('编辑Garden Advisor:', planId, planName, location, experience, fertilizer);
+  const handleEditGardenPlan = async (planId: number, planName: string, location?: string, experience?: string, fertilizer?: string) => {
+    try {
+      // 调用更新Garden Advisor的API
+      await updateGardenAdvisor(planId, planName);
+      
+      // 更新成功后重新获取Garden Advisor列表
+      if (currentProject) {
+        await fetchGardenAdvisorList(currentProject.id);
+      }
+    } catch (error) {
+      console.error('Error updating garden advisor:', error);
+    }
   };
   
   const handleOpenEditModal = (plan: PlanActionParams) => {

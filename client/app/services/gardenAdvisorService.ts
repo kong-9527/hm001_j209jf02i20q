@@ -277,4 +277,20 @@ export const getPlantDetail = async (spaceId: number, plantName: string): Promis
     console.error('获取植物详情失败:', error);
     throw error;
   }
+};
+
+// 更新Garden Advisor
+export const updateGardenAdvisor = async (id: number, planName: string): Promise<GardenAdvisor> => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/garden-advisors/${id}`,
+      { plan_name: planName },
+      { withCredentials: true }
+    );
+    
+    return response.data;
+  } catch (error) {
+    console.error('更新Garden Advisor失败:', error);
+    throw error;
+  }
 }; 
