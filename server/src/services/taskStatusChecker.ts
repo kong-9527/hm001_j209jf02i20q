@@ -11,7 +11,7 @@ const MAX_RUNNING_TIME = 60 * 60 * 1000; // 任务最长运行时间（1小时�
 
 // 新API配置
 const BRIDGE_API_BASE_URL = 'https://bridge.liblib.art/gateway/sd-api/generate/progress/msg/v3';
-const BRIDGE_TOKEN = '77436bc86ee54798a36ebfc48f59a0f578462281277';
+const BRIDGE_TOKEN = 'b965a3a5c25a40a186c15a83d425324678462281277';
 const BRIDGE_WEBID = '1747364397292soukxtpq';
 
 /**
