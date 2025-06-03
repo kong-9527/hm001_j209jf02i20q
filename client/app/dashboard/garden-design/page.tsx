@@ -61,6 +61,7 @@ export default function PhotoGenerator() {
   const [recentImages, setRecentImages] = useState<GardenDesignImage[]>([]);
   const [designImages, setDesignImages] = useState<GardenDesignImage[]>([]);
   const [deletedImages, setDeletedImages] = useState<GardenDesignImage[]>([]);
+  const [isLoadingImages, setIsLoadingImages] = useState(false); // 添加图片加载状态
   const [debugInput, setDebugInput] = useState('');
   const [draggedImage, setDraggedImage] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -1094,6 +1095,9 @@ export default function PhotoGenerator() {
       return;
     }
     
+    // 设置加载状态为true
+    setIsLoadingImages(true);
+    
     // 根据标签类型加载相应数据
     if (tab === 'all') {
       // 获取所有未删除的图片
@@ -1118,6 +1122,8 @@ export default function PhotoGenerator() {
     } catch (error) {
       console.error('Failed to fetch garden design list:', error);
       setDesignImages([]);
+    } finally {
+      setIsLoadingImages(false); // 完成加载，设置状态为false
     }
   }, []);
   
@@ -1132,6 +1138,8 @@ export default function PhotoGenerator() {
     } catch (error) {
       console.error('Failed to fetch liked garden designs:', error);
       setDesignImages([]);
+    } finally {
+      setIsLoadingImages(false); // 完成加载，设置状态为false
     }
   }, []);
   
@@ -1146,6 +1154,8 @@ export default function PhotoGenerator() {
     } catch (error) {
       console.error('Failed to fetch deleted garden designs:', error);
       setDeletedImages([]);
+    } finally {
+      setIsLoadingImages(false); // 完成加载，设置状态为false
     }
   }, []);
   
@@ -1189,6 +1199,9 @@ export default function PhotoGenerator() {
       console.log('No current project, skipping design list API call');
       return;
     }
+    
+    // 设置加载状态为true
+    setIsLoadingImages(true);
     
     // 根据当前选中的标签页加载相应数据
     console.log('Initial data load for tab:', imageTab);
@@ -1308,6 +1321,18 @@ export default function PhotoGenerator() {
   
   // 渲染所有图片
   const renderAllImages = () => {
+    // 添加加载中状态判断
+    if (isLoadingImages) {
+      return (
+        <div className="flex flex-col items-center justify-center p-16">
+          <div className="w-16 h-16 mb-4 relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600"></div>
+          </div>
+          <p className="text-emerald-600 font-medium">加载中...</p>
+        </div>
+      );
+    }
+    
     if (designImages.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center p-16">
@@ -1429,6 +1454,18 @@ export default function PhotoGenerator() {
   
   // 渲染收藏图片
   const renderLikedImages = () => {
+    // 添加加载中状态判断
+    if (isLoadingImages) {
+      return (
+        <div className="flex flex-col items-center justify-center p-16">
+          <div className="w-16 h-16 mb-4 relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600"></div>
+          </div>
+          <p className="text-emerald-600 font-medium">加载中...</p>
+        </div>
+      );
+    }
+    
     if (designImages.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center p-16">
@@ -1513,6 +1550,18 @@ export default function PhotoGenerator() {
   
   // 渲染删除的图片 - 修改为从数据库获取已删除的图片
   const renderDeletedImages = () => {
+    // 添加加载中状态判断
+    if (isLoadingImages) {
+      return (
+        <div className="flex flex-col items-center justify-center p-16">
+          <div className="w-16 h-16 mb-4 relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600"></div>
+          </div>
+          <p className="text-emerald-600 font-medium">加载中...</p>
+        </div>
+      );
+    }
+    
     if (deletedImages.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center p-16">
