@@ -1353,7 +1353,7 @@ export default function PhotoGenerator() {
     });
     
     return (
-      <div className="max-h-[calc(100vh-21em)] overflow-y-auto p-6 scrollbar-thin">
+      <div className="h-full p-6 scrollbar-thin overflow-y-auto">
         <div className="grid grid-cols-2 gap-2">
           {imageData.map((image) => (
             <div  
@@ -1487,7 +1487,7 @@ export default function PhotoGenerator() {
     
     // 与renderAllImages类似的渲染代码，这里简化了
     return (
-      <div className="max-h-[calc(100vh-21em)] overflow-y-auto p-6 scrollbar-thin">
+      <div className="h-full p-6 scrollbar-thin overflow-y-auto">
         <div className="grid grid-cols-2 gap-2">
           {sortedImages.map((image) => (
             <div  
@@ -1582,7 +1582,7 @@ export default function PhotoGenerator() {
     });
     
     return (
-      <div className="max-h-[calc(100vh-21em)] overflow-y-auto p-6 scrollbar-thin">
+      <div className="h-full p-6 scrollbar-thin overflow-y-auto">
         <div className="grid grid-cols-2 gap-2">
           {sortedImages.map((image) => (
             <div  
@@ -2182,7 +2182,7 @@ export default function PhotoGenerator() {
           
           <div className="flex flex-col lg:flex-row gap-6 h-[calc(100%-1rem)] justify-start">
             {/* 左侧面板 */}
-            <div className="bg-white rounded-lg shadow-sm p-6 lg:w-[48%] overflow-y-auto scrollbar-thin max-h-[calc(100vh-120px)]">
+            <div className="bg-white rounded-lg shadow-sm p-6 lg:w-[48%] overflow-y-auto scrollbar-thin max-h-[calc(100vh-100px)]">
               {/* 最近图片 */}
               <div className="mb-8">
                 <div className="flex items-center mb-4">
@@ -2569,8 +2569,8 @@ export default function PhotoGenerator() {
             </div>
             
             {/* 右侧面板 */}
-            <div className="bg-white rounded-lg shadow-sm p-6 lg:w-[48%] overflow-y-auto scrollbar-thin max-h-[calc(100vh-120px)]">
-              <div className="p-6 border-b border-gray-200">
+            <div className="bg-white rounded-lg shadow-sm p-6 lg:w-[48%] max-h-[calc(100vh-100px)] flex flex-col overflow-hidden">
+              <div className="p-6 border-b border-gray-200 flex-shrink-0">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-medium">Images</h2>
                   
@@ -2626,7 +2626,9 @@ export default function PhotoGenerator() {
                 </div>
               </div>
               
-              {renderImageList()}
+              <div className="flex-grow overflow-y-auto">
+                {renderImageList()}
+              </div>
             </div>
           </div>
           
