@@ -2180,7 +2180,7 @@ export default function PhotoGenerator() {
         <div id="garden-design-root" className="w-full h-full">
           {/* <h1 className="text-2xl font-bold mb-6">Images</h1> */}
           
-          <div className="flex flex-col lg:flex-row gap-6 h-[calc(100%)] justify-start">
+          <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-4rem)] justify-start">
             {/* 左侧面板 */}
             <div className="bg-white rounded-lg shadow-sm p-6 lg:w-[48%] overflow-y-auto scrollbar-thin">
               {/* 最近图片 */}
