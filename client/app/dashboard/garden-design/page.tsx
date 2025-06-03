@@ -2142,7 +2142,7 @@ export default function PhotoGenerator() {
   
   return (
     <WithProjectCheck>
-      <div className="w-full h-full">
+      <div className="w-full h-full overflow-hidden">
         <style jsx global>{`
           .scrollbar-thin::-webkit-scrollbar {
             width: 4px;
@@ -2180,9 +2180,9 @@ export default function PhotoGenerator() {
         <div id="garden-design-root" className="w-full h-full">
           {/* <h1 className="text-2xl font-bold mb-6">Images</h1> */}
           
-          <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-4rem)] justify-start">
+          <div className="flex flex-col lg:flex-row gap-6 h-[calc(100%-1rem)] justify-start">
             {/* 左侧面板 */}
-            <div className="bg-white rounded-lg shadow-sm p-6 lg:w-[48%] overflow-y-auto scrollbar-thin">
+            <div className="bg-white rounded-lg shadow-sm p-6 lg:w-[48%] overflow-y-auto scrollbar-thin max-h-[calc(100vh-120px)]">
               {/* 最近图片 */}
               <div className="mb-8">
                 <div className="flex items-center mb-4">
@@ -2569,7 +2569,7 @@ export default function PhotoGenerator() {
             </div>
             
             {/* 右侧面板 */}
-            <div className="bg-white rounded-lg shadow-sm p-6 lg:w-[48%] overflow-y-auto scrollbar-thin">
+            <div className="bg-white rounded-lg shadow-sm p-6 lg:w-[48%] overflow-y-auto scrollbar-thin max-h-[calc(100vh-120px)]">
               <div className="p-6 border-b border-gray-200">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-medium">Images</h2>
