@@ -604,7 +604,7 @@ export default function CreateGardenAdvisorPage() {
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">What are you maintaining your garden for (optional):</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {['Food', 'Wildlife', 'Beauty', 'Education', 'Medicinal', 'Hobby', 'Fragrance', 'Money'].map((goal) => (
+                  {['Food to eat', 'Free growth', 'Beautiful landscape', 'For education', 'Medicinal plant', 'Hobby', 'Floral fragrance', 'Sale for money'].map((goal) => (
                     <label key={goal} className={`flex items-center border rounded-md px-3 py-2 cursor-pointer hover:bg-green-50 transition-colors ${goals.includes(goal) ? 'border-primary' : 'border-gray-200'}`}>
                       <input
                         type="checkbox"
@@ -661,7 +661,7 @@ export default function CreateGardenAdvisorPage() {
               <div className="md:col-span-3">
                 <p className="text-xs text-gray-500 mb-3">What kind of plants you prefer to grow (optional):</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {['Flowers', 'Vegetables', 'Trees', 'Grasses', 'Cacti', 'Mosses', 'Aquatics', 'Orchids', 'Herbs', 'Fruits', 'Shrubs', 'Succulents', 'Ferns', 'Vines', 'Bulbs'].map((type) => (
+                  {['Flowers','Orchids','Succulents','Bulbs','Trees','Grasses','Mosses','Vines','Fruits','Vegetables','Herbs'].map((type) => (
                     <label key={type} className={`flex items-center border rounded-md px-3 py-3 cursor-pointer hover:bg-green-50 transition-colors ${plantTypes.includes(type) ? 'border-primary' : 'border-gray-200'}`}>
                       <input
                         type="checkbox"
@@ -1129,6 +1129,12 @@ export default function CreateGardenAdvisorPage() {
       return;
     }
     
+    // 检查种植空间数量是否超过10个
+    if (gardenSpaces.length > 10) {
+      addNotification({ type: 'error', message: 'You can have at most 10 planting places' });
+      return;
+    }
+    
     // 检查用户是否有足够的点数
     if (!hasEnoughPoints) {
       addNotification({ 
@@ -1140,16 +1146,17 @@ export default function CreateGardenAdvisorPage() {
     
     // 将字典值转换为ID
     const getIdFromDictValue = (dict: any, value: string): number | null => {
+      if (!value) return null;
       const entry = Object.values(dict).find(item => (item as any).value === value);
       return entry ? (entry as any).id : null;
     };
     
-    // 转换值为ID
-    const experienceId = getIdFromDictValue(EXPERIENCE_DICT, experience);
-    const budgetId = getIdFromDictValue(BUDGET_DICT, budget);
-    const timeId = getIdFromDictValue(TIME_DICT, time);
-    const maintenanceId = getIdFromDictValue(MAINTENANCE_DICT, maintenance);
-    const fertilizerId = getIdFromDictValue(FERTILIZER_DICT, fertilizerType);
+    // 转换值为ID，允许为null
+    const experienceId = experience ? getIdFromDictValue(EXPERIENCE_DICT, experience) : null;
+    const budgetId = budget ? getIdFromDictValue(BUDGET_DICT, budget) : null;
+    const timeId = time ? getIdFromDictValue(TIME_DICT, time) : null;
+    const maintenanceId = maintenance ? getIdFromDictValue(MAINTENANCE_DICT, maintenance) : null;
+    const fertilizerId = fertilizerType ? getIdFromDictValue(FERTILIZER_DICT, fertilizerType) : null;
     
     // 准备提交的数据
     const submitData = {

@@ -647,24 +647,31 @@ async function fetchPlantsRecommendation(advisor: GardenAdvisor, space: GardenAd
     const basePrompt = fs.readFileSync(path.join(__dirname, '../data/advisor_prmopt.txt'), 'utf8').replace(/\r\n/g, '\n');
     
     // 构建用户提示词
-    const userInfo = [
-      `Country: ${advisor.location || 'United States'}`,
-      `Cold resistant zone number (USDA standard): ${advisor.hardiness_zone || '6b'}`,
-      `Horticultural Experience Level: ${experienceMap[advisor.experience || 1] || 'Novice'}`,
-      `Planting purpose and use: ${advisor.goals || 'for hobbies/garden fragrance/beauty'}`,
-      `Preferred plant types: ${advisor.plant_types || 'flowers/aquatic plants/orchids/succulents'}`,
-      `Preference for Fertilization Method: ${fertilizerMap[advisor.fertilizer || 1] || 'Organic natural fertilizer'}`,
-      `Horticultural budget level: ${budgetMap[advisor.budget || 1] || 'Low'}`,
-      `Available time: ${timeMap[advisor.time || 1] || 'Low'}`,
-      `Maintenance difficulty: ${maintenanceMap[advisor.maintenance || 1] || 'Low'}`,
-      `Allergens or plant ingredients to avoid: ${advisor.allergies || 'mold/weeds/dust/shrubs/insects'}`,
+    const userInfoLines = [];
+    
+    // 只在字段有值时添加对应行，为空时不添加该条件
+    if (advisor.location) userInfoLines.push(`Country: ${advisor.location}`);
+    if (advisor.hardiness_zone) userInfoLines.push(`Cold resistant zone number (USDA standard): ${advisor.hardiness_zone}`);
+    if (advisor.experience) userInfoLines.push(`Horticultural Experience Level: ${experienceMap[advisor.experience]}`);
+    if (advisor.goals) userInfoLines.push(`Planting purpose and use: ${advisor.goals}`);
+    if (advisor.plant_types) userInfoLines.push(`Preferred plant types: ${advisor.plant_types}`);
+    if (advisor.fertilizer) userInfoLines.push(`Preference for Fertilization Method: ${fertilizerMap[advisor.fertilizer]}`);
+    if (advisor.budget) userInfoLines.push(`Horticultural budget level: ${budgetMap[advisor.budget]}`);
+    if (advisor.time) userInfoLines.push(`Available time: ${timeMap[advisor.time]}`);
+    if (advisor.maintenance) userInfoLines.push(`Maintenance difficulty: ${maintenanceMap[advisor.maintenance]}`);
+    if (advisor.allergies) userInfoLines.push(`Allergens or plant ingredients to avoid: ${advisor.allergies}`);
+    
+    // space相关字段保持不变
+    userInfoLines.push(
       `Cultivation location: ${inOutMap[space.in_out || 1] || 'Indoor'}`,
       `Type of cultivation container: ${cultivationMap[space.cultivation || 1] || 'Square Pot'}`,
       `Cultivation container size: ${containerSizeDesc || 'diameter 30cm, height 30cm'}`,
       `Sunshine environment: ${sunlightMap[space.sunlight || 1] || 'Full Sun'}`,
       `Soil conditions: ${soilMap[space.soil || 1] || 'Loam'}`,
       `Watering method: ${waterAccessMap[space.water_access || 1] || 'Convenient for watering'}`
-    ].join('\n');
+    );
+    
+    const userInfo = userInfoLines.join('\n');
     
     let promptContent = basePrompt.replace('1. My gardening information is as follows:', `1. My gardening information is as follows:\n${userInfo}`);
     
