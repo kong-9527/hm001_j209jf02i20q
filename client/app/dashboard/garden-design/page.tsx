@@ -2338,7 +2338,7 @@ export default function PhotoGenerator() {
               </div>
               
               {/* Partial Redesign部分 */}
-              <div className="mb-8">
+              {/* <div className="mb-8">
                 <div className="flex items-center mb-4">
                   <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">3</div>
                   <h2 className="text-lg font-bold">Partial Redesign</h2>
@@ -2381,12 +2381,12 @@ export default function PhotoGenerator() {
                     Edit Garden Image
                   </button>
                 </div>
-              </div>
+              </div> */}
               
               {/* 选择风格 */}
               <div className="mb-8">
                 <div className="flex items-center mb-4">
-                  <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">4</div>
+                  <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">3</div>
                   <h2 className="text-lg font-bold">Select Style</h2>
                   <button 
                     className="ml-2 text-gray-400 hover:text-gray-500 relative"
@@ -2474,7 +2474,7 @@ export default function PhotoGenerator() {
               {/* 结构相似度 */}
               <div className="mb-8">
                 <div className="flex items-center mb-4">
-                  <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">5</div>
+                  <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">4</div>
                   <h2 className="text-lg font-bold">Structural Similarity</h2>
                   <button 
                     className="ml-2 text-gray-400 hover:text-gray-500 relative"
@@ -2535,7 +2535,7 @@ export default function PhotoGenerator() {
               {/* 生成按钮 */}
               <div>
                 <div className="flex items-center mb-4">
-                  <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">6</div>
+                  <div className="h-6 w-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs mr-2">5</div>
                   <h2 className="text-lg font-bold">Generate</h2>
                 </div>
                 
