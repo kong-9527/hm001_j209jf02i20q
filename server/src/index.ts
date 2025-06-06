@@ -56,7 +56,7 @@ const PORT = process.env.PORT || 5000;
 
 // CORS配置
 const allowedOrigins = [
-  'https://aigardendesign.vercel.app',  // 生产环境前端域名
+  'https://aigardendesign.org',  // 生产环境前端域名
   'http://localhost:3000',              // 开发环境前端地址
 ];
 

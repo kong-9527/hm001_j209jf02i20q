@@ -185,8 +185,8 @@ export const createOrder = async (req: Request, res: Response) => {
 
     // 获取基础URL (支持https)
     const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://aigardendesign.vercel.app' // 生产环境域名，请替换为实际域名
-      : 'https://aigardendesign.vercel.app:3000'; // 开发环境使用https
+      ? 'https://aigardendesign.org' // 生产环境域名，请替换为实际域名
+      : 'https://aigardendesign.org:3000'; // 开发环境使用https
 
     // 支付成功后的回调URL
     const successUrl = `${baseUrl}/dashboard/billing/payment`;

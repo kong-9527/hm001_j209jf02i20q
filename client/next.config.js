@@ -59,7 +59,7 @@ const nextConfig = {
   //   return [
   //     {
   //       source: '/api/:path*',
-  //       destination: 'http://apiaigardendesign.vercel.app/api/:path*',
+  //       destination: 'http://apiaigardendesign.org/api/:path*',
   //     },
   //   ]
   // },
