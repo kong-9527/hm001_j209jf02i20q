@@ -64,7 +64,7 @@ const nextConfig = {
   //   ]
   // },
   // 添加动态路由支持配置
-  trailingSlash: true, // 添加尾部斜杠，有助于处理动态路由
+  trailingSlash: false, // 添加尾部斜杠，有助于处理动态路由
   async rewrites() {
     return [
       // 确保garden-advisor详情页面的动态路由能够正确处理
