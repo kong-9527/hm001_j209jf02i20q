@@ -45,6 +45,8 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<number | null>(null);
+  const [hasMonthlyPlans, setHasMonthlyPlans] = useState(false);
+  const [hasYearlyPlans, setHasYearlyPlans] = useState(false);
 
   useEffect(() => {
     // 从数据库获取价格数据
@@ -86,6 +88,20 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
               features: parsedFeatures
             };
           });
+          
+          // 检查是否存在月付和年付选项
+          const monthlyPlans = formattedPlans.filter((plan: PricingPlan) => plan.goods_version === 1);
+          const yearlyPlans = formattedPlans.filter((plan: PricingPlan) => plan.goods_version === 2);
+          
+          setHasMonthlyPlans(monthlyPlans.length > 0);
+          setHasYearlyPlans(yearlyPlans.length > 0);
+          
+          // 如果只有月付或只有年付，自动设置isYearly
+          if (yearlyPlans.length > 0 && monthlyPlans.length === 0) {
+            setIsYearly(true);
+          } else if (monthlyPlans.length > 0 && yearlyPlans.length === 0) {
+            setIsYearly(false);
+          }
           
           setAllPlans(formattedPlans);
           // 根据当前选择的计费周期筛选计划
@@ -200,31 +216,55 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
           </div>
         )}
 
-        {/* 计费周期切换 */}
-        <div className="flex justify-center mb-12">
-          <div className="inline-flex rounded-full p-1 bg-gray-100">
-            <button
-              className={`px-6 py-2 rounded-full text-sm font-medium flex items-center ${
-                isYearly 
-                  ? 'bg-teal-600 text-white' 
-                  : 'text-gray-700 hover:bg-gray-200'
-              }`}
-              onClick={() => setIsYearly(true)}
-            >
-              <span className="mr-2">🔥</span> Yearly: Get 6+ months free
-            </button>
-            <button
-              className={`px-6 py-2 rounded-full text-sm font-medium ${
-                !isYearly 
-                  ? 'bg-teal-600 text-white' 
-                  : 'text-gray-700 hover:bg-gray-200'
-              }`}
-              onClick={() => setIsYearly(false)}
-            >
-              Monthly
-            </button>
+        {/* 计费周期切换 - 仅当同时存在月付和年付选项时显示 */}
+        {hasMonthlyPlans && hasYearlyPlans && (
+          <div className="flex justify-center mb-12">
+            <div className="inline-flex rounded-full p-1 bg-gray-100">
+              <button
+                className={`px-6 py-2 rounded-full text-sm font-medium flex items-center ${
+                  isYearly 
+                    ? 'bg-teal-600 text-white' 
+                    : 'text-gray-700 hover:bg-gray-200'
+                }`}
+                onClick={() => setIsYearly(true)}
+              >
+                <span className="mr-2">🔥</span> Yearly: Get 6+ months free
+              </button>
+              <button
+                className={`px-6 py-2 rounded-full text-sm font-medium ${
+                  !isYearly 
+                    ? 'bg-teal-600 text-white' 
+                    : 'text-gray-700 hover:bg-gray-200'
+                }`}
+                onClick={() => setIsYearly(false)}
+              >
+                Monthly
+              </button>
+            </div>
           </div>
-        </div>
+        )}
+        
+        {/* 仅年付选项 */}
+        {hasYearlyPlans && !hasMonthlyPlans && (
+          <div className="flex justify-center mb-12">
+            <div className="inline-flex rounded-full p-1 bg-gray-100">
+              <div className="px-6 py-2 rounded-full text-sm font-medium flex items-center bg-teal-600 text-white">
+                <span className="mr-2">🔥</span> Yearly: Get 6+ months free
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* 仅月付选项 */}
+        {hasMonthlyPlans && !hasYearlyPlans && (
+          <div className="flex justify-center mb-12">
+            <div className="inline-flex rounded-full p-1 bg-gray-100">
+              <div className="px-6 py-2 rounded-full text-sm font-medium bg-teal-600 text-white">
+                Monthly
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 定价卡片 */}
         <div className="flex flex-wrap justify-center gap-6">
@@ -280,7 +320,7 @@ const PricingPlans: React.FC<PricingPlansProps> = ({ title = "Subscription Plans
                   {isSubmitting === plan.id ? 'Processing...' : (plan.buttonText || 'Subscribe →')}
                 </button>
 
-                {plan.showViewBilling && (
+                {plan.showViewBilling && hasMonthlyPlans && hasYearlyPlans && (
                   <div className="text-center mt-4">
                     <button 
                       className="text-sm text-gray-500 hover:text-gray-700"
