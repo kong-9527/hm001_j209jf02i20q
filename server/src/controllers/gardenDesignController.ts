@@ -4,13 +4,14 @@ import User from '../models/User';
 import UserOrder from '../models/UserOrder';
 import PointsLog from '../models/PointsLog';
 import { getUserIdFromRequest } from '../utils/auth';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { Op } from 'sequelize';
 import sequelize from '../config/database';
 import gardenStylesData, { commonGardenPrompts, commonRenderingPrompts } from '../data/gardenStyles';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import { downloadAndUploadToCloudinary } from '../services/imageService';
 
 // Load environment variables
 dotenv.config();
@@ -226,10 +227,10 @@ export const generateDesign = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    // Check if BFL API key is configured
-    const BFL_API_KEY = process.env.BFL_API_KEY;
-    if (!BFL_API_KEY) {
-      console.error('Environment variable BFL_API_KEY is not set');
+    // Check if API key is configured
+    const ismaque_API_KEY = process.env.ismaque_API_KEY;
+    if (!ismaque_API_KEY) {
+      console.error('Environment variable ismaque_API_KEY is not set');
       return res.status(500).json({ error: 'API configuration error' });
     }
 
@@ -425,16 +426,17 @@ export const generateDesign = async (req: Request, res: Response) => {
     const similarity = parseInt(structuralSimilarity);
     console.log('Structural similarity:', similarity);
 
-    // First call third-party API to generate image
-    let request_id = null;
+    // Call third-party API to generate image and get result directly
+    let generatedImageUrl = null;
+    let status = 1; // Default to processing
 
     try {
-      console.log('Calling BFL API to generate image');
+      console.log('Calling image generation API');
       
       // Get API key
-      const BFL_API_KEY = process.env.BFL_API_KEY;
-      if (!BFL_API_KEY) {
-        console.error('BFL_API_KEY environment variable not set');
+      const ismaque_API_KEY = process.env.ismaque_API_KEY;
+      if (!ismaque_API_KEY) {
+        console.error('ismaque_API_KEY environment variable not set');
         return res.status(500).json({ error: 'API configuration error' });
       }
       
@@ -448,46 +450,55 @@ export const generateDesign = async (req: Request, res: Response) => {
       
       console.log('Image converted to base64');
       
-      // Request BFL API
-      const apiUrl = 'https://api.bfl.ai/v1/flux-kontext-pro';
+      // Request API
+      const apiUrl = 'https://ismaque.org/v1/images/generations';
       
       const headers = {
         'accept': 'application/json',
-        'x-key': BFL_API_KEY,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ismaque_API_KEY}`
       };
       
       const data = {
-        'prompt': finalPrompt, // Use new format prompt
-        'input_image': base64Image, // Pass base64 encoded image
-        'aspect_ratio': "4:3",
+        'model': 'flux-kontext-pro',
+        'prompt': finalPrompt,
+        'input_image': base64Image,
+        'aspect_ratio': '4:3',
         'safety_tolerance': 2,
         'prompt_upsampling': true,
       };
       
-      console.log('Sending request to BFL API');
+      console.log('Sending request to image generation API');
       
-      const response = await axios.post(apiUrl, data, { headers });
+      // 简化配置，只保留超时设置，让axios使用全局配置的代理
+      const response = await axios.post(apiUrl, data, { 
+        headers,
+        timeout: 180000 // 180 seconds timeout
+      });
       
       if (response.status !== 200) {
         throw new Error(`API responded with status code ${response.status}`);
       }
       
       const result = response.data;
-      console.log('BFL API response:', result);
+      console.log('API response:', result);
       
-      if (!result.id) {
-        throw new Error('Failed to get request_id from BFL API');
+      // Check if the response has the expected data structure
+      if (!result.data || !result.data[0] || !result.data[0].url) {
+        throw new Error('Invalid response format from API');
       }
       
-      request_id = result.id;
-      console.log(`Received request_id: ${request_id}`);
+      // Get the generated image URL
+      generatedImageUrl = result.data[0].url;
+      console.log(`Generated image URL: ${generatedImageUrl}`);
+      status = 2; // Set status to success
+      
     } catch (apiError: any) {
-      console.error('Error calling BFL API:', apiError);
-      return res.status(500).json({ 
-        error: 'Failed to generate garden design', 
-        details: apiError.message 
-      });
+      console.error('Error calling image generation API:', apiError);
+      status = 3; // Set status to failed
+      
+      // Create a failed record but continue with the process
+      console.log('Creating a failed record in the database');
     }
     
     // Create new design record
@@ -495,64 +506,90 @@ export const generateDesign = async (req: Request, res: Response) => {
       user_id,
       project_id: projectId,
       pic_orginial: imageUrl,
-      status: 1, // 1 represents processing
+      status: status, // 1=processing, 2=success, 3=failed
       style_id: Number(style_id),
       style_name,
-      positive_words: positiveWordsString, // Save as comma-separated string
-      negative_words: negativeWordsString, // Save as comma-separated string
+      positive_words: positiveWordsString,
+      negative_words: negativeWordsString,
       structural_similarity: similarity,
       is_like: 0,
       is_del: 0,
       points_cost: 1, // Record points cost
-      third_task_id: request_id, // Save BFL API request ID
+      third_task_id: null, // No longer needed as we directly get the image URL
+      pic_third_orginial: generatedImageUrl, // Save original API image URL
+      pic_result: generatedImageUrl, // Default to original URL, will be updated if Cloudinary successful
       ctime: Math.floor(Date.now() / 1000),
       utime: Math.floor(Date.now() / 1000)
     });
 
-    // Process points deduction
-    try {
-      // 1. Update user points
-      await user.update({
-        points: (userPoints - 1).toString(),
-        utime: Math.floor(Date.now() / 1000)
-      });
-
-      // 2. Update points balance in user order table
-      const userOrder = await UserOrder.findOne({
-        where: {
-          user_id,
-          points_remain: {
-            [Op.gt]: 0
-          }
-        },
-        order: [['member_start_date', 'ASC']]
-      });
-
-      if (userOrder) {
-        await userOrder.update({
-          points_remain: (userOrder.points_remain || 0) - 1,
+    // Only process points deduction and Cloudinary upload if generation was successful
+    if (status === 2 && generatedImageUrl) {
+      // Process points deduction
+      try {
+        // 1. Update user points
+        await user.update({
+          points: (userPoints - 1).toString(),
           utime: Math.floor(Date.now() / 1000)
         });
-      } else {
-        console.log('No valid user order found for user:', user_id);
+
+        // 2. Update points balance in user order table
+        const userOrder = await UserOrder.findOne({
+          where: {
+            user_id,
+            points_remain: {
+              [Op.gt]: 0
+            }
+          },
+          order: [['member_start_date', 'ASC']]
+        });
+
+        if (userOrder) {
+          await userOrder.update({
+            points_remain: (userOrder.points_remain || 0) - 1,
+            utime: Math.floor(Date.now() / 1000)
+          });
+        } else {
+          console.log('No valid user order found for user:', user_id);
+        }
+
+        // 3. Add points log
+        await PointsLog.create({
+          user_id,
+          points_type: '2', // 2 represents decrease
+          points_num: 1,    // Amount deducted this time
+          log_type: 11,     // 11 represents generating design image
+          log_content: 'Generate garden_design',
+          related_id: gardenDesign.id.toString(),
+          ctime: Math.floor(Date.now() / 1000),
+          utime: Math.floor(Date.now() / 1000)
+        });
+
+        console.log('Points deducted successfully for user:', user_id);
+      } catch (pointsError) {
+        console.error('Error processing points deduction:', pointsError);
+        // Log error but don't interrupt flow
       }
-
-      // 3. Add points log
-      await PointsLog.create({
-        user_id,
-        points_type: '2', // 2 represents decrease
-        points_num: 1,    // Amount deducted this time
-        log_type: 11,     // 11 represents generating design image
-        log_content: 'Generate garden_design',
-        related_id: gardenDesign.id.toString(),
-        ctime: Math.floor(Date.now() / 1000),
-        utime: Math.floor(Date.now() / 1000)
-      });
-
-      console.log('Points deducted successfully for user:', user_id);
-    } catch (pointsError) {
-      console.error('Error processing points deduction:', pointsError);
-      // Log error but don't interrupt flow
+      
+      // Upload to Cloudinary if generation was successful
+      try {
+        console.log('Uploading generated image to Cloudinary');
+        const cloudinaryUrl = await downloadAndUploadToCloudinary(generatedImageUrl, user_id);
+        
+        if (cloudinaryUrl && cloudinaryUrl !== generatedImageUrl) {
+          console.log('Image uploaded to Cloudinary successfully:', cloudinaryUrl);
+          
+          // Update the record with Cloudinary URL
+          await gardenDesign.update({
+            pic_result: cloudinaryUrl,
+            utime: Math.floor(Date.now() / 1000)
+          });
+        } else {
+          console.log('Using original URL as Cloudinary upload failed or returned same URL');
+        }
+      } catch (cloudinaryError) {
+        console.error('Error uploading to Cloudinary:', cloudinaryError);
+        // Continue with original URL if Cloudinary upload fails
+      }
     }
     
     return res.status(200).json(gardenDesign);
@@ -563,7 +600,8 @@ export const generateDesign = async (req: Request, res: Response) => {
 };
 
 /**
- * Check BFL API image generation status
+ * Check if garden design is ready (stub function, no longer needed as we get results directly)
+ * This function is kept for backward compatibility with existing frontend code
  * @route GET /api/garden-designs/check-status/:requestId
  */
 export const checkBflStatus = async (req: Request, res: Response) => {
@@ -580,7 +618,7 @@ export const checkBflStatus = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    // Get request_id
+    // Get design ID (previously requestId)
     const { requestId } = req.params;
     
     if (!requestId) {
@@ -588,116 +626,41 @@ export const checkBflStatus = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'requestId is required' });
     }
 
-    // Check if BFL API key is configured
-    const BFL_API_KEY = process.env.BFL_API_KEY;
-    if (!BFL_API_KEY) {
-      console.error('Environment variable BFL_API_KEY is not set');
-      return res.status(500).json({ error: 'API configuration error' });
+    // Find the garden design record
+    const gardenDesign = await GardenDesign.findOne({
+      where: {
+        id: requestId,
+        user_id
+      }
+    });
+    
+    if (!gardenDesign) {
+      return res.status(404).json({ error: 'Garden design not found' });
     }
     
-    try {
-      // Query BFL API for status
-      console.log('Querying BFL API task status:', requestId);
-      
-      // API configuration
-      const apiUrl = 'https://api.bfl.ai/v1/get_result';
-      
-      // Request headers
-      const headers = {
-        'accept': 'application/json',
-        'x-key': BFL_API_KEY
-      };
-      
-      // Request parameters
-      const params = { id: requestId };
-      
-      // Send GET request
-      const response = await axios.get(apiUrl, { params, headers });
-      
-      // Check response
-      if (response.status !== 200) {
-        throw new Error(`API responded with status code ${response.status}`);
-      }
-      
-      const result = response.data;
-      console.log(`BFL API status query result:`, result);
-      
-      if (!result) {
-        return res.status(400).json({ status: 'pending', message: 'No result found' });
-      }
-      
-      // Check task status
-      const status = result.status;
-      
-      if (status === "Ready") {
-        // Task completed, get image URL
-        const imageUrl = result.result.sample;
-        console.log('Generated image URL:', imageUrl);
-        
-        // Find corresponding design record and update status
-        const gardenDesign = await GardenDesign.findOne({
-          where: {
-            third_task_id: requestId,
-            user_id
-          }
-        });
-        
-        if (gardenDesign) {
-          // Update design status to success
-          await gardenDesign.update({
-            pic_result: imageUrl,
-            pic_third_orginial: imageUrl,
-            status: 2, // 2 represents success
-            utime: Math.floor(Date.now() / 1000)
-          });
-          
-          return res.status(200).json({
-            status: 'completed',
-            image_url: imageUrl,
-            garden_design: gardenDesign
-          });
-        } else {
-          return res.status(404).json({ error: 'Garden design not found' });
-        }
-      } else if (status === "Processing" || status === "Queued") {
-        // Task still in progress
-        return res.status(200).json({ status: 'pending', message: 'Generation in progress' });
-      } else {
-        // Task failed or abnormal status
-        console.error(`BFL task abnormal: ${requestId}, status: ${status}`);
-        
-        // Find corresponding design record and update status to failed
-        const gardenDesign = await GardenDesign.findOne({
-          where: {
-            third_task_id: requestId,
-            user_id
-          }
-        });
-        
-        if (gardenDesign) {
-          // Update design status to failed
-          await gardenDesign.update({
-            status: 3, // 3 represents failed
-            utime: Math.floor(Date.now() / 1000)
-          });
-        }
-        
-        return res.status(400).json({ 
-          status: 'failed', 
-          message: `Generation failed with status: ${status}` 
-        });
-      }
-      
-    } catch (apiError: any) {
-      console.error('Error calling BFL API:', apiError);
-      return res.status(500).json({ 
-        error: 'Failed to check generation status', 
-        details: apiError.message 
+    // Return status based on the record
+    if (gardenDesign.status === 2) {
+      // Design is ready
+      return res.status(200).json({
+        status: 'completed',
+        image_url: gardenDesign.pic_result,
+        garden_design: gardenDesign
+      });
+    } else if (gardenDesign.status === 3) {
+      // Design generation failed
+      return res.status(400).json({ 
+        status: 'failed', 
+        message: 'Image generation failed' 
+      });
+    } else {
+      // Should not happen as we now get results directly
+      return res.status(200).json({ 
+        status: 'pending', 
+        message: 'Generation in progress' 
       });
     }
-    
   } catch (error) {
-    console.error('Error checking BFL status:', error);
-    return res.status(500).json({ error: 'Failed to check BFL status' });
+    console.error('Error checking design status:', error);
+    return res.status(500).json({ error: 'Failed to check design status' });
   }
 }; 

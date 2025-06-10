@@ -252,6 +252,10 @@ export const generateGardenDesign = async (
     
     console.log(`Calling API: ${API_URL}/garden-designs/generate`);
     
+    // Set timeout to 60 seconds for image generation
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 seconds timeout
+    
     const response = await fetch(`${API_URL}/garden-designs/generate`, {
       method: 'POST',
       headers: {
@@ -267,7 +271,11 @@ export const generateGardenDesign = async (
         projectId
       }),
       credentials: 'include',
+      signal: controller.signal
     });
+    
+    // Clear the timeout
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       const errorData = await response.json();
@@ -278,8 +286,12 @@ export const generateGardenDesign = async (
     const data = await response.json();
     console.log('API success response for garden design generation:', data);
     return data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating garden design:', error);
+    // Check if error is a timeout error
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out after 60 seconds. Please try again.');
+    }
     throw error;
   }
 };

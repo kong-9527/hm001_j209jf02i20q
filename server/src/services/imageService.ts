@@ -30,7 +30,7 @@ export async function downloadAndUploadToCloudinary(imageUrl: string, userId: nu
       url: imageUrl,
       method: 'GET',
       responseType: 'stream',
-      timeout: 30000, // 30秒超时
+      timeout: 60000, // 60秒超时
     });
     
     // 使用pipeline保存图片到临时文件

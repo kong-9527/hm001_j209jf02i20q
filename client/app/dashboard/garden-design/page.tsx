@@ -413,7 +413,7 @@ export default function PhotoGenerator() {
         }
       }
     } catch (error) {
-      console.error('获取自定义风格详情失败:', error);
+      console.error('Failed to get custom style details:', error);
       alert('Failed to get style details, please try again');
     }
   };
@@ -440,7 +440,7 @@ export default function PhotoGenerator() {
           negativeWordsText
         );
         
-        console.log('更新风格成功:', updatedStyle);
+        console.log('Style updated successfully:', updatedStyle);
         
         // 更新本地风格列表
         setCustomStyles(prevStyles => 
@@ -463,7 +463,7 @@ export default function PhotoGenerator() {
         setShowEditStyleDialog(false);
         setEditingStyleId(null);
       } catch (error) {
-        console.error('更新风格失败:', error);
+        console.error('Failed to update style:', error);
         alert('Failed to update style, please try again');
       }
     }
@@ -504,7 +504,7 @@ export default function PhotoGenerator() {
         setShowLoadStyleDialog(false);
       }
     } catch (error) {
-      console.error('加载风格失败:', error);
+      console.error('Failed to load style:', error);
       alert('Failed to load style, please try again');
     }
   };
@@ -548,7 +548,7 @@ export default function PhotoGenerator() {
           negativeWordsText
         );
         
-        console.log('保存自定义风格成功:', savedStyle);
+        console.log('Custom style saved successfully:', savedStyle);
         
         // 生成预览文本
         let previewText = '';
@@ -571,7 +571,7 @@ export default function PhotoGenerator() {
         // 关闭对话框
         setShowSaveStyleDialog(false);
       } catch (error) {
-        console.error('保存自定义风格失败:', error);
+        console.error('Failed to save custom style:', error);
         alert('Failed to save, please try again');
       }
     }
@@ -1991,7 +1991,7 @@ export default function PhotoGenerator() {
         const width = imgElement.naturalWidth;
         const height = imgElement.naturalHeight;
         const sizeParam = `${width}*${height}`;
-        console.log('- 图片尺寸:', sizeParam);
+        console.log('- Image size:', sizeParam);
       
         // 调用API生成图片
         generateGardenDesign(
@@ -2054,7 +2054,7 @@ export default function PhotoGenerator() {
           setIsGenerating(false);
         })
         .catch((error) => {
-          console.error('生成失败:', error);
+          console.error('Generation failed:', error);
           // 重置生成中状态
           setIsGenerating(false);
             
