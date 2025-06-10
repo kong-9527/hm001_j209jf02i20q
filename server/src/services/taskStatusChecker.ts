@@ -2,6 +2,10 @@ import axios from 'axios';
 import { Sequelize, Op } from 'sequelize';
 import GardenDesign from '../models/GardenDesign';
 import { downloadAndUploadToCloudinary } from './imageService';
+import dotenv from 'dotenv';
+
+// 加载环境变量
+dotenv.config();
 
 // API配置
 const MAX_RETRIES = 3; // 最大重试次数
@@ -9,10 +13,9 @@ const RETRY_DELAY = 1000; // 重试延迟（毫秒）
 const TIMEOUT = 10000; // 请求超时（毫秒）
 const MAX_RUNNING_TIME = 60 * 60 * 1000; // 任务最长运行时间（1小时）
 
-// 新API配置
-const BRIDGE_API_BASE_URL = 'https://bridge.liblib.art/gateway/sd-api/generate/progress/msg/v3';
-const BRIDGE_TOKEN = 'b965a3a5c25a40a186c15a83d425324678462281277';
-const BRIDGE_WEBID = '1747364397292soukxtpq';
+// BFL API配置
+const BFL_API_KEY = process.env.BFL_API_KEY;
+const BFL_API_URL = 'https://api.bfl.ai/v1';
 
 /**
  * 带重试机制的发送请求
@@ -36,7 +39,8 @@ async function sendRequestWithRetry(
       url,
       headers,
       timeout: TIMEOUT,
-      data: method === 'POST' ? data : undefined
+      data: method === 'POST' ? data : undefined,
+      params: method === 'GET' ? data : undefined
     };
     
     const response = await axios(options);
@@ -80,80 +84,49 @@ async function sendRequestWithRetry(
 }
 
 /**
- * 从新接口获取任务结果
- * @param generateId 生成ID
+ * 从BFL API获取任务结果
+ * @param requestId 请求ID
  * @returns 任务结果或null
  */
-async function getTaskResultFromBridge(generateId: number) {
+async function getTaskResultFromBFL(requestId: string) {
   try {
-    // 获取当前时间戳，精确到毫秒
-    const timestamp = Date.now();
-    const url = `${BRIDGE_API_BASE_URL}/${generateId}?timestamp=${timestamp}`;
+    const url = `${BFL_API_URL}/get_result`;
     
     const headers = {
-      'token': BRIDGE_TOKEN,
-      'webid': BRIDGE_WEBID,
-      'Content-Type': 'application/json'
+      'accept': 'application/json',
+      'x-key': BFL_API_KEY
     };
     
-    const data = { flag: 0 };
+    const params = { id: requestId };
     
-    console.log(`正在请求任务状态: ${generateId}`);
-    const result = await sendRequestWithRetry(url, headers, data, 'POST');
+    console.log(`正在请求BFL任务状态: ${requestId}`);
+    const result = await sendRequestWithRetry(url, headers, params, 'GET');
     
     if (!result) {
-      console.error(`获取任务结果失败: ${generateId}`);
+      console.error(`获取BFL任务结果失败: ${requestId}`);
       return null;
     }
     
-    // 检查返回码
-    if (result.code !== 0) {
-      console.error(`任务状态请求返回错误码: ${result.code}, 消息: ${result.msg || '无错误信息'}`);
-      return null;
-    }
+    const status = result.status;
+    console.log(`BFL任务状态: requestId=${requestId}, status=${status}`);
     
     // 检查任务状态
-    const taskData = result.data;
-    console.log(`任务状态: generateId=${generateId}, subStatus=${taskData.subStatus}, 进度=${taskData.percentCompleted}%, subTypeName=${taskData.subTypeName || '未知'}`);
-    
-    // 如果有错误信息
-    if (taskData.errorMsg) {
-      console.error(`任务失败: ${generateId}, 错误信息: ${taskData.errorMsg}`);
-      return 'FAILED';
-    }
-    
-    // 检查任务是否异常
-    if (taskData.subStatus === 3) {
-      console.error(`任务异常: ${generateId}, 状态码: ${taskData.subStatus}`);
-      return 'FAILED';
-    }
-    
-    // 首先检查子状态和完成百分比
-    if (taskData.subStatus === 2 && taskData.percentCompleted === 100) {
-      console.log(`任务已完成 (generateId=${generateId}, subStatus=2, percentCompleted=100)，检查图片URL`);
-      
-      // 检查是否有图片信息
-      if (!taskData.images || taskData.images.length === 0) {
-        console.log(`任务已完成但没有images数组, generateId=${generateId}`);
-        return 'FAILED';
-      }
-      
-      // 检查是否有图片URL (previewPath)
-      if (taskData.images[0].previewPath) {
-        const imgUrl = taskData.images[0].previewPath;
-        console.log(`获取到图片URL: ${imgUrl}, generateId=${generateId}`);
-        return imgUrl;
-      } else {
-        console.log(`任务已完成但未找到图片URL (previewPath为空), generateId=${generateId}`);
-        return 'FAILED'; // 任务完成但没有图片URL，可能是失败
-      }
-    } else {
-      // 任务尚未完成
-      console.log(`任务 ${generateId} 尚未完成 (subStatus=${taskData.subStatus}, percentCompleted=${taskData.percentCompleted}%)`);
+    if (status === "Ready") {
+      // 任务成功完成
+      const imageUrl = result.result.sample;
+      console.log(`BFL任务完成，获取到图片URL: ${imageUrl}`);
+      return imageUrl;
+    } else if (status === "Processing" || status === "Queued") {
+      // 任务仍在处理中
+      console.log(`BFL任务 ${requestId} 仍在处理中 (status=${status})`);
       return null;
+    } else {
+      // 任务失败或状态异常
+      console.error(`BFL任务异常: ${requestId}, 状态: ${status}`);
+      return 'FAILED';
     }
   } catch (error) {
-    console.error(`获取任务结果时发生异常: ${error}`);
+    console.error(`获取BFL任务结果时发生异常: ${error}`);
     return null;
   }
 }
@@ -187,13 +160,13 @@ async function checkPendingTasks() {
     console.log('当前时间：', new Date().toISOString());
     console.log('imageService是否已导入：', typeof downloadAndUploadToCloudinary === 'function' ? '是' : '否');
     
-    // 查找状态为"生成中"，未删除，且有第三方生成ID的记录
+    // 查找状态为"生成中"，未删除，且有第三方任务ID的记录
     const pendingDesigns = await GardenDesign.findAll({
       where: {
         status: 1, // 1代表生成中
         is_del: 0, // 未删除
-        third_generate_id: {
-          [Op.not]: null // third_generate_id不为空
+        third_task_id: {
+          [Op.not]: null // third_task_id不为空
         }
       },
       order: [
@@ -206,14 +179,14 @@ async function checkPendingTasks() {
     
     // 遍历每个任务并检查状态
     for (const design of pendingDesigns) {
-      const generateId = design.third_generate_id;
+      const requestId = design.third_task_id;
       
-      if (!generateId) {
-        console.log(`生成ID为空，跳过: ${design.id}`);
+      if (!requestId) {
+        console.log(`请求ID为空，跳过: ${design.id}`);
         continue;
       }
       
-      console.log(`处理生成ID: ${generateId}, 设计ID: ${design.id}`);
+      console.log(`处理BFL请求ID: ${requestId}, 设计ID: ${design.id}`);
       
       // 检查任务是否运行时间过长
       if (isTaskRunningTooLong(design)) {
@@ -226,7 +199,7 @@ async function checkPendingTasks() {
       }
       
       // 获取任务结果
-      const result = await getTaskResultFromBridge(generateId);
+      const result = await getTaskResultFromBFL(requestId);
       
       // 处理不同的结果
       if (result === 'FAILED') {

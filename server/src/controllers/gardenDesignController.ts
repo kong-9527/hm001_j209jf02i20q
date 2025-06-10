@@ -8,6 +8,12 @@ import axios from 'axios';
 import { Op } from 'sequelize';
 import sequelize from '../config/database';
 import gardenStylesData, { commonGardenPrompts, commonRenderingPrompts } from '../data/gardenStyles';
+import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
+
+// 加载环境变量
+dotenv.config();
 
 // 添加WordTag接口定义
 interface WordTag {
@@ -218,6 +224,13 @@ export const generateDesign = async (req: Request, res: Response) => {
     if (!user_id) {
       console.log('Authentication failed: No user ID found');
       return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    // 检查BFL API密钥是否已配置
+    const BFL_API_KEY = process.env.BFL_API_KEY;
+    if (!BFL_API_KEY) {
+      console.error('环境变量BFL_API_KEY未设置');
+      return res.status(500).json({ error: 'API配置错误' });
     }
 
     // 创建当前日期，仅包含年月日部分
@@ -478,78 +491,75 @@ export const generateDesign = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid size format, expected format: width*height' });
     }
 
-    // 解析结构相似度参数，调整为新接口要求的参数格式
+    // 解析结构相似度参数
     const similarity = parseInt(structuralSimilarity);
-    // 计算strength参数：从6.00~1.00，相似度每增加1%，减少0.05
-    // const ctrlnet_strength = 6.0 - (similarity * 0.05);
-    const ctrlnet_strength = 1;
-    // 计算start_percent参数：从0~0.50，相似度每增加2%，增加0.01
-    // const ctrlnet_start_percent = Math.min(0.5, (similarity * 0.01) / 2);
-    const ctrlnet_start_percent = 0;
-
     console.log('Structural similarity:', similarity);
-    console.log('Calculated ctrlnet_strength:', ctrlnet_strength);
-    console.log('Calculated ctrlnet_start_percent:', ctrlnet_start_percent);
 
     // 先调用第三方接口生成图片
-    let prompt_id = null;
-    let seed = 0; // 添加seed变量声明
+    let request_id = null;
 
     try {
-      console.log('Calling new third-party API to generate image');
+      console.log('调用BFL API生成图片');
       
-      // 生成16位随机数作为seed
-      seed = Math.floor(Math.random() * 9000000000000000) + 1000000000000000;
-      console.log('Generated seed:', seed);
+      // 获取API密钥
+      const BFL_API_KEY = process.env.BFL_API_KEY;
+      if (!BFL_API_KEY) {
+        console.error('BFL_API_KEY环境变量未设置');
+        return res.status(500).json({ error: 'API配置错误' });
+      }
       
-      // 新API配置
-      const apiUrl = "https://comfy.liblib.art/api/prompt";
+      // 从URL下载图片并转换为base64
+      console.log('正在下载并转换图片:', imageUrl);
       
-      // 请求头
+      // 使用axios获取图片数据
+      const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+      const imageBuffer = Buffer.from(imageResponse.data, 'binary');
+      const base64Image = imageBuffer.toString('base64');
+      
+      console.log('图片已转换为base64');
+      
+      // 请求BFL API
+      const apiUrl = 'https://api.bfl.ai/v1/flux-kontext-pro';
+      
       const headers = {
-        'cookie': '_ga=GA1.1.1162931253.1716176209; webidExt=1747364397292soukxtpq; usertokenExt=b965a3a5c25a40a186c15a83d425324678462281277; usertoken_online=b965a3a5c25a40a186c15a83d425324678462281277; Hm_lvt_2f4541bcbee365f31b21f65f00e8ae8b=1747633187,1747731026,1748410786,1748584742; HMACCOUNT=81D27ED34A2F576D; acw_tc=19d314f4-2975-48a7-801c-bd648d8e22ee6d1f482aab1650aa7761749c7ef968d5; Hm_lpvt_2f4541bcbee365f31b21f65f00e8ae8b=1748584873; _ga_24MVZ5C982=GS2.1.s1748584745$o174$g1$t1748584874$j48$l0$h1128649205',
-        'origin': 'https://comfy.liblib.art',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+        'accept': 'application/json',
+        'x-key': BFL_API_KEY,
         'Content-Type': 'application/json'
       };
       
-      // 克隆设计模板并修改关键参数
-      const designJson = require('../../data/design_v1.json');
+      const data = {
+        'prompt': finalPrompt, // 使用最终的正向提示词
+        'input_image': base64Image, // 传入base64编码的图片
+        'aspect_ratio': "4:3",
+        'safety_tolerance': 2,
+      };
       
-      // 更新设计模板中的参数
-      designJson.prompt['3'].inputs.seed = seed;
-      designJson.prompt['6'].inputs.text = finalPrompt;
-      designJson.prompt['7'].inputs.text = finalNegativePrompt;
-      designJson.prompt['16'].inputs.strength = ctrlnet_strength;
-      designJson.prompt['16'].inputs.start_percent = ctrlnet_start_percent;
+      console.log('正在发送请求到BFL API');
       
-      console.log('API Payload prepared with updated parameters');
+      const response = await axios.post(apiUrl, data, { headers });
       
-      // 发送POST请求
-      const response = await axios.post(apiUrl, designJson, { headers });
-      
-      // 检查响应
       if (response.status !== 200) {
         throw new Error(`API responded with status code ${response.status}`);
       }
       
       const result = response.data;
-      prompt_id = result.prompt_id;
-      console.log(`Task created successfully, prompt_id: ${prompt_id}`);
-
-      if (!prompt_id) {
-        throw new Error('Failed to get prompt_id from third-party API');
+      console.log('BFL API响应:', result);
+      
+      if (!result.id) {
+        throw new Error('Failed to get request_id from BFL API');
       }
+      
+      request_id = result.id;
+      console.log(`获取到request_id: ${request_id}`);
     } catch (apiError: any) {
-      console.error('Error calling third-party API:', apiError);
+      console.error('调用BFL API时出错:', apiError);
       return res.status(500).json({ 
-        error: 'Failed to generate garden design', 
+        error: '生成花园设计失败', 
         details: apiError.message 
       });
     }
     
-    // 在调用第三方接口后，获取生成ID
-    // 创建新的设计记录 - 添加新字段
+    // 创建新的设计记录
     const gardenDesign = await GardenDesign.create({
       user_id,
       project_id: projectId,
@@ -557,77 +567,16 @@ export const generateDesign = async (req: Request, res: Response) => {
       status: 1, // 1代表生成中
       style_id: Number(style_id),
       style_name,
-      positive_words: positiveWordsArr.map(tag => tag.text).join(','), // 保存为逗号分隔的字符串
-      negative_words: negativeWordsArr.map(tag => tag.text).join(','), // 保存为逗号分隔的字符串
-      structural_similarity: parseInt(structuralSimilarity),
+      positive_words: finalPrompt, // 保存为逗号分隔的字符串
+      negative_words: finalNegativePrompt, // 保存为逗号分隔的字符串
+      structural_similarity: similarity,
       is_like: 0,
       is_del: 0,
       points_cost: 1, // 记录消耗的点数
-      third_task_id: prompt_id, // 保存prompt_id
-      seed: seed.toString(), // 新增：保存seed值
-      ctrlnet_strength, // 新增：保存strength值
-      ctrlnet_start_percent, // 新增：保存start_percent值
+      third_task_id: request_id, // 保存BFL API的请求ID
       ctime: Math.floor(Date.now() / 1000),
       utime: Math.floor(Date.now() / 1000)
     });
-
-    // 调用bridge接口获取generateId
-    try {
-      console.log('Calling bridge API to get generateId');
-      
-      // 获取当前时间戳（毫秒）
-      const timestamp = Date.now();
-      console.log('Current timestamp:', timestamp);
-      
-      // 新API配置
-      const bridgeApiUrl = `https://bridge.liblib.art/gateway/sd-api/generate/image?timestamp=${timestamp}`;
-      
-      // 请求头
-      const bridgeHeaders = {
-        'token': 'b965a3a5c25a40a186c15a83d425324678462281277',
-        'webid': '1747364397292soukxtpq',
-        'Content-Type': 'application/json'
-      };
-      
-      // 克隆设计结果模板并修改关键参数
-      const designResultJson = require('../../data/design_result_v1.json');
-      
-      // 更新设计模板中的参数
-      designResultJson.comfyUI.prompt['3'].inputs.seed = seed;
-      designResultJson.comfyUI.prompt['6'].inputs.text = finalPrompt;
-      designResultJson.comfyUI.prompt['7'].inputs.text = finalNegativePrompt;
-      designResultJson.comfyUI.prompt['16'].inputs.strength = ctrlnet_strength;
-      designResultJson.comfyUI.prompt['16'].inputs.start_percent = ctrlnet_start_percent;
-      
-      console.log('Bridge API Payload prepared with updated parameters');
-      
-      // 发送POST请求
-      const bridgeResponse = await axios.post(bridgeApiUrl, designResultJson, { headers: bridgeHeaders });
-      
-      // 检查响应
-      if (bridgeResponse.status !== 200) {
-        throw new Error(`Bridge API responded with status code ${bridgeResponse.status}`);
-      }
-      
-      const bridgeResult = bridgeResponse.data;
-      console.log(`Bridge API response:`, bridgeResult);
-      
-      if (bridgeResult.code === 0 && bridgeResult.data) {
-        const generateId = parseInt(bridgeResult.data);
-        console.log(`Retrieved generateId: ${generateId}`);
-        
-        // 更新gardenDesign记录，添加generateId
-        await gardenDesign.update({
-          third_generate_id: generateId,
-          utime: Math.floor(Date.now() / 1000)
-        });
-      } else {
-        console.log('Failed to get valid generateId from bridge API');
-      }
-    } catch (bridgeError: any) {
-      console.error('Error calling bridge API:', bridgeError);
-      // 记录错误但不中断流程
-    }
 
     // 处理积分扣除
     try {
@@ -683,12 +632,12 @@ export const generateDesign = async (req: Request, res: Response) => {
 };
 
 /**
- * 检查Comfy图片生成状态
- * @route GET /api/garden-designs/check-comfy-status/:promptId
+ * 检查BFL API图片生成状态
+ * @route GET /api/garden-designs/check-status/:requestId
  */
-export const checkComfyStatus = async (req: Request, res: Response) => {
+export const checkBflStatus = async (req: Request, res: Response) => {
   try {
-    console.log('API call received: GET /api/garden-designs/check-comfy-status/:promptId');
+    console.log('API call received: GET /api/garden-designs/check-status/:requestId');
     console.log('Request params:', req.params);
     
     // 从请求中获取用户ID
@@ -700,30 +649,39 @@ export const checkComfyStatus = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    // 获取prompt_id
-    const { promptId } = req.params;
+    // 获取request_id
+    const { requestId } = req.params;
     
-    if (!promptId) {
-      console.log('Validation failed: Missing promptId');
-      return res.status(400).json({ error: 'promptId is required' });
+    if (!requestId) {
+      console.log('Validation failed: Missing requestId');
+      return res.status(400).json({ error: 'requestId is required' });
+    }
+
+    // 检查BFL API密钥是否已配置
+    const BFL_API_KEY = process.env.BFL_API_KEY;
+    if (!BFL_API_KEY) {
+      console.error('环境变量BFL_API_KEY未设置');
+      return res.status(500).json({ error: 'API配置错误' });
     }
     
     try {
-      // 查询Comfy API获取状态
-      console.log('Checking status for prompt ID:', promptId);
+      // 查询BFL API获取状态
+      console.log('正在查询BFL API任务状态:', requestId);
       
       // API配置
-      const apiUrl = `https://comfy.liblib.art/api/history/${promptId}`;
+      const apiUrl = 'https://api.bfl.ai/v1/get_result';
       
       // 请求头
       const headers = {
-        'cookie': '_ga=GA1.1.1162931253.1716176209; webidExt=1747364397292soukxtpq; usertokenExt=b965a3a5c25a40a186c15a83d425324678462281277; usertoken_online=b965a3a5c25a40a186c15a83d425324678462281277; Hm_lvt_2f4541bcbee365f31b21f65f00e8ae8b=1747633187,1747731026,1748410786,1748584742; HMACCOUNT=81D27ED34A2F576D; acw_tc=19d314f4-2975-48a7-801c-bd648d8e22ee6d1f482aab1650aa7761749c7ef968d5; Hm_lpvt_2f4541bcbee365f31b21f65f00e8ae8b=1748584873; _ga_24MVZ5C982=GS2.1.s1748584745$o174$g1$t1748584874$j48$l0$h1128649205',
-        'origin': 'https://comfy.liblib.art',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36'
+        'accept': 'application/json',
+        'x-key': BFL_API_KEY
       };
       
+      // 请求参数
+      const params = { id: requestId };
+      
       // 发送GET请求
-      const response = await axios.get(apiUrl, { headers });
+      const response = await axios.get(apiUrl, { params, headers });
       
       // 检查响应
       if (response.status !== 200) {
@@ -731,22 +689,24 @@ export const checkComfyStatus = async (req: Request, res: Response) => {
       }
       
       const result = response.data;
-      console.log(`Status check result:`, result);
+      console.log(`BFL API状态查询结果:`, result);
       
       if (!result) {
         return res.status(400).json({ status: 'pending', message: 'No result found' });
       }
       
-      // 检查是否有输出图片
-      if (result.outputs && result.outputs['9'] && result.outputs['9'].images && result.outputs['9'].images.length > 0) {
-        // 获取生成的图片URL
-        const imageUrl = `https://comfy.liblib.art/view?filename=${result.outputs['9'].images[0].filename}&type=temp`;
-        console.log('Generated image URL:', imageUrl);
+      // 检查任务状态
+      const status = result.status;
+      
+      if (status === "Ready") {
+        // 任务完成，获取图片URL
+        const imageUrl = result.result.sample;
+        console.log('生成的图片URL:', imageUrl);
         
         // 查找对应的design记录并更新状态
         const gardenDesign = await GardenDesign.findOne({
           where: {
-            third_task_id: promptId,
+            third_task_id: requestId,
             user_id
           }
         });
@@ -755,6 +715,7 @@ export const checkComfyStatus = async (req: Request, res: Response) => {
           // 更新设计状态为成功
           await gardenDesign.update({
             pic_result: imageUrl,
+            pic_third_orginial: imageUrl,
             status: 2, // 2代表成功
             utime: Math.floor(Date.now() / 1000)
           });
@@ -762,27 +723,50 @@ export const checkComfyStatus = async (req: Request, res: Response) => {
           return res.status(200).json({
             status: 'completed',
             image_url: imageUrl,
-            garden_design: gardenDesign,
-            third_generate_id: gardenDesign.third_generate_id
+            garden_design: gardenDesign
           });
         } else {
           return res.status(404).json({ error: 'Garden design not found' });
         }
+      } else if (status === "Processing" || status === "Queued") {
+        // 任务仍在处理中
+        return res.status(200).json({ status: 'pending', message: 'Generation in progress' });
+      } else {
+        // 任务失败或状态异常
+        console.error(`BFL任务异常: ${requestId}, 状态: ${status}`);
+        
+        // 查找对应的design记录并更新状态为失败
+        const gardenDesign = await GardenDesign.findOne({
+          where: {
+            third_task_id: requestId,
+            user_id
+          }
+        });
+        
+        if (gardenDesign) {
+          // 更新设计状态为失败
+          await gardenDesign.update({
+            status: 3, // 3代表失败
+            utime: Math.floor(Date.now() / 1000)
+          });
+        }
+        
+        return res.status(400).json({ 
+          status: 'failed', 
+          message: `Generation failed with status: ${status}` 
+        });
       }
       
-      // 如果无图片，返回进行中状态
-      return res.status(200).json({ status: 'pending', message: 'Generation in progress' });
-      
     } catch (apiError: any) {
-      console.error('Error calling Comfy API:', apiError);
+      console.error('调用BFL API时出错:', apiError);
       return res.status(500).json({ 
-        error: 'Failed to check generation status', 
+        error: '无法检查生成状态', 
         details: apiError.message 
       });
     }
     
   } catch (error) {
-    console.error('Error checking comfy status:', error);
-    return res.status(500).json({ error: 'Failed to check comfy status' });
+    console.error('检查BFL状态时出错:', error);
+    return res.status(500).json({ error: '检查BFL状态失败' });
   }
 }; 
