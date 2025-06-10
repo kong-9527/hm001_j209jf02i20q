@@ -462,6 +462,7 @@ export const generateDesign = async (req: Request, res: Response) => {
         'input_image': base64Image, // Pass base64 encoded image
         'aspect_ratio': "4:3",
         'safety_tolerance': 2,
+        'prompt_upsampling': true,
       };
       
       console.log('Sending request to BFL API');
