@@ -22,6 +22,7 @@ import {
 import FaqAccordion from './components/FaqAccordion';
 import PricingPlans from './components/PricingPlans';
 import CallToAction from './components/CallToAction';
+import { JsonLdService, JsonLdOrganization, JsonLdHomePage } from './components/JsonLdSchema';
 
 export default function Home() {
   // 轮播图片数据
@@ -81,6 +82,74 @@ export default function Home() {
       <Script id="plausible-setup">
         {`window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }`}
       </Script>
+      
+      {/* 增强结构化数据 */}
+      <JsonLdHomePage 
+        url="https://aigardendesign.org"
+        title="AI Garden Design | Tailored Garden & Plant Planning"
+        description="Design your perfect garden, patio or balcony with AI. Get intelligent garden layouts and personalized plant suggestions."
+        datePublished="2023-01-01"
+        dateModified={new Date().toISOString().split('T')[0]}
+        organizationName="AI Garden Design"
+        organizationLogo="https://aigardendesign.org/logo.png"
+        mainImage="https://aigardendesign.org/og-image.jpg"
+        pricing={{
+          freeTrial: true,
+          pricePlans: [
+            {
+              name: "Basic",
+              price: 9.99,
+              currency: "USD",
+              frequency: "monthly",
+              description: "Perfect for beginners and small gardens",
+              features: ["5 garden designs per month", "Basic plant recommendations", "Standard support"]
+            },
+            {
+              name: "Pro",
+              price: 19.99,
+              currency: "USD",
+              frequency: "monthly",
+              description: "For serious gardeners with complex needs",
+              features: ["20 garden designs per month", "Advanced plant recommendations", "Premium support", "Custom layouts"]
+            },
+            {
+              name: "Premium",
+              price: 99.99,
+              currency: "USD",
+              frequency: "yearly",
+              description: "Complete gardening solution for professionals",
+              features: ["Unlimited garden designs", "Expert plant recommendations", "Priority support", "Custom layouts", "Commercial use"]
+            }
+          ]
+        }}
+        reviewCount={78}
+        ratingValue={4.8}
+      />
+      
+      {/* 服务结构化数据 */}
+      <JsonLdService 
+        name="AI Garden Design Service"
+        description="Use AI to design your garden, patio or courtyard with customized layout and planting recommendations."
+        provider={{
+          name: "AI Garden Design",
+          url: "https://aigardendesign.org"
+        }}
+        serviceType="Garden Design Service"
+      />
+      
+      {/* 组织结构化数据 */}
+      <JsonLdOrganization
+        name="AI Garden Design"
+        url="https://aigardendesign.org"
+        logo="https://aigardendesign.org/logo.png"
+        description="AI Garden Design helps homeowners create beautiful garden layouts with AI-powered design tools and plant recommendations."
+        sameAs={[
+          "https://twitter.com/aigardendesign",
+          "https://facebook.com/aigardendesign",
+          "https://instagram.com/aigardendesign",
+          "https://pinterest.com/aigardendesign"
+        ]}
+      />
       
       {/* 导航栏 */}
       <Navbar />
@@ -264,11 +333,13 @@ export default function Home() {
           faqs={[
             {
               question: "What is AI Garden Designer?",
-              answer: "AI Garden Designer is an advanced platform that uses artificial intelligence to transform your outdoor spaces into stunning garden designs. It analyzes your space, considers your preferences, and generates professional landscape designs tailored to your needs."
+              answer: "AI Garden Designer is an advanced platform that uses artificial intelligence to transform your outdoor spaces into stunning garden designs. It analyzes your space, considers your preferences, and generates professional landscape designs tailored to your needs.",
+              plainTextAnswer: "AI Garden Designer is an advanced platform that uses artificial intelligence to transform your outdoor spaces into stunning garden designs. It analyzes your space, considers your preferences, and generates professional landscape designs tailored to your needs."
             },
             {
               question: "How does AI Garden Designer work?",
-              answer: "Our platform works by taking images of your space, analyzing the terrain, light conditions, and local climate. You provide preferences about styles, plants, and features you'd like, and our AI generates multiple design options. You can then refine these designs until you're completely satisfied."
+              answer: "Our platform works by taking images of your space, analyzing the terrain, light conditions, and local climate. You provide preferences about styles, plants, and features you'd like, and our AI generates multiple design options. You can then refine these designs until you're completely satisfied.",
+              plainTextAnswer: "Our platform works by taking images of your space, analyzing the terrain, light conditions, and local climate. You provide preferences about styles, plants, and features you'd like, and our AI generates multiple design options. You can then refine these designs until you're completely satisfied."
             },
             {
               question: "What types of gardens can I create?",
@@ -286,7 +357,8 @@ export default function Home() {
                   </ul>
                   <p className="mt-2">The platform is designed to adapt to multiple styles and requirements, offering endless possibilities.</p>
                 </div>
-              )
+              ),
+              plainTextAnswer: "AI Garden Designer can generate various types of gardens, including residential gardens and backyards, Japanese Zen gardens, English cottage gardens, modern minimalist landscapes, desert xeriscapes, tropical paradises, and many more styles. The platform is designed to adapt to multiple styles and requirements, offering endless possibilities."
             },
             {
               question: "Is AI Garden Designer easy to use?",

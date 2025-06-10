@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import { JsonLdFAQ } from './JsonLdSchema';
 
 interface FaqItem {
   question: string;
   answer: React.ReactNode;
+  plainTextAnswer?: string; // 为了JSON-LD添加纯文本版本的答案
 }
 
 interface FaqAccordionProps {
@@ -20,8 +22,20 @@ const FaqAccordion: React.FC<FaqAccordionProps> = ({ title, subtitle, faqs }) =>
     setExpandedIndex(expandedIndex === index ? null : index);
   };
 
+  // 准备JSON-LD数据
+  const jsonLdFaqs = faqs.map(faq => ({
+    question: faq.question,
+    answer: faq.plainTextAnswer || 
+      (typeof faq.answer === 'string' 
+        ? faq.answer 
+        : 'Please visit our website for detailed answer.')
+  }));
+
   return (
     <section id="faq" className="py-16 bg-white">
+      {/* 添加结构化数据 */}
+      <JsonLdFAQ faqs={jsonLdFaqs} />
+      
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-3">{title}</h2>

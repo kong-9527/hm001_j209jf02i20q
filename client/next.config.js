@@ -53,6 +53,10 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 60,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   // 在统一部署模型下，不需要特殊的 API 重写，删除或注释掉这部分
   // async rewrites() {
@@ -92,6 +96,47 @@ const nextConfig = {
         permanent: false,
       },
     ];
+  },
+  // 添加Headers配置用于缓存控制
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800',
+          },
+        ],
+      },
+      {
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      {
+        source: '/_next/image/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      {
+        source: '/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ]
   },
 }
 
