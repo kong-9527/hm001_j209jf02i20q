@@ -414,7 +414,7 @@ export default function PhotoGenerator() {
       }
     } catch (error) {
       console.error('获取自定义风格详情失败:', error);
-      alert('获取风格详情失败，请重试');
+      alert('Failed to get style details, please try again');
     }
   };
   
@@ -464,7 +464,7 @@ export default function PhotoGenerator() {
         setEditingStyleId(null);
       } catch (error) {
         console.error('更新风格失败:', error);
-        alert('更新风格失败，请重试');
+        alert('Failed to update style, please try again');
       }
     }
   };
@@ -505,7 +505,7 @@ export default function PhotoGenerator() {
       }
     } catch (error) {
       console.error('加载风格失败:', error);
-      alert('加载风格失败，请重试');
+      alert('Failed to load style, please try again');
     }
   };
   
@@ -524,11 +524,11 @@ export default function PhotoGenerator() {
           setShowDeleteConfirmDialog(false);
           setDeletingStyleId(null);
         } else {
-          throw new Error('删除失败');
+          throw new Error('Delete failed');
         }
       } catch (error) {
-        console.error('删除自定义风格失败:', error);
-        alert('删除风格失败，请重试');
+        console.error('Failed to delete custom style:', error);
+        alert('Failed to delete style, please try again');
       }
     }
   };
@@ -572,7 +572,7 @@ export default function PhotoGenerator() {
         setShowSaveStyleDialog(false);
       } catch (error) {
         console.error('保存自定义风格失败:', error);
-        alert('保存失败，请重试');
+        alert('Failed to save, please try again');
       }
     }
   };
@@ -1319,16 +1319,16 @@ export default function PhotoGenerator() {
     }
   };
   
-  // 渲染所有图片
+  // Render all images
   const renderAllImages = () => {
-    // 添加加载中状态判断
+    // Add loading state check
     if (isLoadingImages) {
       return (
         <div className="flex flex-col items-center justify-center p-16">
           <div className="w-16 h-16 mb-4 relative">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600"></div>
           </div>
-          <p className="text-emerald-600 font-medium">加载中...</p>
+          <p className="text-emerald-600 font-medium">Loading...</p>
         </div>
       );
     }
@@ -1347,7 +1347,7 @@ export default function PhotoGenerator() {
       );
     }
     
-    // 使用API数据，按照ctime倒序排序
+    // Use API data, sort by ctime in descending order
     const imageData = [...designImages].sort((a, b) => {
       return (b.ctime || 0) - (a.ctime || 0);
     });
@@ -1360,7 +1360,7 @@ export default function PhotoGenerator() {
               key={image.id} 
               className={`relative aspect-square bg-gray-100 rounded-md overflow-hidden ${image.status !== 1 ? "group" : ""}`}
             >
-              {/* 所有状态都显示背景图片 */}
+              {/* Show background image for all states */}
               {image.pic_result ? (
               <Image 
                   src={image.pic_result}
@@ -1380,7 +1380,7 @@ export default function PhotoGenerator() {
               )}
               
               {image.status === 1 && (
-                // 生成中的状态显示 - 保留背景图片
+                // Processing state display - keep background image
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40">
                   <div className="w-12 h-12 mb-3 relative">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -1452,7 +1452,7 @@ export default function PhotoGenerator() {
     );
   };
   
-  // 渲染收藏图片
+  // Render liked images
   const renderLikedImages = () => {
     // 添加加载中状态判断
     if (isLoadingImages) {
@@ -1461,7 +1461,7 @@ export default function PhotoGenerator() {
           <div className="w-16 h-16 mb-4 relative">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600"></div>
           </div>
-          <p className="text-emerald-600 font-medium">加载中...</p>
+          <p className="text-emerald-600 font-medium">Loading...</p>
         </div>
       );
     }
@@ -1548,7 +1548,7 @@ export default function PhotoGenerator() {
     );
   };
   
-  // 渲染删除的图片 - 修改为从数据库获取已删除的图片
+  // Render deleted images - modified to fetch deleted images from database
   const renderDeletedImages = () => {
     // 添加加载中状态判断
     if (isLoadingImages) {
@@ -1557,7 +1557,7 @@ export default function PhotoGenerator() {
           <div className="w-16 h-16 mb-4 relative">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600"></div>
           </div>
-          <p className="text-emerald-600 font-medium">加载中...</p>
+          <p className="text-emerald-600 font-medium">Loading...</p>
         </div>
       );
     }
@@ -1793,7 +1793,7 @@ export default function PhotoGenerator() {
   const handleDelete = async (e: React.MouseEvent, image: GardenDesignImage) => {
     e.stopPropagation(); // 阻止事件冒泡，避免触发图片点击事件
 
-    if (!window.confirm('确定要删除这张图片吗？')) {
+    if (!window.confirm('Are you sure you want to delete this image?')) {
       return;
     }
 
@@ -1957,33 +1957,33 @@ export default function PhotoGenerator() {
       // 设置生成中状态
       setIsGenerating(true);
       
-      console.log('Garden Design: 提交生成请求');
-      console.log('- 图片URL:', uploadedImageUrl);
+      console.log('Garden Design: Submitting generation request');
+      console.log('- Image URL:', uploadedImageUrl);
       const styleType = selectedTab === 'premade' ? 'Classic styles' : 'Custom styles';
-      console.log('- 风格类型:', styleType);
+      console.log('- Style type:', styleType);
         
-      // 准备参数
+              // Prepare parameters
       let positiveWordsParam = '';
       let negativeWordsParam = '';
         
       if (selectedTab === 'premade') {
-        console.log('- 预设风格ID:', selectedStyleId);
-        console.log('- 预设风格名称:', getSelectedStyle()?.name);
-        // 对于预设风格，只传递风格名称
+        console.log('- Preset style ID:', selectedStyleId);
+        console.log('- Preset style name:', getSelectedStyle()?.name);
+                  // For preset styles, only pass the style name
         positiveWordsParam = getSelectedStyle()?.name || '';
-        negativeWordsParam = ''; // 对于Classic styles，负向词交由后端处理
+                  negativeWordsParam = ''; // For Classic styles, negative words are handled by the backend
       } else {
-        console.log('- 正向词:', positiveWords);
-        console.log('- 负向词:', negativeWords);
-        // 对于自定义风格，将词组数组转换为逗号分隔的字符串
+                  console.log('- Positive words:', positiveWords);
+          console.log('- Negative words:', negativeWords);
+                  // For custom styles, convert the word arrays to comma-separated strings
         positiveWordsParam = positiveWords.map(word => word.text).join(',');
         negativeWordsParam = negativeWords.map(word => word.text).join(',');
       }
         
       const structuralSimilarity = resemblancePercent.toString();
-      console.log('- 结构相似度:', structuralSimilarity + '%');
+              console.log('- Structural similarity:', structuralSimilarity + '%');
         
-      // 获取图片尺寸
+              // Get image dimensions
       const imgElement = new window.Image();
         
       // 使用箭头函数保留this上下文
@@ -2004,7 +2004,7 @@ export default function PhotoGenerator() {
           projectId
         )
         .then((response) => {
-          console.log('生成成功，返回数据:', response);
+          console.log('Generation successful, returned data:', response);
           // 显示成功提示
           addNotification({
             type: 'success',
@@ -2069,7 +2069,7 @@ export default function PhotoGenerator() {
             // 其他错误显示通用错误提示或服务器返回的消息
             addNotification({
               type: 'error',
-              message: error.message || '生成图片失败，请重试',
+              message: error.message || 'Failed to generate image, please try again',
               duration: 5000
             });
           }
@@ -2083,7 +2083,7 @@ export default function PhotoGenerator() {
         setIsGenerating(false);
         addNotification({
           type: 'error',
-          message: '无法加载图片，请重新上传',
+          message: 'Unable to load image, please upload again',
           duration: 5000
         });
       };
@@ -2091,12 +2091,12 @@ export default function PhotoGenerator() {
       // 设置图片src，触发onload事件
       imgElement.src = uploadedImageUrl;
     } catch (error) {
-      console.error('Garden Design: 生成图片失败:', error);
+      console.error('Garden Design: Failed to generate image:', error);
       // 重置生成中状态
       setIsGenerating(false);
       addNotification({
         type: 'error',
-        message: '生成图片失败，请重试',
+        message: 'Failed to generate image, please try again',
         duration: 5000
       });
     }
@@ -2809,7 +2809,7 @@ export default function PhotoGenerator() {
                         {/* 分页控制 */}
                         <div className="flex justify-between items-center mt-4">
                           <div className="text-xs text-gray-500">
-                            显示 {Math.min((currentPage - 1) * stylesPerPage + 1, customStyles.length)} - {Math.min(currentPage * stylesPerPage, customStyles.length)} 共 {customStyles.length} 条
+                            Showing {Math.min((currentPage - 1) * stylesPerPage + 1, customStyles.length)} - {Math.min(currentPage * stylesPerPage, customStyles.length)} of {customStyles.length} items
                           </div>
                           <div className="flex space-x-2">
                             <button
@@ -2821,7 +2821,7 @@ export default function PhotoGenerator() {
                               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                               disabled={currentPage === 1}
                             >
-                              上一页
+                              Previous
                             </button>
                             {Array.from(
                               { length: Math.min(3, Math.ceil(customStyles.length / stylesPerPage)) },
@@ -2852,7 +2852,7 @@ export default function PhotoGenerator() {
                               }
                               disabled={currentPage >= Math.ceil(customStyles.length / stylesPerPage)}
                             >
-                              下一页
+                              Next
                             </button>
                           </div>
                         </div>

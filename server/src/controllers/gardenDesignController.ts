@@ -12,17 +12,17 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-// 加载环境变量
+// Load environment variables
 dotenv.config();
 
-// 添加WordTag接口定义
+// Add WordTag interface definition
 interface WordTag {
   id: number | string;
   text: string;
 }
 
 /**
- * 获取当前用户和项目的花园设计图片
+ * Get current user's garden design images for a project
  * @route GET /api/garden-designs
  */
 export const getGardenDesigns = async (req: Request, res: Response) => {
@@ -31,7 +31,7 @@ export const getGardenDesigns = async (req: Request, res: Response) => {
     console.log('Request query:', req.query);
     console.log('Request user:', req.user);
     
-    // 从请求中获取用户ID
+    // Get user ID from request
     const user_id = getUserIdFromRequest(req);
     console.log('Extracted user_id:', user_id);
     
@@ -40,7 +40,7 @@ export const getGardenDesigns = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    // 从请求参数中获取项目ID并转换为数字
+    // Get project ID from query and convert to number
     const { project_id, is_del, is_like } = req.query;
     console.log('Raw project_id from query:', project_id);
     console.log('Raw is_del from query:', is_del);
@@ -51,7 +51,7 @@ export const getGardenDesigns = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Project ID is required' });
     }
     
-    // 将project_id转换为数字
+    // Convert project_id to number
     const projectId = Number(project_id);
     console.log('Converted projectId:', projectId);
     
@@ -60,29 +60,29 @@ export const getGardenDesigns = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Project ID must be a number' });
     }
     
-    // 构建查询条件
+    // Build query conditions
     const whereCondition: any = {
       user_id,
       project_id: projectId,
     };
     
-    // 如果提供了is_del参数，将其添加到查询条件中
+    // If is_del parameter is provided, add it to query conditions
     if (is_del !== undefined) {
       whereCondition.is_del = Number(is_del);
     }
     
-    // 如果提供了is_like参数，将其添加到查询条件中
+    // If is_like parameter is provided, add it to query conditions
     if (is_like !== undefined) {
       whereCondition.is_like = Number(is_like);
     }
     
     console.log('Executing database query with params:', whereCondition);
     
-    // 查询数据库获取花园设计图片
+    // Query database to get garden design images
     const gardenDesigns = await GardenDesign.findAll({
       where: whereCondition,
       order: [
-        ['ctime', 'DESC'] // 按创建时间倒序排序
+        ['ctime', 'DESC'] // Sort by creation time in descending order
       ]
     });
     
@@ -96,7 +96,7 @@ export const getGardenDesigns = async (req: Request, res: Response) => {
 };
 
 /**
- * 更新花园设计图片的收藏状态
+ * Update garden design image like status
  * @route PUT /api/garden-designs/:id/like
  */
 export const updateLikeStatus = async (req: Request, res: Response) => {
@@ -105,7 +105,7 @@ export const updateLikeStatus = async (req: Request, res: Response) => {
     console.log('Request params:', req.params);
     console.log('Request body:', req.body);
     
-    // 从请求中获取用户ID
+    // Get user ID from request
     const user_id = getUserIdFromRequest(req);
     console.log('Extracted user_id:', user_id);
     
@@ -114,7 +114,7 @@ export const updateLikeStatus = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    // 获取图片ID
+    // Get image ID
     const { id } = req.params;
     const designId = Number(id);
     
@@ -123,7 +123,7 @@ export const updateLikeStatus = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Design ID must be a number' });
     }
     
-    // 获取要设置的收藏状态
+    // Get like status to set
     const { is_like } = req.body;
     
     if (is_like === undefined || ![0, 1].includes(Number(is_like))) {
@@ -131,7 +131,7 @@ export const updateLikeStatus = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'is_like must be 0 or 1' });
     }
     
-    // 查找该图片并确保它属于当前用户
+    // Find the image and ensure it belongs to the current user
     const gardenDesign = await GardenDesign.findOne({
       where: {
         id: designId,
@@ -144,7 +144,7 @@ export const updateLikeStatus = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Garden design not found' });
     }
     
-    // 更新收藏状态
+    // Update like status
     await gardenDesign.update({ is_like: Number(is_like) });
     
     console.log(`Updated design ${designId} like status to ${is_like}`);
@@ -157,7 +157,7 @@ export const updateLikeStatus = async (req: Request, res: Response) => {
 };
 
 /**
- * 软删除花园设计图片（标记为已删除）
+ * Soft delete garden design image (mark as deleted)
  * @route PUT /api/garden-designs/:id/delete
  */
 export const softDeleteDesign = async (req: Request, res: Response) => {
@@ -165,7 +165,7 @@ export const softDeleteDesign = async (req: Request, res: Response) => {
     console.log('API call received: PUT /api/garden-designs/:id/delete');
     console.log('Request params:', req.params);
     
-    // 从请求中获取用户ID
+    // Get user ID from request
     const user_id = getUserIdFromRequest(req);
     console.log('Extracted user_id:', user_id);
     
@@ -174,7 +174,7 @@ export const softDeleteDesign = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    // 获取图片ID
+    // Get image ID
     const { id } = req.params;
     const designId = Number(id);
     
@@ -183,7 +183,7 @@ export const softDeleteDesign = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Design ID must be a number' });
     }
     
-    // 查找该图片并确保它属于当前用户
+    // Find the image and ensure it belongs to the current user
     const gardenDesign = await GardenDesign.findOne({
       where: {
         id: designId,
@@ -196,7 +196,7 @@ export const softDeleteDesign = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Garden design not found' });
     }
     
-    // 更新删除状态为已删除(is_del=1)
+    // Update delete status to deleted (is_del=1)
     await gardenDesign.update({ is_del: 1 });
     
     console.log(`Soft deleted design ${designId}`);
@@ -209,7 +209,7 @@ export const softDeleteDesign = async (req: Request, res: Response) => {
 };
 
 /**
- * 生成花园设计图
+ * Generate garden design image
  * @route POST /api/garden-designs/generate
  */
 export const generateDesign = async (req: Request, res: Response) => {
@@ -217,7 +217,7 @@ export const generateDesign = async (req: Request, res: Response) => {
     console.log('API call received: POST /api/garden-designs/generate');
     console.log('Request body:', req.body);
     
-    // 从请求中获取用户ID
+    // Get user ID from request
     const user_id = getUserIdFromRequest(req);
     console.log('Extracted user_id:', user_id);
     
@@ -226,42 +226,42 @@ export const generateDesign = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    // 检查BFL API密钥是否已配置
+    // Check if BFL API key is configured
     const BFL_API_KEY = process.env.BFL_API_KEY;
     if (!BFL_API_KEY) {
-      console.error('环境变量BFL_API_KEY未设置');
-      return res.status(500).json({ error: 'API配置错误' });
+      console.error('Environment variable BFL_API_KEY is not set');
+      return res.status(500).json({ error: 'API configuration error' });
     }
 
-    // 创建当前日期，仅包含年月日部分
+    // Create current date, only year-month-day part
     const now = new Date();
-    // 将日期转换为YYYY-MM-DD格式的字符串
+    // Convert date to YYYY-MM-DD format string
     const todayStr = now.toISOString().split('T')[0];
-    // 创建只包含日期的Date对象
+    // Create Date object with only date
     const today = new Date(todayStr);
     
-    console.log('今天日期(字符串格式):', todayStr);
-    console.log('今天日期(Date对象):', today);
+    console.log('Today\'s date (string format):', todayStr);
+    console.log('Today\'s date (Date object):', today);
 
-    // 检查用户是否有活跃订阅
+    // Check if user has active subscription
     const activeSubscription = await UserOrder.findOne({
       where: {
         user_id,
         member_start_date: {
-          [Op.lte]: today // 开始日期小于等于当前日期
+          [Op.lte]: today // Start date less than or equal to current date
         },
         member_end_date: {
-          [Op.gte]: today // 结束日期大于等于当前日期
+          [Op.gte]: today // End date greater than or equal to current date
         }
       }
     });
 
-    // 调试日志
-    console.log('查询订阅条件:', {
+    // Debug logs
+    console.log('Subscription query conditions:', {
       user_id,
       'member_start_date <=': todayStr,
       'member_end_date >=': todayStr,
-      'Date对象': today
+      'Date object': today
     });
 
     if (!activeSubscription) {
@@ -278,21 +278,21 @@ export const generateDesign = async (req: Request, res: Response) => {
       });
     }
 
-    // 检查用户积分是否足够
+    // Check if user points are sufficient
     const user = await User.findByPk(user_id);
     if (!user) {
       console.log('User not found:', user_id);
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // 检查用户积分是否足够
+    // Check if user points are sufficient
     const userPoints = parseInt(user.points || '0', 10);
     if (userPoints < 1) {
       console.log('Insufficient points for user:', user_id);
       return res.status(400).json({ error: 'Insufficient points' });
     }
     
-    // 获取请求参数
+    // Get request parameters
     const { 
       imageUrl, 
       size, 
@@ -303,172 +303,101 @@ export const generateDesign = async (req: Request, res: Response) => {
       projectId 
     } = req.body;
     
-    // 参数验证
+    // Parameter validation
     if (!imageUrl || !size || !styleType || !projectId) {
       console.log('Validation failed: Missing required parameters');
       return res.status(400).json({ error: 'Missing required parameters' });
     }
     
-    // 解析参数
-    let finalPrompt = '';  // 最终发送给API的正向提示词
-    let finalNegativePrompt = ''; // 最终发送给API的负向提示词
-    let style_id = '';  // 风格ID
-    let style_name = ''; // 风格名称
-    let positiveWordsArr: WordTag[] = []; // 正向词数组
-    let negativeWordsArr: WordTag[] = []; // 负向词数组
+    // Parse parameters
+    let finalPrompt = '';  // Final prompt to send to API
+    let finalNegativePrompt = ''; // Final negative prompt to send to API
+    let style_id = '';  // Style ID
+    let style_name = ''; // Style name
+    let positiveWordsArr: WordTag[] = []; // Positive words array
+    let negativeWordsArr: WordTag[] = []; // Negative words array
 
-    // 限制每种类型词组的数量
+    // Limit number of words in each type group
     const MAX_STYLE_WORDS = 5;
     const MAX_COMMON_GARDEN_WORDS = 5;
     const MAX_COMMON_RENDERING_WORDS = 5;
 
-    // 根据styleType进行不同处理
+    // Different processing based on styleType
     if (styleType === 'Classic styles') {
-      // Classic styles: 使用风格名称查找预设风格
-      style_name = positiveWords; // 风格名称保存在positiveWords
+      // Classic styles: Use style name to find preset style
+      style_name = positiveWords; // Style name saved in positiveWords
       
-      // 在gardenStylesData中查找对应风格
+      // Find corresponding style in gardenStylesData
       const styleIndex = gardenStylesData.findIndex((style: any) => style.name === style_name);
       
       if (styleIndex !== -1) {
-        style_id = (styleIndex + 1).toString(); // 风格ID为索引+1
+        style_id = (styleIndex + 1).toString(); // Style ID is index+1
         
-        // 获取该风格的预设正向词和负向词
+        // Get preset positive and negative words for this style
         const stylePositivePrompts = gardenStylesData[styleIndex].positivePrompts;
         const styleNegativePrompts = gardenStylesData[styleIndex].negativePrompts;
+        const styleDescription = gardenStylesData[styleIndex].description || "";
         
-        // 将风格名称作为WordTag添加到positiveWordsArr，限制数量
+        // Format prompt according to new template
+        finalPrompt = `Please change the design style of the garden space in the picture to ${style_name}. The main features of this style are: ${styleDescription}.`;
+        
+        // Save original words for database record
         positiveWordsArr = stylePositivePrompts.split(',')
-          .slice(0, MAX_STYLE_WORDS)
           .map((text: string) => ({
           id: Date.now() + Math.random(),
           text: text.trim()
         }));
         
-        // 如果有负向词，也添加到negativeWordsArr，限制数量
+        // If there are negative words, add them to negativeWordsArr
         if (styleNegativePrompts) {
           negativeWordsArr = styleNegativePrompts.split(',')
-            .slice(0, MAX_STYLE_WORDS)
             .map((text: string) => ({
             id: Date.now() + Math.random(),
             text: text.trim()
           }));
         }
-        
-        // 添加通用花园提示词，限制数量
-        const commonGardenPositive = commonGardenPrompts.positivePrompts.split(',')
-          .slice(0, MAX_COMMON_GARDEN_WORDS)
-          .map((text: string) => ({
-          id: Date.now() + Math.random(),
-          text: text.trim()
-        }));
-        
-        const commonGardenNegative = commonGardenPrompts.negativePrompts.split(',')
-          .slice(0, MAX_COMMON_GARDEN_WORDS)
-          .map((text: string) => ({
-          id: Date.now() + Math.random(),
-          text: text.trim()
-        }));
-        
-        // 添加通用渲染质量提示词，限制数量
-        const commonRenderingPositive = commonRenderingPrompts.positivePrompts.split(',')
-          .slice(0, MAX_COMMON_RENDERING_WORDS)
-          .map((text: string) => ({
-          id: Date.now() + Math.random(),
-          text: text.trim()
-        }));
-        
-        const commonRenderingNegative = commonRenderingPrompts.negativePrompts.split(',')
-          .slice(0, MAX_COMMON_RENDERING_WORDS)
-          .map((text: string) => ({
-          id: Date.now() + Math.random(),
-          text: text.trim()
-        }));
-        
-        // 合并所有正向词
-        positiveWordsArr = [
-          ...positiveWordsArr,
-          ...commonGardenPositive,
-          ...commonRenderingPositive
-        ];
-        
-        // 合并所有负向词
-        negativeWordsArr = [
-          ...negativeWordsArr,
-          ...commonGardenNegative,
-          ...commonRenderingNegative
-        ];
       } else {
         console.log('Style not found:', style_name);
         return res.status(400).json({ error: 'Invalid style name' });
       }
     } else if (styleType === 'Custom styles') {
-      // Custom styles: 解析用户提供的自定义词汇
-      style_id = '99'; // 99代表Custom styles
+      // Custom styles: Parse user-provided custom words
+      style_id = '99'; // 99 represents Custom styles
       style_name = 'custom style';
 
       try {
-        // 处理用户提供的正向词，已是逗号分隔的字符串
-        const userPositiveWordsArray = positiveWords ? positiveWords.split(',') : [];
-        positiveWordsArr = userPositiveWordsArray
-          .slice(0, MAX_STYLE_WORDS)
-          .map((text: string) => ({
-            id: Date.now() + Math.random(),
-            text: text.trim()
-          }));
+        // Process user-provided positive and negative words (already comma-separated strings)
+        const hasPositiveWords = positiveWords && positiveWords.trim().length > 0;
+        const hasNegativeWords = negativeWords && negativeWords.trim().length > 0;
         
-        // 处理用户提供的负向词，已是逗号分隔的字符串
-        const userNegativeWordsArray = negativeWords ? negativeWords.split(',') : [];
-        negativeWordsArr = userNegativeWordsArray
-          .slice(0, MAX_STYLE_WORDS)
-          .map((text: string) => ({
-            id: Date.now() + Math.random(),
-            text: text.trim()
-          }));
+        // Format prompt based on whether positive and negative words are available
+        if (hasPositiveWords && hasNegativeWords) {
+          finalPrompt = `Please adjust this picture according to the following requirements: 1. Add these elements "${positiveWords}" on the basis of the original picture; 2. At the same time, please do not include these elements in the generated new image: "${negativeWords}"`;
+        } else if (hasPositiveWords) {
+          finalPrompt = `Please adjust this picture according to the following requirements: Add these elements "${positiveWords}" on the basis of the original picture;`;
+        } else if (hasNegativeWords) {
+          finalPrompt = `Please adjust this picture according to the following requirements: please do not include these elements in the generated new image: "${negativeWords}"`;
+        } else {
+          // If user didn't provide any words, use default prompt
+          finalPrompt = "Please adjust and optimize this garden picture to make it more beautiful and professional.";
+        }
         
-        // 添加通用花园提示词，限制数量
-        const commonGardenPositive = commonGardenPrompts.positivePrompts.split(',')
-          .slice(0, MAX_COMMON_GARDEN_WORDS)
-          .map((text: string) => ({
-          id: Date.now() + Math.random(),
-          text: text.trim()
-        }));
+        // Save original words for database record
+        if (hasPositiveWords) {
+          positiveWordsArr = positiveWords.split(',')
+            .map((text: string) => ({
+              id: Date.now() + Math.random(),
+              text: text.trim()
+            }));
+        }
         
-        const commonGardenNegative = commonGardenPrompts.negativePrompts.split(',')
-          .slice(0, MAX_COMMON_GARDEN_WORDS)
-          .map((text: string) => ({
-          id: Date.now() + Math.random(),
-          text: text.trim()
-        }));
-        
-        // 添加通用渲染质量提示词，限制数量
-        const commonRenderingPositive = commonRenderingPrompts.positivePrompts.split(',')
-          .slice(0, MAX_COMMON_RENDERING_WORDS)
-          .map((text: string) => ({
-          id: Date.now() + Math.random(),
-          text: text.trim()
-        }));
-        
-        const commonRenderingNegative = commonRenderingPrompts.negativePrompts.split(',')
-          .slice(0, MAX_COMMON_RENDERING_WORDS)
-          .map((text: string) => ({
-          id: Date.now() + Math.random(),
-          text: text.trim()
-        }));
-        
-        // 合并所有正向词
-        positiveWordsArr = [
-          ...positiveWordsArr,
-          ...commonGardenPositive,
-          ...commonRenderingPositive
-        ];
-        
-        // 合并所有负向词
-        negativeWordsArr = [
-          ...negativeWordsArr,
-          ...commonGardenNegative,
-          ...commonRenderingNegative
-        ];
+        if (hasNegativeWords) {
+          negativeWordsArr = negativeWords.split(',')
+            .map((text: string) => ({
+              id: Date.now() + Math.random(),
+              text: text.trim()
+            }));
+        }
       } catch (e) {
         console.error('Error parsing word tags:', e);
         return res.status(400).json({ error: 'Invalid word tag format' });
@@ -478,47 +407,48 @@ export const generateDesign = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid style type' });
     }
     
-    // 将WordTag数组转换为字符串，用英文逗号分隔
-    finalPrompt = positiveWordsArr.map(tag => tag.text).filter(Boolean).join(', ');
-    finalNegativePrompt = negativeWordsArr.map(tag => tag.text).filter(Boolean).join(', ');
+    // Convert WordTag arrays to strings for database storage
+    const positiveWordsString = positiveWordsArr.map(tag => tag.text).filter(Boolean).join(', ');
+    const negativeWordsString = negativeWordsArr.map(tag => tag.text).filter(Boolean).join(', ');
     
-    console.log('Final positive prompt:', finalPrompt);
-    console.log('Final negative prompt:', finalNegativePrompt);
+    console.log('Final prompt:', finalPrompt);
+    console.log('Positive words for DB:', positiveWordsString);
+    console.log('Negative words for DB:', negativeWordsString);
     
-    // 解析图片尺寸
+    // Parse image size
     if (!size.includes('*')) {
       console.log('Validation failed: Invalid size format');
       return res.status(400).json({ error: 'Invalid size format, expected format: width*height' });
     }
 
-    // 解析结构相似度参数
+    // Parse structural similarity parameter
     const similarity = parseInt(structuralSimilarity);
     console.log('Structural similarity:', similarity);
 
-    // 先调用第三方接口生成图片
+    // First call third-party API to generate image
     let request_id = null;
 
     try {
-      console.log('调用BFL API生成图片');
+      console.log('Calling BFL API to generate image');
       
-      // 获取API密钥
+      // Get API key
       const BFL_API_KEY = process.env.BFL_API_KEY;
       if (!BFL_API_KEY) {
-        console.error('BFL_API_KEY环境变量未设置');
-        return res.status(500).json({ error: 'API配置错误' });
+        console.error('BFL_API_KEY environment variable not set');
+        return res.status(500).json({ error: 'API configuration error' });
       }
       
-      // 从URL下载图片并转换为base64
-      console.log('正在下载并转换图片:', imageUrl);
+      // Download image from URL and convert to base64
+      console.log('Downloading and converting image:', imageUrl);
       
-      // 使用axios获取图片数据
+      // Use axios to get image data
       const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
       const imageBuffer = Buffer.from(imageResponse.data, 'binary');
       const base64Image = imageBuffer.toString('base64');
       
-      console.log('图片已转换为base64');
+      console.log('Image converted to base64');
       
-      // 请求BFL API
+      // Request BFL API
       const apiUrl = 'https://api.bfl.ai/v1/flux-kontext-pro';
       
       const headers = {
@@ -528,13 +458,13 @@ export const generateDesign = async (req: Request, res: Response) => {
       };
       
       const data = {
-        'prompt': finalPrompt, // 使用最终的正向提示词
-        'input_image': base64Image, // 传入base64编码的图片
+        'prompt': finalPrompt, // Use new format prompt
+        'input_image': base64Image, // Pass base64 encoded image
         'aspect_ratio': "4:3",
         'safety_tolerance': 2,
       };
       
-      console.log('正在发送请求到BFL API');
+      console.log('Sending request to BFL API');
       
       const response = await axios.post(apiUrl, data, { headers });
       
@@ -543,50 +473,50 @@ export const generateDesign = async (req: Request, res: Response) => {
       }
       
       const result = response.data;
-      console.log('BFL API响应:', result);
+      console.log('BFL API response:', result);
       
       if (!result.id) {
         throw new Error('Failed to get request_id from BFL API');
       }
       
       request_id = result.id;
-      console.log(`获取到request_id: ${request_id}`);
+      console.log(`Received request_id: ${request_id}`);
     } catch (apiError: any) {
-      console.error('调用BFL API时出错:', apiError);
+      console.error('Error calling BFL API:', apiError);
       return res.status(500).json({ 
-        error: '生成花园设计失败', 
+        error: 'Failed to generate garden design', 
         details: apiError.message 
       });
     }
     
-    // 创建新的设计记录
+    // Create new design record
     const gardenDesign = await GardenDesign.create({
       user_id,
       project_id: projectId,
       pic_orginial: imageUrl,
-      status: 1, // 1代表生成中
+      status: 1, // 1 represents processing
       style_id: Number(style_id),
       style_name,
-      positive_words: finalPrompt, // 保存为逗号分隔的字符串
-      negative_words: finalNegativePrompt, // 保存为逗号分隔的字符串
+      positive_words: positiveWordsString, // Save as comma-separated string
+      negative_words: negativeWordsString, // Save as comma-separated string
       structural_similarity: similarity,
       is_like: 0,
       is_del: 0,
-      points_cost: 1, // 记录消耗的点数
-      third_task_id: request_id, // 保存BFL API的请求ID
+      points_cost: 1, // Record points cost
+      third_task_id: request_id, // Save BFL API request ID
       ctime: Math.floor(Date.now() / 1000),
       utime: Math.floor(Date.now() / 1000)
     });
 
-    // 处理积分扣除
+    // Process points deduction
     try {
-      // 1. 更新用户积分
+      // 1. Update user points
       await user.update({
         points: (userPoints - 1).toString(),
         utime: Math.floor(Date.now() / 1000)
       });
 
-      // 2. 更新用户订单表中的积分余额
+      // 2. Update points balance in user order table
       const userOrder = await UserOrder.findOne({
         where: {
           user_id,
@@ -606,13 +536,13 @@ export const generateDesign = async (req: Request, res: Response) => {
         console.log('No valid user order found for user:', user_id);
       }
 
-      // 3. 添加积分日志
+      // 3. Add points log
       await PointsLog.create({
         user_id,
-        points_type: '2', // 2代表减少
-        points_num: 1,    // 本次扣除数量
-        log_type: 11,     // 11代表生成设计图
-        log_content: '生成garden_design',
+        points_type: '2', // 2 represents decrease
+        points_num: 1,    // Amount deducted this time
+        log_type: 11,     // 11 represents generating design image
+        log_content: 'Generate garden_design',
         related_id: gardenDesign.id.toString(),
         ctime: Math.floor(Date.now() / 1000),
         utime: Math.floor(Date.now() / 1000)
@@ -621,7 +551,7 @@ export const generateDesign = async (req: Request, res: Response) => {
       console.log('Points deducted successfully for user:', user_id);
     } catch (pointsError) {
       console.error('Error processing points deduction:', pointsError);
-      // 记录错误但不中断流程
+      // Log error but don't interrupt flow
     }
     
     return res.status(200).json(gardenDesign);
@@ -632,7 +562,7 @@ export const generateDesign = async (req: Request, res: Response) => {
 };
 
 /**
- * 检查BFL API图片生成状态
+ * Check BFL API image generation status
  * @route GET /api/garden-designs/check-status/:requestId
  */
 export const checkBflStatus = async (req: Request, res: Response) => {
@@ -640,7 +570,7 @@ export const checkBflStatus = async (req: Request, res: Response) => {
     console.log('API call received: GET /api/garden-designs/check-status/:requestId');
     console.log('Request params:', req.params);
     
-    // 从请求中获取用户ID
+    // Get user ID from request
     const user_id = getUserIdFromRequest(req);
     console.log('Extracted user_id:', user_id);
     
@@ -649,7 +579,7 @@ export const checkBflStatus = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    // 获取request_id
+    // Get request_id
     const { requestId } = req.params;
     
     if (!requestId) {
@@ -657,53 +587,53 @@ export const checkBflStatus = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'requestId is required' });
     }
 
-    // 检查BFL API密钥是否已配置
+    // Check if BFL API key is configured
     const BFL_API_KEY = process.env.BFL_API_KEY;
     if (!BFL_API_KEY) {
-      console.error('环境变量BFL_API_KEY未设置');
-      return res.status(500).json({ error: 'API配置错误' });
+      console.error('Environment variable BFL_API_KEY is not set');
+      return res.status(500).json({ error: 'API configuration error' });
     }
     
     try {
-      // 查询BFL API获取状态
-      console.log('正在查询BFL API任务状态:', requestId);
+      // Query BFL API for status
+      console.log('Querying BFL API task status:', requestId);
       
-      // API配置
+      // API configuration
       const apiUrl = 'https://api.bfl.ai/v1/get_result';
       
-      // 请求头
+      // Request headers
       const headers = {
         'accept': 'application/json',
         'x-key': BFL_API_KEY
       };
       
-      // 请求参数
+      // Request parameters
       const params = { id: requestId };
       
-      // 发送GET请求
+      // Send GET request
       const response = await axios.get(apiUrl, { params, headers });
       
-      // 检查响应
+      // Check response
       if (response.status !== 200) {
         throw new Error(`API responded with status code ${response.status}`);
       }
       
       const result = response.data;
-      console.log(`BFL API状态查询结果:`, result);
+      console.log(`BFL API status query result:`, result);
       
       if (!result) {
         return res.status(400).json({ status: 'pending', message: 'No result found' });
       }
       
-      // 检查任务状态
+      // Check task status
       const status = result.status;
       
       if (status === "Ready") {
-        // 任务完成，获取图片URL
+        // Task completed, get image URL
         const imageUrl = result.result.sample;
-        console.log('生成的图片URL:', imageUrl);
+        console.log('Generated image URL:', imageUrl);
         
-        // 查找对应的design记录并更新状态
+        // Find corresponding design record and update status
         const gardenDesign = await GardenDesign.findOne({
           where: {
             third_task_id: requestId,
@@ -712,11 +642,11 @@ export const checkBflStatus = async (req: Request, res: Response) => {
         });
         
         if (gardenDesign) {
-          // 更新设计状态为成功
+          // Update design status to success
           await gardenDesign.update({
             pic_result: imageUrl,
             pic_third_orginial: imageUrl,
-            status: 2, // 2代表成功
+            status: 2, // 2 represents success
             utime: Math.floor(Date.now() / 1000)
           });
           
@@ -729,13 +659,13 @@ export const checkBflStatus = async (req: Request, res: Response) => {
           return res.status(404).json({ error: 'Garden design not found' });
         }
       } else if (status === "Processing" || status === "Queued") {
-        // 任务仍在处理中
+        // Task still in progress
         return res.status(200).json({ status: 'pending', message: 'Generation in progress' });
       } else {
-        // 任务失败或状态异常
-        console.error(`BFL任务异常: ${requestId}, 状态: ${status}`);
+        // Task failed or abnormal status
+        console.error(`BFL task abnormal: ${requestId}, status: ${status}`);
         
-        // 查找对应的design记录并更新状态为失败
+        // Find corresponding design record and update status to failed
         const gardenDesign = await GardenDesign.findOne({
           where: {
             third_task_id: requestId,
@@ -744,9 +674,9 @@ export const checkBflStatus = async (req: Request, res: Response) => {
         });
         
         if (gardenDesign) {
-          // 更新设计状态为失败
+          // Update design status to failed
           await gardenDesign.update({
-            status: 3, // 3代表失败
+            status: 3, // 3 represents failed
             utime: Math.floor(Date.now() / 1000)
           });
         }
@@ -758,15 +688,15 @@ export const checkBflStatus = async (req: Request, res: Response) => {
       }
       
     } catch (apiError: any) {
-      console.error('调用BFL API时出错:', apiError);
+      console.error('Error calling BFL API:', apiError);
       return res.status(500).json({ 
-        error: '无法检查生成状态', 
+        error: 'Failed to check generation status', 
         details: apiError.message 
       });
     }
     
   } catch (error) {
-    console.error('检查BFL状态时出错:', error);
-    return res.status(500).json({ error: '检查BFL状态失败' });
+    console.error('Error checking BFL status:', error);
+    return res.status(500).json({ error: 'Failed to check BFL status' });
   }
 }; 
