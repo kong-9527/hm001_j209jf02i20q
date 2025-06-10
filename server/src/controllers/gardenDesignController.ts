@@ -340,7 +340,7 @@ export const generateDesign = async (req: Request, res: Response) => {
         const styleDescription = gardenStylesData[styleIndex].description || "";
         
         // Format prompt according to new template
-        finalPrompt = `Please change the design style of the garden space in the picture to ${style_name}. The main features of this style are: ${styleDescription}.`;
+        finalPrompt = `Please change the design style of the garden space in the picture to ${style_name}. Please keep the space structure of the picture. The main features of this style are: ${styleDescription}.`;
         
         // Save original words for database record
         positiveWordsArr = stylePositivePrompts.split(',')
