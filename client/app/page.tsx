@@ -135,7 +135,7 @@ export default function Home() {
         {/* 主标题和副标题 */}
         <div className="relative z-20 -mt-60 text-center px-4 sm:px-6 lg:px-8 pb-16">
           <h1 className="text-5xl sm:text-6xl font-bold text-teal-400 mb-4">
-            Build Your Dream Garden<br />With AI
+            Design Your Dream Garden with AI
           </h1>
           <p className="text-xl text-white/90 max-w-3xl mx-auto mt-6">
             Create dream designs and advisors for your garden<br />

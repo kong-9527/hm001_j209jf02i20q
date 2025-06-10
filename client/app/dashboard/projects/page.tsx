@@ -162,7 +162,7 @@ export default function ProjectsPage() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-semibold">Manage Projects</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Manage Your Garden Projects</h1>
         <button 
           onClick={() => setIsCreateModalOpen(true)}
           className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
@@ -222,7 +222,7 @@ export default function ProjectsPage() {
                 </div>
                 
                 <div className="p-4 flex-grow">
-                  <h3 className="text-lg font-medium mb-2">{project.project_name}</h3>
+                  <h2 className="text-lg font-medium mb-2">{project.project_name}</h2>
                   
                   <div className="text-sm text-gray-500">
                     Created: {new Date(Number(project.ctime) * 1000).toLocaleDateString()}

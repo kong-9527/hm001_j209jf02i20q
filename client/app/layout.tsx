@@ -9,7 +9,8 @@ import { NotificationProvider } from './components/NotificationCenter'
 
 export const metadata: Metadata = {
   title: 'AI Garden Design',
-  description: 'AI Garden Design',
+  description: 'Use AI to design your garden, patio or courtyard with customized layout and planting recommendations.',
+  robots: 'index, follow',
 }
 
 export default function RootLayout({

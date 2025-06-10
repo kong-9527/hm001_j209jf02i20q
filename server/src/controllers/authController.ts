@@ -93,6 +93,8 @@ export const googleCallback = async (req: Request, res: Response) => {
         <html>
         <head>
           <title>Login Success</title>
+          <meta name="description" content="Use AI to design your garden, patio or courtyard with customized layout and planting recommendations." />
+          <meta name="robots" content="index, follow" />
           <style>
             body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
             .success-message { margin: 20px auto; max-width: 400px; }

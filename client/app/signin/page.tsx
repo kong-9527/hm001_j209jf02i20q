@@ -355,7 +355,7 @@ export default function SignIn() {
       </Link>
       
       <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Login</h1>
+        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Sign In to AI Garden Design</h1>
         
         {errorMessage && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -364,49 +364,7 @@ export default function SignIn() {
         )}
         
         <div className="bg-white rounded-lg p-8 shadow-md">
-          {/* <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <input
-                type="email"
-                value={email}
-                onChange={handleEmailChange}
-                placeholder="Your email"
-                className={`w-full px-4 py-3 bg-white border ${
-                  emailError ? 'border-red-500' : 'border-gray-300'
-                } rounded-md focus:outline-none focus:ring-1 focus:ring-primary`}
-                required
-              />
-              {emailError && (
-                <p className="mt-1 text-sm text-red-500">{emailError}</p>
-              )}
-            </div>
-            
-            <div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Your password"
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-                required
-              />
-            </div>
-            
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md transition-colors shadow-md disabled:bg-teal-400"
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
-          
-          <div className="flex items-center my-6">
-            <div className="flex-grow h-px bg-gray-300"></div>
-            <span className="px-3 text-gray-500">OR</span>
-            <div className="flex-grow h-px bg-gray-300"></div>
-          </div>
-           */}
+          <h2 className="text-xl font-semibold mb-6 text-center text-gray-700">Choose Your Login Method</h2>
           <button
             onClick={handleGoogleLogin}
             disabled={isGoogleLoading}
@@ -431,12 +389,6 @@ export default function SignIn() {
               </>
             )}
           </button>
-          
-          {/* <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Don't have an account? <Link href="/register" className="text-teal-600 hover:underline font-medium">Register</Link>
-            </p>
-          </div> */}
         </div>
         
         <div className="mt-6 text-center text-sm text-gray-500">
