@@ -12,8 +12,18 @@ export const metadata: Metadata = {
     default: 'AI Garden Design | Tailored Garden & Plant Planning',
     template: '%s | AI Garden Design'
   },
-  description: 'Design your perfect garden, patio or balcony with AI. Get intelligent garden layouts and personalized plant suggestions.',
-  robots: 'index, follow',
+  description: 'Design your perfect garden, patio or balcony with AI. Get intelligent garden layouts and personalized plant suggestions. You can transform your garden by using AI-powered design tool. Upload a photo and get instant professional garden designs. No design experience needed.',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    }
+  },
   viewport: 'width=device-width, initial-scale=1',
   openGraph: {
     title: 'AI Garden Design',
