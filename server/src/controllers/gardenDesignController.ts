@@ -228,8 +228,8 @@ export const generateDesign = async (req: Request, res: Response) => {
     }
     
     // Check if API key is configured
-    const ismaque_API_KEY = process.env.ismaque_API_KEY;
-    if (!ismaque_API_KEY) {
+    const FLUX_API_KEY = process.env.FLUX_API_KEY;
+    if (!FLUX_API_KEY) {
       console.error('Environment variable ismaque_API_KEY is not set');
       return res.status(500).json({ error: 'API configuration error' });
     }
@@ -429,13 +429,14 @@ export const generateDesign = async (req: Request, res: Response) => {
     // Call third-party API to generate image and get result directly
     let generatedImageUrl = null;
     let status = 1; // Default to processing
+    let thirdTaskId = null; // Variable to store the task ID
 
     try {
       console.log('Calling image generation API');
       
       // Get API key
-      const ismaque_API_KEY = process.env.ismaque_API_KEY;
-      if (!ismaque_API_KEY) {
+      const FLUX_API_KEY = process.env.FLUX_API_KEY;
+      if (!FLUX_API_KEY) {
         console.error('ismaque_API_KEY environment variable not set');
         return res.status(500).json({ error: 'API configuration error' });
       }
@@ -451,16 +452,15 @@ export const generateDesign = async (req: Request, res: Response) => {
       console.log('Image converted to base64');
       
       // Request API
-      const apiUrl = 'https://ismaque.org/v1/images/generations';
+      const apiUrl = 'https://api.bfl.ai/v1/flux-kontext-pro';
       
       const headers = {
         'accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ismaque_API_KEY}`
+        'x-key': `${FLUX_API_KEY}`
       };
       
       const data = {
-        'model': 'flux-kontext-pro',
         'prompt': finalPrompt,
         'input_image': base64Image,
         'aspect_ratio': '4:3',
@@ -483,15 +483,14 @@ export const generateDesign = async (req: Request, res: Response) => {
       const result = response.data;
       console.log('API response:', result);
       
-      // Check if the response has the expected data structure
-      if (!result.data || !result.data[0] || !result.data[0].url) {
-        throw new Error('Invalid response format from API');
+      // Check if the response has the expected data structure with an ID
+      if (!result.id) {
+        throw new Error('Invalid response format from API: missing task ID');
       }
       
-      // Get the generated image URL
-      generatedImageUrl = result.data[0].url;
-      console.log(`Generated image URL: ${generatedImageUrl}`);
-      status = 2; // Set status to success
+      // Save the task ID
+      thirdTaskId = result.id;
+      console.log(`Received task ID: ${thirdTaskId}`);
       
     } catch (apiError: any) {
       console.error('Error calling image generation API:', apiError);
@@ -515,16 +514,15 @@ export const generateDesign = async (req: Request, res: Response) => {
       is_like: 0,
       is_del: 0,
       points_cost: 1, // Record points cost
-      third_task_id: null, // No longer needed as we directly get the image URL
-      pic_third_orginial: generatedImageUrl, // Save original API image URL
-      pic_result: generatedImageUrl, // Default to original URL, will be updated if Cloudinary successful
+      third_task_id: thirdTaskId, // Save the task ID
+      pic_third_orginial: null, // Will be updated when we get the result
+      pic_result: null, // Will be updated when we get the result
       ctime: Math.floor(Date.now() / 1000),
       utime: Math.floor(Date.now() / 1000)
     });
 
-    // Only process points deduction and Cloudinary upload if generation was successful
-    if (status === 2 && generatedImageUrl) {
-      // Process points deduction
+    // Process points deduction if we have a valid task ID
+    if (thirdTaskId) {
       try {
         // 1. Update user points
         await user.update({
@@ -569,27 +567,16 @@ export const generateDesign = async (req: Request, res: Response) => {
         console.error('Error processing points deduction:', pointsError);
         // Log error but don't interrupt flow
       }
-      
-      // Upload to Cloudinary if generation was successful
-      try {
-        console.log('Uploading generated image to Cloudinary');
-        const cloudinaryUrl = await downloadAndUploadToCloudinary(generatedImageUrl, user_id);
-        
-        if (cloudinaryUrl && cloudinaryUrl !== generatedImageUrl) {
-          console.log('Image uploaded to Cloudinary successfully:', cloudinaryUrl);
-          
-          // Update the record with Cloudinary URL
-          await gardenDesign.update({
-            pic_result: cloudinaryUrl,
-            utime: Math.floor(Date.now() / 1000)
-          });
-        } else {
-          console.log('Using original URL as Cloudinary upload failed or returned same URL');
-        }
-      } catch (cloudinaryError) {
-        console.error('Error uploading to Cloudinary:', cloudinaryError);
-        // Continue with original URL if Cloudinary upload fails
-      }
+    }
+    
+    // If we have a task ID, poll for results
+    if (thirdTaskId) {
+      // Start polling for results in the background
+      pollForResults(gardenDesign.id, thirdTaskId, user_id, userPoints, user);
+    } else if (status === 3) {
+      // If API call failed and we didn't get a task ID, refund points immediately
+      // No need to refund points here as we haven't deducted them yet
+      console.log('API call failed, no points were deducted');
     }
     
     return res.status(200).json(gardenDesign);
@@ -600,8 +587,187 @@ export const generateDesign = async (req: Request, res: Response) => {
 };
 
 /**
- * Check if garden design is ready (stub function, no longer needed as we get results directly)
- * This function is kept for backward compatibility with existing frontend code
+ * Poll for results from the BFL API
+ * @param designId Garden design ID
+ * @param taskId BFL task ID
+ * @param userId User ID
+ * @param userPoints User's current points before deduction
+ * @param user User object
+ */
+async function pollForResults(designId: number, taskId: string, userId: number, userPoints: number, user: any) {
+  console.log(`Starting to poll for results for design ${designId}, task ${taskId}`);
+  
+  const MAX_RETRIES = 10;
+  const POLL_INTERVAL = 5000; // 5 seconds
+  
+  let retries = 0;
+  let success = false;
+  
+  // Get the most up-to-date user data for accurate points calculation
+  const updatedUser = await User.findByPk(userId);
+  if (!updatedUser) {
+    console.error(`User ${userId} not found during polling`);
+    return;
+  }
+  
+  while (retries < MAX_RETRIES && !success) {
+    console.log(`Poll attempt ${retries + 1} for task ${taskId}`);
+    
+    // Wait for the polling interval
+    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+    
+    try {
+      // Get result from BFL API
+      const baseUrl = 'https://api.bfl.ai/v1/get_result';
+      const headers = {
+        'accept': 'application/json',
+        'x-key': process.env.FLUX_API_KEY,
+      };
+      const params = { id: taskId };
+      
+      const response = await axios.get(baseUrl, { headers, params });
+      const result = response.data;
+      
+      console.log(`Poll response for task ${taskId}:`, result);
+      
+      // Check if the result is ready
+      if (result.status === "Ready" && result.result && result.result.sample) {
+        // Get the generated image URL
+        const generatedImageUrl = result.result.sample;
+        console.log(`Generated image URL: ${generatedImageUrl}`);
+        
+        // Update the garden design record
+        const gardenDesign = await GardenDesign.findByPk(designId);
+        if (gardenDesign) {
+          // Save the original URL
+          await gardenDesign.update({
+            pic_third_orginial: generatedImageUrl,
+            utime: Math.floor(Date.now() / 1000)
+          });
+          
+          // Upload to Cloudinary
+          try {
+            console.log('Uploading generated image to Cloudinary');
+            const cloudinaryUrl = await downloadAndUploadToCloudinary(generatedImageUrl, userId);
+            
+            if (cloudinaryUrl && cloudinaryUrl !== generatedImageUrl) {
+              console.log('Image uploaded to Cloudinary successfully:', cloudinaryUrl);
+              
+              // Update the record with Cloudinary URL and mark as success
+              await gardenDesign.update({
+                pic_result: cloudinaryUrl,
+                status: 2, // Set status to success
+                utime: Math.floor(Date.now() / 1000)
+              });
+            } else {
+              console.log('Using original URL as Cloudinary upload failed or returned same URL');
+              // Update with original URL and mark as success
+              await gardenDesign.update({
+                pic_result: generatedImageUrl,
+                status: 2, // Set status to success
+                utime: Math.floor(Date.now() / 1000)
+              });
+            }
+          } catch (cloudinaryError) {
+            console.error('Error uploading to Cloudinary:', cloudinaryError);
+            // Continue with original URL if Cloudinary upload fails
+            await gardenDesign.update({
+              pic_result: generatedImageUrl,
+              status: 2, // Set status to success
+              utime: Math.floor(Date.now() / 1000)
+            });
+          }
+        }
+        
+        success = true;
+        break;
+      } else if (result.status === "Failed") {
+        console.log(`Task ${taskId} failed`);
+        // Mark as failed and refund points
+        await handleFailedGeneration(designId, userId, userPoints - 1, updatedUser);
+        break;
+      } else {
+        console.log(`Task ${taskId} still processing, status: ${result.status}`);
+        retries++;
+      }
+    } catch (error) {
+      console.error(`Error polling for task ${taskId}:`, error);
+      retries++;
+    }
+  }
+  
+  // If we've exhausted all retries and still haven't succeeded
+  if (!success && retries >= MAX_RETRIES) {
+    console.log(`Max retries (${MAX_RETRIES}) reached for task ${taskId}, marking as failed`);
+    await handleFailedGeneration(designId, userId, userPoints - 1, updatedUser);
+  }
+}
+
+/**
+ * Handle failed generation by updating status and refunding points
+ * @param designId Garden design ID
+ * @param userId User ID
+ * @param userPoints User's current points
+ * @param user User object
+ */
+async function handleFailedGeneration(designId: number, userId: number, userPoints: number, user: any) {
+  try {
+    // Update garden design status to failed
+    const gardenDesign = await GardenDesign.findByPk(designId);
+    if (gardenDesign) {
+      await gardenDesign.update({
+        status: 3, // Set status to failed
+        utime: Math.floor(Date.now() / 1000)
+      });
+    }
+    
+    // 1. Update user points (add back the deducted point)
+    await user.update({
+      points: (userPoints + 1).toString(), // Refund the point
+      utime: Math.floor(Date.now() / 1000)
+    });
+
+    // 2. Update points balance in user order table
+    const userOrder = await UserOrder.findOne({
+      where: {
+        user_id: userId,
+        points_remain: {
+          [Op.gte]: 0 // Changed from [Op.gt] to include orders with 0 points
+        }
+      },
+      order: [['member_start_date', 'ASC']]
+    });
+
+    if (userOrder) {
+      await userOrder.update({
+        points_remain: (userOrder.points_remain || 0) + 1, // Refund the point
+        utime: Math.floor(Date.now() / 1000)
+      });
+    } else {
+      console.log('No valid user order found for user:', userId);
+    }
+
+    // 3. Add points log for refund
+    await PointsLog.create({
+      user_id: userId,
+      points_type: '1', // 1 represents increase
+      points_num: 1,    // Amount refunded
+      log_type: 12,     // 12 represents refund for failed generation
+      log_content: 'Refund for failed garden_design generation',
+      related_id: designId.toString(),
+      ctime: Math.floor(Date.now() / 1000),
+      utime: Math.floor(Date.now() / 1000)
+    });
+
+    console.log('Points refunded successfully for user:', userId);
+  } catch (error) {
+    console.error('Error handling failed generation:', error);
+  }
+}
+
+/**
+ * Check if garden design is ready
+ * This function now simply returns the current status from the database
  * @route GET /api/garden-designs/check-status/:requestId
  */
 export const checkBflStatus = async (req: Request, res: Response) => {
@@ -653,7 +819,7 @@ export const checkBflStatus = async (req: Request, res: Response) => {
         message: 'Image generation failed' 
       });
     } else {
-      // Should not happen as we now get results directly
+      // Still processing
       return res.status(200).json({ 
         status: 'pending', 
         message: 'Generation in progress' 
