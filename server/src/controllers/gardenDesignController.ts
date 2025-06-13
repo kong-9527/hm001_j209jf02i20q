@@ -630,7 +630,7 @@ async function pollForResults(designId: number, taskId: string, userId: number, 
       
       console.log(`Poll response for task ${taskId}:`, result);
       
-      // Check if the result is ready
+      // Check if the result is ready - ONLY "Ready" status is considered successful
       if (result.status === "Ready" && result.result && result.result.sample) {
         // Get the generated image URL
         const generatedImageUrl = result.result.sample;
@@ -682,12 +682,13 @@ async function pollForResults(designId: number, taskId: string, userId: number, 
         success = true;
         break;
       } else if (result.status === "Failed") {
-        console.log(`Task ${taskId} failed`);
+        console.log(`Task ${taskId} failed with status: Failed`);
         // Mark as failed and refund points
         await handleFailedGeneration(designId, userId, userPoints - 1, updatedUser);
         break;
       } else {
-        console.log(`Task ${taskId} still processing, status: ${result.status}`);
+        // Any other status (Processing, Queued, etc.) means we need to keep retrying
+        console.log(`Task ${taskId} not ready yet, status: ${result.status}`);
         retries++;
       }
     } catch (error) {
