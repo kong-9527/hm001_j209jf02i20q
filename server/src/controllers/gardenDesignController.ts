@@ -491,6 +491,70 @@ export const generateDesign = async (req: Request, res: Response) => {
       // Save the task ID
       thirdTaskId = result.id;
       console.log(`Received task ID: ${thirdTaskId}`);
+
+      // 立即开始轮询结果
+      // 定义轮询参数
+      const MAX_POLL_RETRIES = 10;
+      const POLL_INTERVAL = 5000; // 5 seconds
+      let pollRetries = 0;
+      let pollSuccess = false;
+      let generatedImageUrl = null;
+      
+      console.log(`Starting to poll for results for task ${thirdTaskId}`);
+      
+      // 同步轮询结果
+      while (pollRetries < MAX_POLL_RETRIES && !pollSuccess) {
+        console.log(`Poll attempt ${pollRetries + 1} for task ${thirdTaskId}`);
+        
+        // 等待轮询间隔
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+        
+        try {
+          // 获取BFL API结果
+          const pollUrl = 'https://api.bfl.ai/v1/get_result';
+          const pollHeaders = {
+            'accept': 'application/json',
+            'x-key': FLUX_API_KEY,
+          };
+          const pollParams = { id: thirdTaskId };
+          
+          const pollResponse = await axios.get(pollUrl, { 
+            headers: pollHeaders, 
+            params: pollParams,
+            timeout: 10000 // 10秒超时
+          });
+          
+          const pollResult = pollResponse.data;
+          console.log(`Poll response for task ${thirdTaskId}:`, pollResult);
+          
+          // 检查结果是否准备好 - 只有"Ready"状态被视为成功
+          if (pollResult.status === "Ready" && pollResult.result && pollResult.result.sample) {
+            // 获取生成的图片URL
+            generatedImageUrl = pollResult.result.sample;
+            console.log(`Generated image URL: ${generatedImageUrl}`);
+            pollSuccess = true;
+            status = 2; // 设置状态为成功
+            break;
+          } else if (pollResult.status === "Failed") {
+            console.log(`Task ${thirdTaskId} failed with status: Failed`);
+            status = 3; // 设置状态为失败
+            break;
+          } else {
+            // 其他状态(Processing, Queued等)意味着我们需要继续重试
+            console.log(`Task ${thirdTaskId} not ready yet, status: ${pollResult.status}`);
+            pollRetries++;
+          }
+        } catch (pollError) {
+          console.error(`Error polling for task ${thirdTaskId}:`, pollError);
+          pollRetries++;
+        }
+      }
+      
+      // 如果达到最大重试次数仍未成功
+      if (!pollSuccess && pollRetries >= MAX_POLL_RETRIES) {
+        console.log(`Max retries (${MAX_POLL_RETRIES}) reached for task ${thirdTaskId}, marking as failed`);
+        status = 3; // 设置状态为失败
+      }
       
     } catch (apiError: any) {
       console.error('Error calling image generation API:', apiError);
@@ -569,17 +633,59 @@ export const generateDesign = async (req: Request, res: Response) => {
       }
     }
     
-    // If we have a task ID, poll for results
-    if (thirdTaskId) {
-      // Start polling for results in the background
-      pollForResults(gardenDesign.id, thirdTaskId, user_id, userPoints, user);
+    // 如果轮询成功获取了图片URL，更新记录
+    if (status === 2 && generatedImageUrl) {
+      try {
+        // 更新原始URL
+        await gardenDesign.update({
+          pic_third_orginial: generatedImageUrl,
+          utime: Math.floor(Date.now() / 1000)
+        });
+        
+        // 上传到Cloudinary
+        console.log('Uploading generated image to Cloudinary');
+        const cloudinaryUrl = await downloadAndUploadToCloudinary(generatedImageUrl, user_id);
+        
+        if (cloudinaryUrl && cloudinaryUrl !== generatedImageUrl) {
+          console.log('Image uploaded to Cloudinary successfully:', cloudinaryUrl);
+          
+          // 更新记录使用Cloudinary URL
+          await gardenDesign.update({
+            pic_result: cloudinaryUrl,
+            status: 2, // 设置状态为成功
+            utime: Math.floor(Date.now() / 1000)
+          });
+        } else {
+          console.log('Using original URL as Cloudinary upload failed or returned same URL');
+          // 使用原始URL更新记录
+          await gardenDesign.update({
+            pic_result: generatedImageUrl,
+            status: 2, // 设置状态为成功
+            utime: Math.floor(Date.now() / 1000)
+          });
+        }
+      } catch (cloudinaryError) {
+        console.error('Error uploading to Cloudinary:', cloudinaryError);
+        // 如果Cloudinary上传失败，继续使用原始URL
+        await gardenDesign.update({
+          pic_result: generatedImageUrl,
+          status: 2, // 设置状态为成功
+          utime: Math.floor(Date.now() / 1000)
+        });
+      }
     } else if (status === 3) {
-      // If API call failed and we didn't get a task ID, refund points immediately
-      // No need to refund points here as we haven't deducted them yet
-      console.log('API call failed, no points were deducted');
+      // 如果API调用失败且没有获取到taskId，立即退款
+      if (thirdTaskId) {
+        // 处理失败生成并退还积分
+        await handleFailedGeneration(gardenDesign.id, user_id, userPoints - 1, user);
+      } else {
+        console.log('API call failed, no points were deducted');
+      }
     }
     
-    return res.status(200).json(gardenDesign);
+    // 查询最新的garden design记录以确保返回最新数据
+    const updatedGardenDesign = await GardenDesign.findByPk(gardenDesign.id);
+    return res.status(200).json(updatedGardenDesign || gardenDesign);
   } catch (error) {
     console.error('Error generating garden design:', error);
     return res.status(500).json({ error: 'Failed to generate garden design' });
